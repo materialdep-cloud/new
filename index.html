@@ -851,11 +851,17 @@
             currentUserId = userId;
             localStorage.setItem('active_trainee_id', userId);
 
-            const saved = localStorage.getItem(`trainee_data_${userId}`);
-            if (saved) {
-                currentUserData = JSON.parse(saved);
+            // 優先讀取雲端快取，次之讀取本機，無紀錄則建立預設
+            if (allTraineesCache[userId]) {
+                currentUserData = allTraineesCache[userId];
+                localStorage.setItem(`trainee_data_${userId}`, JSON.stringify(currentUserData));
             } else {
-                currentUserData = createNewUserData(userId);
+                const saved = localStorage.getItem(`trainee_data_${userId}`);
+                if (saved) {
+                    currentUserData = JSON.parse(saved);
+                } else {
+                    currentUserData = createNewUserData(userId);
+                }
             }
 
             // Fill UI Fields
@@ -884,17 +890,24 @@
 
         function updateUserSelectorOptions() {
             const selector = document.getElementById('userSelector');
+            if (!selector) return;
             selector.innerHTML = '';
 
-            // Collect all local user IDs
-            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
-            if (userKeys.length === 0) {
-                userKeys.push(`trainee_data_${currentUserId}`);
+            // 整合本機與雲端的所有 Key，確保跨裝置資料全部列出
+            const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
+            const cloudKeys = Object.keys(allTraineesCache);
+            const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+
+            if (allIds.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = currentUserId;
+                opt.innerText = "新進員工";
+                selector.appendChild(opt);
+                return;
             }
 
-            userKeys.forEach(key => {
-                const uid = key.replace('trainee_data_', '');
-                const uData = JSON.parse(localStorage.getItem(key) || '{}');
+            allIds.forEach(uid => {
+                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
                 const opt = document.createElement('option');
                 opt.value = uid;
                 opt.innerText = `${uData.empName || '新進員工'} (${uData.startDate || '未設定'})`;
@@ -919,11 +932,18 @@
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
             localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
+            allTraineesCache[newId] = newData;
+
+            if (db && auth.currentUser) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
+                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
+            }
+
             loadUserData(newId);
             showToast(`已建立 ${newName} 的培訓檔案`);
         }
 
-        // Realtime Listener
+        // Realtime Listener & Multi-Device Sync
         function setupRealtimeSync() {
             if (!db) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'trainees');
@@ -936,8 +956,7 @@
                     if (localData && localData.id) {
                         const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', localData.id);
                         const docSnap = await getDoc(docRef);
-                        // 若雲端尚無此資料，自動補上傳至雲端
-                        if (!docSnap.exists()) {
+                        if (!docSnap || !docSnap.exists()) {
                             await setDoc(docRef, localData);
                             console.log(`已自動同步本機歷史檔案 [${localData.empName || localData.id}] 至雲端`);
                         }
@@ -948,27 +967,64 @@
             });
 
             onSnapshot(colRef, (snapshot) => {
+                let count = 0;
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
                     if (data && data.id) {
+                        count++;
                         allTraineesCache[data.id] = data;
                         localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
                     }
                 });
 
-                updateUserSelectorOptions();
+                updateSyncBadgeStatus('connected', `雲端後台已連線 (${count} 筆資料同步中)`);
                 
-                // 重新刷新目前開啟的檔案資料與勾選狀態
-                if (currentUserId) {
+                // 跨裝置自動匹配：若新裝置當前 ID 為空或預設值，自動切換至雲端現有第一個員工
+                const cloudIds = Object.keys(allTraineesCache);
+                if (cloudIds.length > 0 && (!currentUserId || currentUserId === 'trainee_default' || !allTraineesCache[currentUserId])) {
+                    currentUserId = cloudIds[0];
+                }
+
+                updateUserSelectorOptions();
+
+                if (currentUserId && allTraineesCache[currentUserId]) {
                     loadUserData(currentUserId);
                 }
 
-                if (document.getElementById('adminView').classList.contains('hidden') === false) {
+                if (document.getElementById('adminView')?.classList.contains('hidden') === false) {
                     renderAdminDashboard();
                 }
             }, (error) => {
                 console.warn("Realtime sync warning:", error);
+                updateSyncBadgeStatus('error', '雲端連線失敗 (請檢查權限或網路)');
             });
+        }
+
+        window.loadSelectedUser = function(uid) {
+            if (!uid) return;
+            loadUserData(uid);
+        }
+
+        window.createNewUserPrompt = function() {
+            if (!isAdminUnlocked) {
+                openAdminAuthModal();
+                return;
+            }
+            const newName = prompt("請輸入新員工姓名：", "張小明");
+            if (!newName) return;
+
+            const newId = 'trainee_' + Date.now();
+            const newData = createNewUserData(newId, newName);
+            localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
+            allTraineesCache[newId] = newData;
+
+            if (db && auth.currentUser) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
+                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
+            }
+
+            loadUserData(newId);
+            showToast(`已建立 ${newName} 的培訓檔案`);
         }
 
         // Admin Auth & Lock Logic
@@ -1031,16 +1087,20 @@
         }
 
         window.renderAdminDashboard = function() {
-            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
-            let total = userKeys.length;
+            const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
+            const cloudKeys = Object.keys(allTraineesCache);
+            const userIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+
+            let total = userIds.length;
             let certifiedCount = 0;
             let totalProgressSum = 0;
 
             const tbody = document.getElementById('adminTraineeTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            userKeys.forEach(key => {
-                const uData = JSON.parse(localStorage.getItem(key) || '{}');
+            userIds.forEach(uid => {
+                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
                 let c3Count = 0;
                 CHECKLIST_ITEMS.forEach(item => {
                     if (uData.checks?.[item.id]?.c3) c3Count++;
