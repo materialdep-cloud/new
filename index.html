@@ -594,8 +594,9 @@
                     updateSyncBadgeStatus('local', '本機模式 (點擊連線後台)');
                 }
             } catch (err) {
-                console.warn("Cloud setup skipped, defaulting to local storage:", err);
-                updateSyncBadgeStatus('error', '雲端連線失敗 (點擊重試)');
+                console.error("Cloud setup failed with detailed error:", err);
+                const errMsg = err.code ? `雲端連線失敗 (${err.code})` : '雲端連線失敗 (請檢查 Firebase 匿名登入或 Rules 權限)';
+                updateSyncBadgeStatus('error', errMsg);
             }
 
             // Default User Profile ID
@@ -926,6 +927,26 @@
         function setupRealtimeSync() {
             if (!db) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'trainees');
+
+            // 自動將本機儲存的歷史資料上傳同步至 Firebase 雲端
+            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
+            userKeys.forEach(async (key) => {
+                try {
+                    const localData = JSON.parse(localStorage.getItem(key) || '{}');
+                    if (localData && localData.id) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', localData.id);
+                        const docSnap = await getDoc(docRef);
+                        // 若雲端尚無此資料，自動補上傳至雲端
+                        if (!docSnap.exists()) {
+                            await setDoc(docRef, localData);
+                            console.log(`已自動同步本機歷史檔案 [${localData.empName || localData.id}] 至雲端`);
+                        }
+                    }
+                } catch(e) {
+                    console.warn("自動同步本機資料至雲端失敗:", e);
+                }
+            });
+
             onSnapshot(colRef, (snapshot) => {
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
@@ -934,7 +955,14 @@
                         localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
                     }
                 });
+
                 updateUserSelectorOptions();
+                
+                // 重新刷新目前開啟的檔案資料與勾選狀態
+                if (currentUserId) {
+                    loadUserData(currentUserId);
+                }
+
                 if (document.getElementById('adminView').classList.contains('hidden') === false) {
                     renderAdminDashboard();
                 }
