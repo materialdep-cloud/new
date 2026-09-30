@@ -3,670 +3,823 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>綠園生活倉管新人培訓檢核表</title>
+    <title>綠園生活倉管新人培訓系統</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Microsoft JhengHei', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .page-break { page-break-before: always; }
-            body { background-color: white !important; font-size: 11pt; }
-            .shadow-lg, .shadow-md, .shadow-sm { box-shadow: none !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .shadow-xl, .shadow-2xl, .shadow-md, .shadow-sm { box-shadow: none !important; }
             .border { border-color: #cbd5e1 !important; }
+            .page-break { page-break-before: always; }
         }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
-    <!-- 頂部導覽列 (免列印) -->
-    <header class="bg-emerald-800 text-white shadow-md sticky top-0 z-40 no-print">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid me-2 fa-boxes-packing text-2xl text-emerald-300"></i>
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-md">
+                    <i class="fa-solid fa-boxes-packing text-white"></i>
+                </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">綠園生活倉管新人培訓檢核表</h1>
-                    <p class="text-xs text-emerald-200" id="syncStatus">
-                        <i class="fa-solid fa-circle text-emerald-400 text-[10px] animate-pulse"></i> 雲端資料庫已連線 (newwork-5aff3)
-                    </p>
+                    <h1 class="font-bold text-base sm:text-lg tracking-wide leading-tight">綠園生活倉管新人培訓系統</h1>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 flex-wrap">
-                <button onclick="switchView('trainee')" id="btnTraineeView" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-700 text-white border border-emerald-500 shadow-sm transition">
-                    <i class="fa-solid fa-user-pen mr-1"></i> 實物檢核表填報
-                </button>
-                <button onclick="openAdminModal()" id="btnAdminView" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-600 transition">
-                    <i class="fa-solid fa-user-shield mr-1"></i> 主管管理後台
-                </button>
-                <button onclick="window.print()" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition">
-                    <i class="fa-solid fa-print mr-1"></i> 列印 / 匯出 PDF
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Sync Status Indicator -->
+                <div id="syncBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-emerald-950 text-emerald-400 border border-emerald-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="syncText">雲端自動同步中</span>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                    <button id="tabFormBtn" onclick="switchView('form')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>實務檢核表</span>
+                    </button>
+                    <button id="tabAdminBtn" onclick="switchView('admin')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>主管管理後台</span>
+                    </button>
+                </nav>
+
+                <button onclick="window.print()" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition border border-slate-700" title="列印或導出PDF">
+                    <i class="fa-solid fa-print"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
 
-        <!-- 新人填報介面 -->
-        <div id="viewTrainee" class="space-y-6">
+        <!-- ========================================== -->
+        <!-- VIEW 1: 新人實務檢核表 (Trainee Checklist View) -->
+        <!-- ========================================== -->
+        <div id="formView" class="space-y-6">
 
-            <!-- 抬頭與個人資料卡片 -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div class="border-b border-slate-200 pb-4 mb-6 text-center">
-                    <h2 class="text-2xl font-bold text-slate-800">農產倉管新人實務培訓與作業能力檢核表</h2>
-                    <p class="text-sm text-slate-500 mt-1">包含設備安全、品項分級、現場作業與系統單據發料之完整實務考核</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">受訓新人姓名</label>
-                        <input type="text" id="traineeName" onchange="saveData()" placeholder="請輸入姓名" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+            <!-- Employee Info Header Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2.5 bg-brand-50 text-brand-600 rounded-xl">
+                            <i class="fa-solid fa-id-card text-xl"></i>
+                        </span>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">倉管人員培訓檔案</h2>
+                            <p class="text-xs text-slate-500">請完成三階段（觀念理解、帶教示範、獨立操作）訓練與檢核認證</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">到職日期</label>
-                        <input type="date" id="startDate" onchange="saveData()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">帶教指導員（帶教員）</label>
-                        <input type="text" id="mentorName" onchange="saveData()" placeholder="請輸入帶教員姓名" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">考核主管</label>
-                        <input type="text" id="managerName" onchange="saveData()" placeholder="請輸入主管姓名" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
-                    </div>
-                </div>
-
-                <!-- 開立或切換人員檔案 (雲端) -->
-                <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 no-print">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-medium text-slate-500">切換人員檔案：</span>
-                        <select id="userSelect" onchange="switchUser(this.value)" class="text-sm border border-slate-300 rounded-md px-2 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                            <option value="default">預設新進人員</option>
+                    
+                    <!-- Record Switcher Dropdown & Actions -->
+                    <div class="flex items-center gap-2 no-print">
+                        <select id="userSelector" onchange="loadSelectedUser(this.value)" class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500 outline-none">
+                            <option value="">-- 選擇培訓人員檔案 --</option>
                         </select>
-                    </div>
-                    <button onclick="createNewProfile()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium px-3 py-1.5 rounded border border-emerald-200 transition">
-                        <i class="fa-solid fa-plus mr-1"></i> 新增其他新人培訓檔案
-                    </button>
-                </div>
-            </div>
-
-            <!-- 進度儀表板 -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 no-print">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <div class="text-xs font-semibold text-slate-400">全項目獨立完成率</div>
-                        <div class="text-2xl font-bold text-emerald-600 mt-0.5" id="totalPercent">0%</div>
-                        <div class="text-[11px] text-slate-400" id="totalCountStr">0 / 26 項完成</div>
-                    </div>
-                    <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl font-bold">
-                        <i class="fa-solid fa-chart-pie"></i>
+                        <button onclick="saveCurrentProgress()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold transition shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>儲存進度</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <!-- Input Fields Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                        <div class="text-xs font-semibold text-slate-400">一階：觀念理解</div>
-                        <div class="text-2xl font-bold text-blue-600 mt-0.5" id="l1Count">0 / 26</div>
-                        <div class="text-[11px] text-slate-400">完成標準作業流程講解</div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">員工姓名</label>
+                        <input type="text" id="empName" placeholder="請輸入姓名" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
-                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xl">
-                        <i class="fa-solid fa-book-open"></i>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-semibold text-slate-400">二階：帶教示範</div>
-                        <div class="text-2xl font-bold text-amber-600 mt-0.5" id="l2Count">0 / 26</div>
-                        <div class="text-[11px] text-slate-400">帶教員現場實作示範</div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">到職日期</label>
+                        <input type="date" id="startDate" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
-                    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 text-xl">
-                        <i class="fa-solid fa-hands-holding"></i>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-semibold text-slate-400">三階：獨立操作</div>
-                        <div class="text-2xl font-bold text-emerald-600 mt-0.5" id="l3Count">0 / 26</div>
-                        <div class="text-[11px] text-slate-400">可獨自精準完成作業</div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">帶教員姓名</label>
+                        <input type="text" id="mentorName" placeholder="請輸入帶教員" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
-                    <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl">
-                        <i class="fa-solid fa-user-check"></i>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">部門主管</label>
+                        <input type="text" id="supervisorName" placeholder="請輸入主管" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
                 </div>
             </div>
 
-            <!-- 檢核說明列 (免列印) -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 flex items-start space-x-2 no-print">
-                <i class="fa-solid fa-circle-info text-blue-500 text-sm mt-0.5"></i>
-                <div>
-                    <span class="font-bold">三階段實務培育說明：</span>
-                    【一階：觀念理解】明白安全守則與作業細節｜
-                    【二階：帶教示範】在帶教員監督下參與練習｜
-                    【三階：獨立操作】能獨立無誤地執行任務。點擊各項目名稱可開啟說明。
+            <!-- Overall Progress KPI Bar -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">培訓整體達成率</span>
+                        <h3 class="text-2xl font-black text-slate-900 mt-1" id="overallPercentText">0%</h3>
+                    </div>
+                    <div class="flex gap-4 text-xs">
+                        <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="text-slate-500 block">觀念理解</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c1Count">0 / 26</span>
+                        </div>
+                        <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="text-slate-500 block">帶教示範</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c2Count">0 / 26</span>
+                        </div>
+                        <div class="text-center px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800">
+                            <span class="block">獨立操作認證</span>
+                            <span class="font-bold text-emerald-700 text-sm" id="c3Count">0 / 26</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Progress bar graphics -->
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
+                    <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-emerald-600 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
 
-            <!-- 26 項獨立檢核表卡片 -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- Main Checklist Sections Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i>
+                        <span>培訓檢核項目表 (共 26 個獨立項目)</span>
+                    </h3>
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-slate-200 rounded"></span> 一階: 觀念理解</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-blue-200 rounded"></span> 二階: 帶教示範</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-emerald-200 rounded"></span> 三階: 獨立操作</span>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 font-bold">
-                                <th class="p-3.5 w-12 text-center">編號</th>
-                                <th class="p-3.5 w-32">作業類別</th>
-                                <th class="p-3.5 min-w-[240px]">現場檢核項目細項（共26項獨立評核）</th>
-                                <th class="p-3.5 text-center w-28 bg-blue-50/50">一階：觀念</th>
-                                <th class="p-3.5 text-center w-28 bg-amber-50/50">二階：帶教</th>
-                                <th class="p-3.5 text-center w-28 bg-emerald-50/50">三階：獨立</th>
-                                <th class="p-3.5 w-32 text-center">帶教員簽認</th>
-                                <th class="p-3.5 min-w-[140px]">備註 / 現場特別記錄</th>
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-700 font-bold text-xs uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-4 w-12 text-center">編號</th>
+                                <th class="py-3.5 px-4 w-52">訓練項目名稱</th>
+                                <th class="py-3.5 px-4">標準作業流程重點與細節規範</th>
+                                <th class="py-3.5 px-2 w-20 text-center">一階<br><span class="text-[10px] text-slate-500 font-normal">觀念理解</span></th>
+                                <th class="py-3.5 px-2 w-20 text-center">二階<br><span class="text-[10px] text-slate-500 font-normal">帶教示範</span></th>
+                                <th class="py-3.5 px-2 w-20 text-center">三階<br><span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded font-normal">獨立操作</span></th>
+                                <th class="py-3.5 px-3 w-28 text-center">帶教員簽認</th>
+                                <th class="py-3.5 px-3 w-28 text-center">完成日期</th>
                             </tr>
                         </thead>
-                        <tbody id="checkListBody" class="divide-y divide-slate-200">
-                            <!-- 由 JS 動態生成 26 項列 -->
+                        <tbody id="checklistTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamically generated items -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 帶教員綜合評語與總簽核 -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
-                <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center">
-                    <i class="fa-solid fa-clipboard-check text-emerald-600 mr-2"></i> 帶教員綜合總評與試用簽核
+            <!-- Signatures & Supervisor Evaluation Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-signature text-brand-600"></i>
+                    <span>考核總評與簽認核准</span>
                 </h3>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">帶教員指導評語與改善建議</label>
-                    <textarea id="mentorNotes" onchange="saveData()" rows="3" placeholder="請記錄新人受訓期間之優良表現或需持續追蹤之細節..." class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-2">帶教員實務觀察評語</label>
+                        <textarea id="mentorComments" rows="3" oninput="autoSaveField()" placeholder="請帶教員填寫新人學習態度、操作熟練度與改善建議..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-2">主管試用期決簽意見</label>
+                        <textarea id="supervisorComments" rows="3" oninput="autoSaveField()" placeholder="主管批核意見 (如：同意獨立操作、延長帶教時數等)..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
-                    <div class="border border-slate-200 p-3 rounded-md bg-slate-50/50">
-                        <div class="text-xs font-bold text-slate-500 mb-2">受訓新人簽認</div>
-                        <input type="text" id="traineeSign" onchange="saveData()" placeholder="簽名或蓋章" class="w-full px-2 py-1 text-sm border-b border-slate-300 bg-transparent focus:outline-none">
-                        <input type="date" id="traineeSignDate" onchange="saveData()" class="mt-2 text-xs border border-slate-200 rounded px-2 py-1 w-full bg-white">
+                <!-- Sign Off Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                        <span class="text-xs text-slate-500 block mb-1">受訓新人確認簽章</span>
+                        <input type="text" id="traineeSign" placeholder="請輸入新人姓名" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-slate-300 focus:border-brand-500 outline-none text-slate-800 text-sm py-1">
                     </div>
-                    <div class="border border-slate-200 p-3 rounded-md bg-slate-50/50">
-                        <div class="text-xs font-bold text-slate-500 mb-2">帶教員總簽認</div>
-                        <input type="text" id="mentorSign" onchange="saveData()" placeholder="簽名或蓋章" class="w-full px-2 py-1 text-sm border-b border-slate-300 bg-transparent focus:outline-none">
-                        <input type="date" id="mentorSignDate" onchange="saveData()" class="mt-2 text-xs border border-slate-200 rounded px-2 py-1 w-full bg-white">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                        <span class="text-xs text-slate-500 block mb-1">帶教員評核簽認</span>
+                        <input type="text" id="mentorSign" placeholder="請輸入帶教員姓名" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-slate-300 focus:border-brand-500 outline-none text-slate-800 text-sm py-1">
                     </div>
-                    <div class="border border-slate-200 p-3 rounded-md bg-slate-50/50">
-                        <div class="text-xs font-bold text-slate-500 mb-2">倉管主管決簽</div>
-                        <input type="text" id="managerSign" onchange="saveData()" placeholder="簽名或蓋章" class="w-full px-2 py-1 text-sm border-b border-slate-300 bg-transparent focus:outline-none">
-                        <input type="date" id="managerSignDate" onchange="saveData()" class="mt-2 text-xs border border-slate-200 rounded px-2 py-1 w-full bg-white">
+                    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+                        <span class="text-xs text-emerald-700 block mb-1">部門主管審核蓋章</span>
+                        <input type="text" id="supervisorSign" placeholder="請主管簽核" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-emerald-300 focus:border-emerald-600 outline-none text-emerald-900 text-sm py-1">
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- 主管管理後台介面 (預設隱藏) -->
-        <div id="viewAdmin" class="hidden space-y-6">
-            <div class="bg-slate-900 text-white rounded-xl p-6 shadow-md flex justify-between items-center">
+        <!-- ========================================== -->
+        <!-- VIEW 2: 主管管理後台視角 (Admin Dashboard View) -->
+        <!-- ========================================== -->
+        <div id="adminView" class="space-y-6 hidden no-print">
+
+            <!-- Admin Header -->
+            <div class="bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold flex items-center">
-                        <i class="fa-solid fa-user-shield text-amber-400 mr-2"></i> 主管管理主控台
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-1">管理倉管新人培訓進度、審核獨立操作完成率與匯出報表</p>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-800/50">管理員控制台 (已驗證)</span>
+                    <h2 class="text-2xl font-bold tracking-tight mt-1">倉管新人培訓彙整與審核後台</h2>
+                    <p class="text-xs text-slate-400 mt-1">即時檢視團隊所有新人受訓進度、獨立操作達成率與考核決簽</p>
                 </div>
-                <button onclick="lockAdmin()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs border border-slate-700 transition">
-                    <i class="fa-solid fa-lock mr-1"></i> 鎖定後台
-                </button>
-            </div>
-
-            <!-- 後台統計卡片 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs text-slate-500 font-bold">目前建檔新人總數</div>
-                    <div class="text-3xl font-extrabold text-slate-800 mt-2" id="adminTotalTrainees">0 人</div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs text-slate-500 font-bold">團隊平均獨立操作合格率</div>
-                    <div class="text-3xl font-extrabold text-emerald-600 mt-2" id="adminAvgRate">0%</div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs text-slate-500 font-bold">已可獨立操作全員總項數</div>
-                    <div class="text-3xl font-extrabold text-blue-600 mt-2" id="adminTotalL3Items">0 項</div>
-                </div>
-            </div>
-
-            <!-- 新人清單表格 -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-700 text-sm flex justify-between items-center">
-                    <span>受訓人員整體進度清單</span>
-                    <button onclick="createNewProfile()" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded hover:bg-emerald-700 transition">
-                        + 新增受訓檔案
+                <div class="flex items-center gap-2">
+                    <button onclick="createNewUserPrompt()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-user-plus text-sm"></i>
+                        <span>新增新人培訓檔案</span>
+                    </button>
+                    <button onclick="lockAdminPanel()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>鎖定後台</span>
                     </button>
                 </div>
+            </div>
+
+            <!-- Dashboard Overview KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-slate-100 text-slate-700 rounded-xl text-xl">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">總培訓新人人數</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminTotalTrainees">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-brand-50 text-brand-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">團隊平均獨立操作率</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminAvgProgress">0%</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">考試合格/獨立檢核認證</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminCertifiedCount">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">帶教進行中</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminInTrainingCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trainee Management List -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-brand-600"></i>
+                        <span>受訓新人檔案總覽表</span>
+                    </h3>
+                    <span class="text-xs text-slate-500">點擊列存取該員工完整勾選表與簽核</span>
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold">
+                        <thead class="bg-slate-100 text-slate-700 font-bold text-xs uppercase border-b border-slate-200">
                             <tr>
-                                <th class="p-3">新人姓名</th>
-                                <th class="p-3">到職日</th>
-                                <th class="p-3">帶教指導員</th>
-                                <th class="p-3">獨立完成項目 (共26項)</th>
-                                <th class="p-3">總完成進度條</th>
-                                <th class="p-3 text-center">操作</th>
+                                <th class="py-3.5 px-4">員工姓名</th>
+                                <th class="py-3.5 px-4">到職日期</th>
+                                <th class="py-3.5 px-4">帶教員</th>
+                                <th class="py-3.5 px-4">主管</th>
+                                <th class="py-3.5 px-4 w-48">獨立操作達成率 (三階)</th>
+                                <th class="py-3.5 px-4 text-center">主管審核狀態</th>
+                                <th class="py-3.5 px-4 text-right">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="adminTraineeTable" class="divide-y divide-slate-200">
-                            <!-- JS 動態帶入 -->
+                        <tbody id="adminTraineeTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamic admin rows -->
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
 
     </main>
 
-    <!-- 項目說明彈窗 Modal (免列印) -->
-    <div id="infoModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4">
-            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
-                <h3 class="font-bold text-lg text-slate-800" id="modalTitle">項目細節說明</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-            <div class="text-sm text-slate-600 space-y-2 leading-relaxed" id="modalContent">
-                <!-- 動態注入內容 -->
-            </div>
-            <div class="pt-3 border-t border-slate-100 text-right">
-                <button onclick="closeModal()" class="px-4 py-1.5 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700">理解關閉</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 主管密碼解鎖 Modal (免列印) -->
-    <div id="pwdModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-100">
-            <div class="text-center">
-                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
-                    <i class="fa-solid fa-lock"></i>
+    <!-- Modal for Detailed SOP Description -->
+    <div id="sopModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-brand-50 rounded-xl text-brand-600">
+                    <i class="fa-solid fa-book-open text-xl"></i>
                 </div>
-                <h3 class="font-bold text-slate-800 text-lg">主管身份驗證</h3>
-                <p class="text-xs text-slate-500 mt-1">請輸入主管後台存取密碼以進行管理</p>
+                <div>
+                    <span id="modalCatTag" class="text-xs font-bold text-brand-700 uppercase tracking-wide">作業步驟指引</span>
+                    <h4 id="modalTitle" class="text-lg font-bold text-slate-900">項目名稱</h4>
+                </div>
             </div>
-            <div>
-                <input type="password" id="adminPwdInput" placeholder="請輸入密碼" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-center text-lg tracking-widest focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                <p class="text-xs text-red-500 mt-1 text-center hidden" id="pwdError">密碼錯誤，請重新輸入！</p>
+            <div id="modalContent" class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 max-h-80 overflow-y-auto">
             </div>
-            <div class="flex gap-2">
-                <button onclick="closePwdModal()" class="w-1/2 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200">取消</button>
-                <button onclick="verifyPassword()" class="w-1/2 py-2 bg-amber-500 text-white rounded-lg text-sm font-bold hover:bg-amber-600 shadow transition">驗證進入</button>
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition">知道了</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // --- 1. Firebase 雲端資料庫正式配置（已自動套用您的 Realtime Database 金鑰）---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfWhr9XHYgE91dAeS2vNBI67sry4xsqwU",
-            authDomain: "newwork-5aff3.firebaseapp.com",
-            databaseURL: "https://newwork-5aff3-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "newwork-5aff3",
-            storageBucket: "newwork-5aff3.firebasestorage.app",
-            messagingSenderId: "22068640852",
-            appId: "1:22068640852:web:3faf608dbc5c22084e01c1",
-            measurementId: "G-LGFR7TSBCC"
-        };
+    <!-- Modal for Admin Password Verification -->
+    <div id="adminAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-slate-100 rounded-xl text-slate-800">
+                    <i class="fa-solid fa-lock text-xl text-brand-600"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-brand-700 uppercase tracking-wide">權限控管</span>
+                    <h4 class="text-base font-bold text-slate-900">主管管理後台驗證</h4>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500">此區域僅限主管存取，請輸入通行密碼以繼續：</p>
+            <div>
+                <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none">
+                <p id="adminAuthError" class="text-xs text-red-500 mt-1 hidden"><i class="fa-solid fa-circle-exclamation"></i> 密碼錯誤，請重新輸入！</p>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAdminAuthModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition">取消</button>
+                <button onclick="verifyAdminPassword()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition">解鎖進入</button>
+            </div>
+        </div>
+    </div>
 
-        // 初始化 Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
+        <i class="fa-solid fa-circle-check text-brand-400 text-lg"></i>
+        <span id="toastMsg" class="text-xs font-medium">進度已儲存</span>
+    </div>
 
-        // --- 2. 26 項完全獨立的檢核項目定義（不合併、無英文專有名詞）---
-        const CHECK_ITEMS = [
-            // 用具使用 (3項)
-            { id: 1,  cat: "用具具備與操作", name: "拖板車使用", detail: "掌握手動拖板車升降壓桿操作、迴轉角度控制、載重平衡與停放煞車安全規定。" },
-            { id: 2,  cat: "用具具備與操作", name: "烏龜車使用", detail: "熟悉烏龜車（棧板搬運小車）堆疊疊加方式、狹窄通道轉彎與空車收納規範。" },
-            { id: 3,  cat: "用具具備與操作", name: "堆高機使用", detail: "須具備合格證照或帶教安全監督，掌握牙腳進叉深度、舉升角度、車速限制與充電操作。" },
+    <!-- Application Logic & Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            // 產品認識 (3項)
-            { id: 4,  cat: "產品認識與分級", name: "香菇分級", detail: "清楚辨識香菇級別（大/中/小/花菇/開傘等）、蕈傘完整度、水分狀態與瑕疵淘汰標準。" },
-            { id: 5,  cat: "產品認識與分級", name: "杏鮑菇分級", detail: "掌握杏鮑菇長度、蕈柄粗細、黑頭與水傷判定分級規範。" },
-            { id: 6,  cat: "產品認識與分級", name: "其他菇品項分級", detail: "熟悉金針菇、木耳、秀珍菇、鴻喜菇等雜菇之品質品級與驗收標準。" },
+        // Global Firebase Configuration & State Management
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'warehouse-training-app';
+        let db = null;
+        let auth = null;
+        let currentUserData = null;
+        let currentUserId = null;
+        let allTraineesCache = {};
 
-            // 現場實作 (20項)
-            { id: 7,  cat: "現場作業實作", name: "上午接駁車備貨", detail: "依晨間調撥需求，確認上午接駁車點收、冷鏈溫控及按時發車拉貨。" },
-            { id: 8,  cat: "現場作業實作", name: "下午接駁車備貨", detail: "執行午後廠區間補貨接駁，核對品項數量與進出庫紀錄。" },
-            { id: 9,  cat: "現場作業實作", name: "家樂福大園倉出貨備貨及明確知道備貨數量", detail: "正確核對大園倉訂單規格、貼標規定、棧板堆疊高度及準確備貨數量。" },
-            { id: 10, cat: "現場作業實作", name: "家樂福西螺倉出貨備貨及明確知道備貨數量", detail: "正確核對西螺倉訂單規格、驗貨要求及確實鎖定備貨總數量。" },
-            { id: 11, cat: "現場作業實作", name: "盤商出貨 - 順益（劉家瑜）", detail: "專屬對口盤商順益（劉家瑜）之品項規格、指定包裝與出貨單據簽收流程。" },
-            { id: 12, cat: "現場作業實作", name: "盤商出貨 - 名間（澎湖有限）", detail: "專屬對口盤商名間（澎湖有限）之出貨數量清點與船班/物流對接時間配合。" },
-            { id: 13, cat: "現場作業實作", name: "盤商出貨 - 有來", detail: "盤商有來之產品等級核對、裝箱數量與現場載運點交。" },
-            { id: 14, cat: "現場作業實作", name: "盤商出貨 - 鋒圓", detail: "盤商鋒圓之出貨品項清點與單據填寫。" },
-            { id: 15, cat: "現場作業實作", name: "盤商出貨 - 子信", detail: "盤商子信之出貨品項清點、重量覆核與出貨備貨。" },
-            { id: 16, cat: "現場作業實作", name: "特殊出貨 - 零售客（需收錢）", detail: "現場散客或零售購買（需現場收現金/清點金額）之開單與金流點交流程。" },
-            { id: 17, cat: "現場作業實作", name: "特殊出貨 - 零售客（不用收錢）", detail: "公關、試吃或月結/免收錢零售客之簽收單填寫與出貨紀錄。" },
-            { id: 18, cat: "現場作業實作", name: "特殊出貨 - 商田", detail: "特定客戶商田之專屬規格、出貨包裝與發貨點交。" },
-            { id: 19, cat: "現場作業實作", name: "特殊進貨 - 包材", detail: "紙箱、塑膠袋、貼紙等包裝材料進貨驗收、數量清點與入庫歸位。" },
-            { id: 20, cat: "現場作業實作", name: "特殊進貨 - 盤商進貨（順益）", detail: "盤商順益進貨產品品質檢驗、重量過磅與進貨入庫記錄。" },
-            { id: 21, cat: "現場作業實作", name: "特殊進貨 - 盤商進貨（名間）", detail: "盤商名間進貨品項驗收與庫存登記。" },
-            { id: 22, cat: "現場作業實作", name: "銷退貨處理", detail: "客戶退貨產品之瑕疵判定、分類隔離、退貨單填寫與責任歸屬記錄。" },
-            { id: 23, cat: "現場作業實作", name: "待處理倉處理", detail: "待處理分級品、暫存品之標示管控、每日先進先出與清倉作業。" },
-            { id: 24, cat: "現場作業實作", name: "調撥單發料（63-7）- 香菇", detail: "系統 63-7 調撥單之香菇品項扣帳、發料與現場實際扣料核對。" },
-            { id: 25, cat: "現場作業實作", name: "調撥單發料（63-7）- 雜菇", detail: "系統 63-7 調撥單之各類雜菇品項發料與庫存異動操作。" },
-            { id: 26, cat: "現場作業實作", name: "63-6理貨倉補貨", detail: "63-6 理貨倉之每日庫存警戒線檢查與自動/手動補貨發料程序。" }
+        // Complete 26 Checklist Items Data Definition
+        const CHECKLIST_ITEMS = [
+            // Category 1: 用具學習 (3項)
+            { id: 1, category: "用具學習", name: "拖板車使用", sop: "安全承載檢查、壓桿升降操作、轉彎行進安全角度與固定靜置擺放規範。" },
+            { id: 2, category: "用具學習", name: "烏龜車使用", sop: "多層疊加規範、載重平衡拿捏、通道平穩推行與空車歸位管理。" },
+            { id: 3, category: "用具學習", name: "堆高機使用", sop: "發動前安全檢查、牙叉調寬與高低升降、載貨視線注意、充電作業與安全帶配戴。" },
+
+            // Category 2: 產品認識 (3項)
+            { id: 4, category: "產品認識", name: "香菇分級", sop: "區分大/中/小朵等級、菇傘開度、蕈褶顏色判別、水份瑕疵與發黴剔除基準。" },
+            { id: 5, category: "產品認識", name: "杏鮑菇分級", sop: "區分 A/B 級、蕈柄粗細度、切口平整度、質地彈性與表面壓傷檢視。" },
+            { id: 6, category: "產品認識", name: "其他菇品項分級", sop: "金針菇、木耳、秀珍菇、鴻喜菇等品質規範、包裝完整性與失水耗損辨識。" },
+
+            // Category 3: 現場實作 (20項)
+            { id: 7, category: "現場實作", name: "上午接駁車備貨", sop: "確認早班車次預估單、棧板核對、標籤張貼與準時拉貨上車。" },
+            { id: 8, category: "現場實作", name: "下午接駁車備貨", sop: "午後溫控防護、車次品項確認、點交數量與送達對接作業。" },
+            { id: 9, category: "現場實作", name: "家樂福大園倉出貨備貨及明確知道備貨數量", sop: "核對大園倉物流單號、嚴格複核總箱數與品規、溫控棧板包覆與驗貨無誤。" },
+            { id: 10, category: "現場實作", name: "家樂福西螺倉出貨備貨及明確知道備貨數量", sop: "對應西螺倉出貨表、確實掌握正確件數、溫控封膜與交接單據清點。" },
+            { id: 11, category: "現場實作", name: "盤商出貨-順益(劉家瑜)", sop: "確認順益指定品質規格、核對聯絡人品項數量、專用標籤粘貼與點交。" },
+            { id: 12, category: "現場實作", name: "盤商出貨-名間(澎湖有限)", sop: "核對名間指定菇類等級、重量與件數精準對齊、出貨聯單記錄。" },
+            { id: 13, category: "現場實作", name: "盤商出貨-有來", sop: "有來訂單明細核對、裝箱規範檢視與出貨放行。" },
+            { id: 14, category: "現場實作", name: "盤商出貨-鋒圓", sop: "鋒圓訂單清單確認、庫存批號扣抵與實際備貨件數對齊。" },
+            { id: 15, category: "現場實作", name: "盤商出貨-子信", sop: "子信指定出貨項目清點、標籤複核與專車載運安排。" },
+            { id: 16, category: "現場實作", name: "特殊出貨-零售客(需收錢)", sop: "開立零售單據、核對現場點交數量、現場當面收妥款項並註記銷帳。" },
+            { id: 17, category: "現場實作", name: "特殊出貨-零售客(不用收錢)", sop: "核對月結/公關或主管特批簽核單據，點交貨品後簽收留存。" },
+            { id: 18, category: "現場實作", name: "特殊出貨-商田", sop: "商田專用包裝與規格複核、出貨單據簽章與司機點交。" },
+            { id: 19, category: "現場實作", name: "特殊進貨-包材", sop: "核對進貨紙箱/袋類數量、外觀瑕疵抽驗、入庫定位與數量登錄。" },
+            { id: 20, category: "現場實作", name: "特殊進貨-盤商進貨(順益)", sop: "順益進貨數量檢驗、品質抽檢、進貨單簽核與進貨區歸位。" },
+            { id: 21, category: "現場實作", name: "特殊進貨-盤商進貨(名間)", sop: "名間進貨驗收、溫度與品質檢查、過磅記錄與入庫。" },
+            { id: 22, category: "現場實作", name: "銷退貨處理", sop: "銷退菇類品質檢驗、區分為可可處理或廢棄、填寫退貨單據。" },
+            { id: 23, category: "現場實作", name: "待處理倉處理", sop: "待處理產品標示分類、每日庫存盤點、配合品保做不良品後續處置。" },
+            { id: 24, category: "現場實作", name: "調撥單發料(63-7)-香菇", sop: "系統開立 63-7 調撥單、核對香菇數量與等級、實體發料並系統扣帳。" },
+            { id: 25, category: "現場實作", name: "調撥單發料(63-7)-雜菇", sop: "系統開立 63-7 調撥單、核對雜菇各品項數量、實際發料與單據歸檔。" },
+            { id: 26, category: "現場實作", name: "63-6理貨倉補貨", sop: "檢查理貨倉 63-6 安全庫存量、開立補貨需求、實體搬運補滿與系統紀錄。" }
         ];
 
-        // 全域變數
-        let currentUserId = "default";
-        let appData = {
-            profiles: {
-                "default": {
-                    traineeName: "新進人員",
-                    startDate: new Date().toISOString().split('T')[0],
-                    mentorName: "",
-                    managerName: "",
-                    checks: {},
-                    mentorSign: "",
-                    mentorSignDate: "",
-                    traineeSign: "",
-                    traineeSignDate: "",
-                    managerSign: "",
-                    managerSignDate: "",
-                    mentorNotes: ""
+        // Initialize Firebase
+        async function initApp() {
+            try {
+                let firebaseConfig = null;
+                if (typeof __firebase_config !== 'undefined') {
+                    firebaseConfig = JSON.parse(__firebase_config);
                 }
+
+                if (firebaseConfig) {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    console.log("Firebase initialized successfully.");
+                    document.getElementById('syncBadge').classList.remove('hidden');
+                } else {
+                    console.log("Operating in local mode (LocalStorage).");
+                }
+            } catch (err) {
+                console.warn("Cloud setup skipped, defaulting to local storage:", err);
             }
-        };
 
-        // --- 3. 核心初始化 ---
-        window.addEventListener('DOMContentLoaded', () => {
-            renderTable();
-            loadFromFirebase();
-        });
+            // Default User Profile ID
+            currentUserId = localStorage.getItem('active_trainee_id') || 'trainee_default';
+            renderTableRows();
+            loadUserData(currentUserId);
+            setupRealtimeSync();
+        }
 
-        // 繪製 26 項獨立表格
-        function renderTable() {
-            const tbody = document.getElementById('checkListBody');
+        function createNewUserData(id, name = "新進員工") {
+            const checks = {};
+            CHECKLIST_ITEMS.forEach(item => {
+                checks[item.id] = { c1: false, c2: false, c3: false, mentor: "", date: "" };
+            });
+
+            return {
+                id: id,
+                empName: name,
+                startDate: new Date().toISOString().split('T')[0],
+                mentorName: "",
+                supervisorName: "",
+                mentorComments: "",
+                supervisorComments: "",
+                traineeSign: "",
+                mentorSign: "",
+                supervisorSign: "",
+                checks: checks,
+                updatedAt: new Date().toISOString()
+            };
+        }
+
+        // Render Table Rows
+        function renderTableRows() {
+            const tbody = document.getElementById('checklistTableBody');
             tbody.innerHTML = '';
 
-            CHECK_ITEMS.forEach((item, index) => {
+            let currentCategory = '';
+
+            CHECKLIST_ITEMS.forEach(item => {
+                // Category Header Separator
+                if (item.category !== currentCategory) {
+                    currentCategory = item.category;
+                    const catRow = document.createElement('tr');
+                    catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
+                    catRow.innerHTML = `
+                        <td colspan="8" class="py-2.5 px-4">
+                            <div class="flex items-center gap-2 text-brand-800">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <span>【${currentCategory}】類別</span>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(catRow);
+                }
+
                 const tr = document.createElement('tr');
-                tr.className = index % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-50';
-                
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm";
                 tr.innerHTML = `
-                    <td class="p-3 text-center text-slate-400 font-mono text-xs">${item.id}</td>
-                    <td class="p-3 font-medium text-xs text-slate-500">${item.cat}</td>
-                    <td class="p-3">
-                        <button type="button" onclick="showDetail(${item.id})" class="text-left font-bold text-slate-700 hover:text-emerald-700 hover:underline flex items-center">
-                            ${item.name}
-                            <i class="fa-regular fa-circle-question text-slate-400 text-xs ml-1.5 no-print"></i>
+                    <td class="py-3 px-4 text-center font-bold text-slate-400">${item.id}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900">
+                        <button onclick="openSopModal(${item.id})" class="text-left hover:text-brand-600 transition flex items-center gap-1.5 group">
+                            <span>${item.name}</span>
+                            <i class="fa-solid fa-circle-info text-slate-300 group-hover:text-brand-500 text-xs"></i>
                         </button>
                     </td>
-                    <td class="p-3 text-center bg-blue-50/20">
-                        <input type="checkbox" id="c_${item.id}_l1" onchange="updateCheck(${item.id}, 'l1', this.checked)" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-slate-300">
+                    <td class="py-3 px-4 text-slate-600 text-xs leading-relaxed max-w-xs sm:max-w-md">${item.sop}</td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="checkbox" id="chk_${item.id}_1" onchange="onCheckChange(${item.id})" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
                     </td>
-                    <td class="p-3 text-center bg-amber-50/20">
-                        <input type="checkbox" id="c_${item.id}_l2" onchange="updateCheck(${item.id}, 'l2', this.checked)" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-slate-300">
+                    <td class="py-3 px-2 text-center">
+                        <input type="checkbox" id="chk_${item.id}_2" onchange="onCheckChange(${item.id})" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
                     </td>
-                    <td class="p-3 text-center bg-emerald-50/20">
-                        <input type="checkbox" id="c_${item.id}_l3" onchange="updateCheck(${item.id}, 'l3', this.checked)" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-slate-300">
+                    <td class="py-3 px-2 text-center bg-emerald-50/40">
+                        <input type="checkbox" id="chk_${item.id}_3" onchange="onCheckChange(${item.id})" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
                     </td>
-                    <td class="p-3 text-center">
-                        <input type="text" id="c_${item.id}_signer" onchange="updateCheckText(${item.id}, 'signer', this.value)" placeholder="帶教員簽認" class="w-full text-center text-xs py-1 border border-slate-200 rounded focus:outline-none focus:border-emerald-500 bg-transparent">
+                    <td class="py-3 px-3 text-center">
+                        <input type="text" id="mentor_${item.id}" oninput="autoSaveField()" placeholder="簽認" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-brand-500 outline-none">
                     </td>
-                    <td class="p-3">
-                        <input type="text" id="c_${item.id}_note" onchange="updateCheckText(${item.id}, 'note', this.value)" placeholder="備註紀錄" class="w-full text-xs py-1 border border-slate-200 rounded px-2 focus:outline-none focus:border-emerald-500 bg-transparent">
+                    <td class="py-3 px-3 text-center">
+                        <input type="date" id="date_${item.id}" onchange="autoSaveField()" class="w-full px-1 py-1 border border-slate-200 rounded text-[11px] focus:ring-1 focus:ring-brand-500 outline-none">
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- 4. 資料更新與統計 ---
-        function updateCheck(itemId, level, checked) {
-            const user = getActiveUser();
-            if (!user.checks[itemId]) user.checks[itemId] = {};
-            user.checks[itemId][level] = checked;
-            calculateStats();
-            saveData();
+        window.onCheckChange = function(itemId) {
+            updateProgress();
+            autoSaveField();
         }
 
-        function updateCheckText(itemId, field, value) {
-            const user = getActiveUser();
-            if (!user.checks[itemId]) user.checks[itemId] = {};
-            user.checks[itemId][field] = value;
-            saveData();
+        function updateProgress() {
+            let c1 = 0, c2 = 0, c3 = 0;
+            CHECKLIST_ITEMS.forEach(item => {
+                if (document.getElementById(`chk_${item.id}_1`)?.checked) c1++;
+                if (document.getElementById(`chk_${item.id}_2`)?.checked) c2++;
+                if (document.getElementById(`chk_${item.id}_3`)?.checked) c3++;
+            });
+
+            document.getElementById('c1Count').innerText = `${c1} / 26`;
+            document.getElementById('c2Count').innerText = `${c2} / 26`;
+            document.getElementById('c3Count').innerText = `${c3} / 26`;
+
+            const percent = Math.round((c3 / 26) * 100);
+            document.getElementById('overallPercentText').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
         }
 
-        function getActiveUser() {
-            if (!appData.profiles[currentUserId]) {
-                appData.profiles[currentUserId] = { checks: {} };
+        window.autoSaveField = function() {
+            if (!currentUserData) return;
+
+            currentUserData.empName = document.getElementById('empName').value;
+            currentUserData.startDate = document.getElementById('startDate').value;
+            currentUserData.mentorName = document.getElementById('mentorName').value;
+            currentUserData.supervisorName = document.getElementById('supervisorName').value;
+            currentUserData.mentorComments = document.getElementById('mentorComments').value;
+            currentUserData.supervisorComments = document.getElementById('supervisorComments').value;
+            currentUserData.traineeSign = document.getElementById('traineeSign').value;
+            currentUserData.mentorSign = document.getElementById('mentorSign').value;
+            currentUserData.supervisorSign = document.getElementById('supervisorSign').value;
+
+            CHECKLIST_ITEMS.forEach(item => {
+                currentUserData.checks[item.id] = {
+                    c1: document.getElementById(`chk_${item.id}_1`)?.checked || false,
+                    c2: document.getElementById(`chk_${item.id}_2`)?.checked || false,
+                    c3: document.getElementById(`chk_${item.id}_3`)?.checked || false,
+                    mentor: document.getElementById(`mentor_${item.id}`)?.value || '',
+                    date: document.getElementById(`date_${item.id}`)?.value || ''
+                };
+            });
+
+            currentUserData.updatedAt = new Date().toISOString();
+
+            // LocalStorage Backup
+            localStorage.setItem(`trainee_data_${currentUserId}`, JSON.stringify(currentUserData));
+            updateUserSelectorOptions();
+
+            // Cloud Async Push
+            if (db && auth.currentUser) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', currentUserId);
+                setDoc(docRef, currentUserData, { merge: true }).catch(err => console.warn("Cloud save error:", err));
             }
-            return appData.profiles[currentUserId];
         }
 
-        function calculateStats() {
-            const user = getActiveUser();
-            let l1 = 0, l2 = 0, l3 = 0;
-
-            CHECK_ITEMS.forEach(item => {
-                const c = user.checks[item.id] || {};
-                if (c.l1) l1++;
-                if (c.l2) l2++;
-                if (c.l3) l3++;
-            });
-
-            const percent = Math.round((l3 / CHECK_ITEMS.length) * 100);
-
-            document.getElementById('totalPercent').innerText = percent + '%';
-            document.getElementById('totalCountStr').innerText = `${l3} / ${CHECK_ITEMS.length} 項完成`;
-            document.getElementById('l1Count').innerText = `${l1} / ${CHECK_ITEMS.length}`;
-            document.getElementById('l2Count').innerText = `${l2} / ${CHECK_ITEMS.length}`;
-            document.getElementById('l3Count').innerText = `${l3} / ${CHECK_ITEMS.length}`;
+        window.saveCurrentProgress = function() {
+            autoSaveField();
+            showToast('進度儲存成功！');
         }
 
-        // 將界面數據同步填回 DOM
-        function updateDOMFromData() {
-            const user = getActiveUser();
+        function loadUserData(userId) {
+            currentUserId = userId;
+            localStorage.setItem('active_trainee_id', userId);
 
-            document.getElementById('traineeName').value = user.traineeName || "";
-            document.getElementById('startDate').value = user.startDate || "";
-            document.getElementById('mentorName').value = user.mentorName || "";
-            document.getElementById('managerName').value = user.managerName || "";
-            
-            document.getElementById('mentorNotes').value = user.mentorNotes || "";
-            document.getElementById('traineeSign').value = user.traineeSign || "";
-            document.getElementById('traineeSignDate').value = user.traineeSignDate || "";
-            document.getElementById('mentorSign').value = user.mentorSign || "";
-            document.getElementById('mentorSignDate').value = user.mentorSignDate || "";
-            document.getElementById('managerSign').value = user.managerSign || "";
-            document.getElementById('managerSignDate').value = user.managerSignDate || "";
-
-            CHECK_ITEMS.forEach(item => {
-                const c = user.checks[item.id] || {};
-                document.getElementById(`c_${item.id}_l1`).checked = !!c.l1;
-                document.getElementById(`c_${item.id}_l2`).checked = !!c.l2;
-                document.getElementById(`c_${item.id}_l3`).checked = !!c.l3;
-                document.getElementById(`c_${item.id}_signer`).value = c.signer || "";
-                document.getElementById(`c_${item.id}_note`).value = c.note || "";
-            });
-
-            calculateStats();
-            updateUserSelectDropdown();
-        }
-
-        function collectDataFromDOM() {
-            const user = getActiveUser();
-            user.traineeName = document.getElementById('traineeName').value;
-            user.startDate = document.getElementById('startDate').value;
-            user.mentorName = document.getElementById('mentorName').value;
-            user.managerName = document.getElementById('managerName').value;
-
-            user.mentorNotes = document.getElementById('mentorNotes').value;
-            user.traineeSign = document.getElementById('traineeSign').value;
-            user.traineeSignDate = document.getElementById('traineeSignDate').value;
-            user.mentorSign = document.getElementById('mentorSign').value;
-            user.mentorSignDate = document.getElementById('mentorSignDate').value;
-            user.managerSign = document.getElementById('managerSign').value;
-            user.managerSignDate = document.getElementById('managerSignDate').value;
-        }
-
-        // --- 5. Firebase 雲端與本地儲存同步 ---
-        function saveData() {
-            collectDataFromDOM();
-            // 本地儲存
-            localStorage.setItem('warehouse_sop_data', JSON.stringify(appData));
-            
-            // 雲端即時同步
-            db.ref('warehouse_training/' + currentUserId).set(appData.profiles[currentUserId])
-                .then(() => {
-                    document.getElementById('syncStatus').innerHTML = `<i class="fa-solid fa-circle text-emerald-400 text-[10px]"></i> 雲端同步成功 (${new Date().toLocaleTimeString()})`;
-                })
-                .catch(err => {
-                    document.getElementById('syncStatus').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400 text-[10px]"></i> 本地已存 (雲端備註: ${err.message})`;
-                });
-        }
-
-        function loadFromFirebase() {
-            // 先載入本地 quick load
-            const local = localStorage.getItem('warehouse_sop_data');
-            if (local) {
-                try {
-                    appData = JSON.parse(local);
-                    updateDOMFromData();
-                } catch(e){}
+            const saved = localStorage.getItem(`trainee_data_${userId}`);
+            if (saved) {
+                currentUserData = JSON.parse(saved);
+            } else {
+                currentUserData = createNewUserData(userId);
             }
 
-            // 讀取 Firebase 雲端整包資料
-            db.ref('warehouse_training').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    appData.profiles = data;
-                    if (!appData.profiles[currentUserId]) {
-                        currentUserId = Object.keys(appData.profiles)[0] || "default";
-                    }
-                    updateDOMFromData();
-                    renderAdminDashboard();
-                }
+            // Fill UI Fields
+            document.getElementById('empName').value = currentUserData.empName || '';
+            document.getElementById('startDate').value = currentUserData.startDate || '';
+            document.getElementById('mentorName').value = currentUserData.mentorName || '';
+            document.getElementById('supervisorName').value = currentUserData.supervisorName || '';
+            document.getElementById('mentorComments').value = currentUserData.mentorComments || '';
+            document.getElementById('supervisorComments').value = currentUserData.supervisorComments || '';
+            document.getElementById('traineeSign').value = currentUserData.traineeSign || '';
+            document.getElementById('mentorSign').value = currentUserData.mentorSign || '';
+            document.getElementById('supervisorSign').value = currentUserData.supervisorSign || '';
+
+            CHECKLIST_ITEMS.forEach(item => {
+                const chk = currentUserData.checks?.[item.id] || {};
+                if (document.getElementById(`chk_${item.id}_1`)) document.getElementById(`chk_${item.id}_1`).checked = chk.c1 || false;
+                if (document.getElementById(`chk_${item.id}_2`)) document.getElementById(`chk_${item.id}_2`).checked = chk.c2 || false;
+                if (document.getElementById(`chk_${item.id}_3`)) document.getElementById(`chk_${item.id}_3`).checked = chk.c3 || false;
+                if (document.getElementById(`mentor_${item.id}`)) document.getElementById(`mentor_${item.id}`).value = chk.mentor || '';
+                if (document.getElementById(`date_${item.id}`)) document.getElementById(`date_${item.id}`).value = chk.date || '';
             });
+
+            updateProgress();
+            updateUserSelectorOptions();
         }
 
-        // 多人員切換
-        function updateUserSelectDropdown() {
-            const select = document.getElementById('userSelect');
-            select.innerHTML = '';
-            Object.keys(appData.profiles).forEach(uid => {
-                const p = appData.profiles[uid];
+        function updateUserSelectorOptions() {
+            const selector = document.getElementById('userSelector');
+            selector.innerHTML = '';
+
+            // Collect all local user IDs
+            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
+            if (userKeys.length === 0) {
+                userKeys.push(`trainee_data_${currentUserId}`);
+            }
+
+            userKeys.forEach(key => {
+                const uid = key.replace('trainee_data_', '');
+                const uData = JSON.parse(localStorage.getItem(key) || '{}');
                 const opt = document.createElement('option');
                 opt.value = uid;
-                opt.innerText = `${p.traineeName || '未命名新人'} (${p.startDate || '無到職日'})`;
+                opt.innerText = `${uData.empName || '新進員工'} (${uData.startDate || '未設定'})`;
                 if (uid === currentUserId) opt.selected = true;
-                select.appendChild(opt);
+                selector.appendChild(opt);
             });
         }
 
-        function switchUser(uid) {
-            collectDataFromDOM();
-            currentUserId = uid;
-            updateDOMFromData();
+        window.loadSelectedUser = function(uid) {
+            if (!uid) return;
+            loadUserData(uid);
         }
 
-        function createNewProfile() {
-            const name = prompt("請輸入新進員工姓名：");
-            if (!name) return;
-            const newId = "emp_" + Date.now();
-            appData.profiles[newId] = {
-                traineeName: name,
-                startDate: new Date().toISOString().split('T')[0],
-                mentorName: "",
-                managerName: "",
-                checks: {}
-            };
-            currentUserId = newId;
-            saveData();
-            updateDOMFromData();
+        window.createNewUserPrompt = function() {
+            if (!isAdminUnlocked) {
+                openAdminAuthModal();
+                return;
+            }
+            const newName = prompt("請輸入新員工姓名：", "張小明");
+            if (!newName) return;
+
+            const newId = 'trainee_' + Date.now();
+            const newData = createNewUserData(newId, newName);
+            localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
+            loadUserData(newId);
+            showToast(`已建立 ${newName} 的培訓檔案`);
         }
 
-        // --- 6. 主管後台與密碼鎖驗證 (預設密碼: 1021) ---
-        function openAdminModal() {
-            document.getElementById('pwdError').classList.add('hidden');
-            document.getElementById('adminPwdInput').value = '';
-            document.getElementById('pwdModal').classList.remove('hidden');
-            document.getElementById('adminPwdInput').focus();
+        // Realtime Listener
+        function setupRealtimeSync() {
+            if (!db) return;
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'trainees');
+            onSnapshot(colRef, (snapshot) => {
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data && data.id) {
+                        allTraineesCache[data.id] = data;
+                        localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
+                    }
+                });
+                updateUserSelectorOptions();
+                if (document.getElementById('adminView').classList.contains('hidden') === false) {
+                    renderAdminDashboard();
+                }
+            }, (error) => {
+                console.warn("Realtime sync warning:", error);
+            });
         }
 
-        function closePwdModal() {
-            document.getElementById('pwdModal').classList.add('hidden');
-        }
+        // Admin Auth & Lock Logic
+        let isAdminUnlocked = false;
 
-        function verifyPassword() {
-            const pwd = document.getElementById('adminPwdInput').value;
-            if (pwd === "1021") {
-                closePwdModal();
-                switchView('admin');
+        window.switchView = function(mode) {
+            const formView = document.getElementById('formView');
+            const adminView = document.getElementById('adminView');
+            const tabFormBtn = document.getElementById('tabFormBtn');
+            const tabAdminBtn = document.getElementById('tabAdminBtn');
+
+            if (mode === 'admin') {
+                if (!isAdminUnlocked) {
+                    openAdminAuthModal();
+                    return;
+                }
+                formView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+
+                tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
+                tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
+
                 renderAdminDashboard();
             } else {
-                document.getElementById('pwdError').classList.remove('hidden');
+                adminView.classList.add('hidden');
+                formView.classList.remove('hidden');
+
+                tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
+                tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
             }
         }
 
-        function lockAdmin() {
-            switchView('trainee');
+        function openAdminAuthModal() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminAuthError').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
         }
 
-        function switchView(view) {
-            if (view === 'admin') {
-                document.getElementById('viewTrainee').classList.add('hidden');
-                document.getElementById('viewAdmin').classList.remove('hidden');
-                document.getElementById('btnTraineeView').classList.remove('bg-emerald-700');
-                document.getElementById('btnTraineeView').classList.add('bg-slate-700');
+        window.closeAdminAuthModal = function() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        window.verifyAdminPassword = function() {
+            const pwd = document.getElementById('adminPasswordInput').value;
+            if (pwd === '1021') {
+                isAdminUnlocked = true;
+                closeAdminAuthModal();
+                switchView('admin');
+                showToast('主管身分驗證成功！');
             } else {
-                document.getElementById('viewAdmin').classList.add('hidden');
-                document.getElementById('viewTrainee').classList.remove('hidden');
-                document.getElementById('btnTraineeView').classList.add('bg-emerald-700');
+                document.getElementById('adminAuthError').classList.remove('hidden');
             }
         }
 
-        function renderAdminDashboard() {
-            const profiles = appData.profiles || {};
-            const keys = Object.keys(profiles);
-            
-            document.getElementById('adminTotalTrainees').innerText = keys.length + " 人";
+        window.lockAdminPanel = function() {
+            isAdminUnlocked = false;
+            switchView('form');
+            showToast('主管後台已重新鎖定');
+        }
 
-            let totalL3Sum = 0;
-            const tbody = document.getElementById('adminTraineeTable');
+        window.renderAdminDashboard = function() {
+            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
+            let total = userKeys.length;
+            let certifiedCount = 0;
+            let totalProgressSum = 0;
+
+            const tbody = document.getElementById('adminTraineeTableBody');
             tbody.innerHTML = '';
 
-            keys.forEach(uid => {
-                const p = profiles[uid];
-                let l3Count = 0;
-                if (p.checks) {
-                    Object.values(p.checks).forEach(c => {
-                        if (c.l3) l3Count++;
-                    });
-                }
-                totalL3Sum += l3Count;
-                const percent = Math.round((l3Count / CHECK_ITEMS.length) * 100);
+            userKeys.forEach(key => {
+                const uData = JSON.parse(localStorage.getItem(key) || '{}');
+                let c3Count = 0;
+                CHECKLIST_ITEMS.forEach(item => {
+                    if (uData.checks?.[item.id]?.c3) c3Count++;
+                });
+
+                const percent = Math.round((c3Count / 26) * 100);
+                totalProgressSum += percent;
+
+                if (percent >= 100 || uData.supervisorSign) certifiedCount++;
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50";
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
                 tr.innerHTML = `
-                    <td class="p-3 font-bold text-slate-800">${p.traineeName || '未命名'}</td>
-                    <td class="p-3 text-slate-500 text-xs">${p.startDate || '-'}</td>
-                    <td class="p-3 text-slate-600">${p.mentorName || '未設定'}</td>
-                    <td class="p-3 font-semibold ${l3Count === 26 ? 'text-emerald-600' : 'text-slate-700'}">${l3Count} / 26 項</td>
-                    <td class="p-3">
-                        <div class="w-full bg-slate-200 rounded-full h-2 max-w-[120px]">
-                            <div class="bg-emerald-500 h-2 rounded-full" style="width: ${percent}%"></div>
+                    <td class="py-3 px-4 font-bold text-slate-900">${uData.empName || '未命名'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${uData.startDate || '-'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${uData.mentorName || '-'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${uData.supervisorName || '-'}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-brand-500 h-full rounded-full" style="width: ${percent}%"></div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700">${percent}%</span>
                         </div>
                     </td>
-                    <td class="p-3 text-center">
-                        <button onclick="switchAndEdit('${uid}')" class="px-2.5 py-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 rounded hover:bg-emerald-100">
+                    <td class="py-3 px-4 text-center">
+                        ${uData.supervisorSign ? 
+                            '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-full text-[11px]"><i class="fa-solid fa-check"></i> 已主管核章</span>' : 
+                            '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-full text-[11px]"><i class="fa-solid fa-clock"></i> 待主管審核</span>'}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="adminInspectUser('${uData.id}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold transition">
                             開啟審核
                         </button>
                     </td>
@@ -674,35 +827,58 @@
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('adminTotalL3Items').innerText = totalL3Sum + " 項";
-            const avgRate = keys.length ? Math.round((totalL3Sum / (keys.length * 26)) * 100) : 0;
-            document.getElementById('adminAvgRate').innerText = avgRate + "%";
+            document.getElementById('adminTotalTrainees').innerText = total;
+            document.getElementById('adminAvgProgress').innerText = total > 0 ? `${Math.round(totalProgressSum / total)}%` : '0%';
+            document.getElementById('adminCertifiedCount').innerText = certifiedCount;
+            document.getElementById('adminInTrainingCount').innerText = total - certifiedCount;
         }
 
-        function switchAndEdit(uid) {
-            currentUserId = uid;
-            updateDOMFromData();
-            switchView('trainee');
+        window.adminInspectUser = function(uid) {
+            loadUserData(uid);
+            switchView('form');
+            showToast(`已切換至 ${currentUserData.empName || '員工'} 的檢核表`);
         }
 
-        // --- 7. 細節 Modal 視窗 ---
-        function showDetail(id) {
-            const item = CHECK_ITEMS.find(x => x.id === id);
+        // SOP Modal
+        window.openSopModal = function(id) {
+            const item = CHECKLIST_ITEMS.find(i => i.id === id);
             if (!item) return;
+
+            document.getElementById('modalCatTag').innerText = item.category;
             document.getElementById('modalTitle').innerText = `${item.id}. ${item.name}`;
             document.getElementById('modalContent').innerHTML = `
-                <p class="font-bold text-emerald-700">【歸屬類別】${item.cat}</p>
-                <p class="mt-2 text-slate-700">${item.detail}</p>
-                <div class="mt-4 p-3 bg-slate-50 rounded border border-slate-200 text-xs text-slate-500">
-                    💡 帶教建議：確認新人是否能清晰述說重點，並在無監督下符合安全與精準度標準。
+                <p class="font-bold text-slate-800 mb-1">【標準作業指引 (SOP)】</p>
+                <p class="text-slate-600 leading-relaxed">${item.sop}</p>
+                <div class="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg text-xs text-brand-900">
+                    <p class="font-bold">帶教重點提示：</p>
+                    <ul class="list-disc list-inside mt-1 space-y-1">
+                        <li>一階：清楚理解標準規範與安全要求。</li>
+                        <li>二階：能跟隨帶教員示範正確操作。</li>
+                        <li>三階：能無誤、獨立且安全地獨力完成。</li>
+                    </ul>
                 </div>
             `;
-            document.getElementById('infoModal').classList.remove('hidden');
+            document.getElementById('sopModal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('infoModal').classList.add('hidden');
+        window.closeModal = function() {
+            document.getElementById('sopModal').classList.add('hidden');
         }
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // On Load Entry Point
+        window.onload = function() {
+            initApp();
+        };
     </script>
 </body>
 </html>
