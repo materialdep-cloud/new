@@ -1127,26 +1127,27 @@
                     currentCategory = item.category;
                     currentSubgroup = '';
                     categoryItemNumber = 0;
+
+                    const catRow = document.createElement('tr');
+                    catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
+                    const categoryExtraButton = currentCategory === '進貨' ? `
+                        <a href="https://drive.google.com/file/d/1Lr8VxiCOnpZw8i1mOFb5Xho1W0uT4yGy/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-2 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition font-semibold no-underline">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span>進貨參考資料</span>
+                        </a>` : '';
+                    catRow.innerHTML = `
+                        <td colspan="8" class="py-2.5 px-4">
+                            <div class="flex items-center gap-2 text-brand-800">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <span>【${currentCategory}】類別</span>
+                                ${categoryExtraButton}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(catRow);
                 }
+
                 categoryItemNumber++;
-                const catRow = document.createElement('tr');
-                catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
-                const categoryExtraButton = currentCategory === '進貨' ? `
-                    <a href="https://drive.google.com/file/d/1Lr8VxiCOnpZw8i1mOFb5Xho1W0uT4yGy/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-2 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition font-semibold no-underline">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        <span>進貨參考資料</span>
-                    </a>` : '';
-                catRow.innerHTML = `
-                    <td colspan="8" class="py-2.5 px-4">
-                        <div class="flex items-center gap-2 text-brand-800">
-                            <i class="fa-solid fa-folder-open"></i>
-                            <span>【${currentCategory}】類別</span>
-                            ${categoryExtraButton}
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(catRow);
-            }
 
                 if (item.subgroup && item.subgroup !== currentSubgroup) {
                     currentSubgroup = item.subgroup;
