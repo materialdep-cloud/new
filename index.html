@@ -118,7 +118,7 @@
                 padding-bottom: 2px !important;
             }
             #checklistTableBody .checklist-item-row td:nth-child(7)::before {
-                content: '帶教員簽認';
+                content: '教導員/主管簽認';
                 display: block;
                 font-weight: 700;
                 font-size: 11px;
@@ -307,7 +307,7 @@
                                 <th class="py-3.5 px-2 w-20 text-center">一階<br><span class="text-[10px] text-slate-500 font-normal">觀念理解</span></th>
                                 <th class="py-3.5 px-2 w-20 text-center">二階<br><span class="text-[10px] text-slate-500 font-normal">帶教示範</span></th>
                                 <th class="py-3.5 px-2 w-20 text-center">三階<br><span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded font-normal">獨立操作</span></th>
-                                <th class="py-3.5 px-3 w-28 text-center">帶教員簽認</th>
+                                <th class="py-3.5 px-3 w-28 text-center">教導員/主管簽認</th>
                                 <th class="py-3.5 px-3 w-28 text-center">完成日期</th>
                             </tr>
                         </thead>
@@ -327,10 +327,6 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-2">帶教員實務觀察評語</label>
-                        <textarea id="mentorComments" rows="3" oninput="autoSaveField()" placeholder="請帶教員填寫新人學習態度、操作熟練度與改善建議..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
-                    </div>
-                    <div>
                         <label class="block text-xs font-bold text-slate-600 mb-2">主管試用期決簽意見</label>
                         <textarea id="supervisorComments" rows="3" oninput="autoSaveField()" placeholder="主管批核意見 (如：同意獨立操作、延長帶教時數等)..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
                     </div>
@@ -343,7 +339,7 @@
                         <input type="text" id="traineeSign" placeholder="請輸入新人姓名" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-slate-300 focus:border-brand-500 outline-none text-slate-800 text-sm py-1">
                     </div>
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                        <span class="text-xs text-slate-500 block mb-1">帶教員評核簽認</span>
+                        <span class="text-xs text-slate-500 block mb-1">教導員/主管簽認</span>
                         <input type="text" id="mentorSign" placeholder="請輸入帶教員姓名" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-slate-300 focus:border-brand-500 outline-none text-slate-800 text-sm py-1">
                     </div>
                     <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
