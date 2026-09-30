@@ -64,10 +64,10 @@
             
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Sync Status Indicator -->
-                <div id="syncBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-emerald-950 text-emerald-400 border border-emerald-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="syncText">雲端自動同步中</span>
-                </div>
+                <button id="syncBadge" onclick="openBackendModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-slate-800 text-amber-300 border border-slate-700 hover:bg-slate-700 transition shadow-sm cursor-pointer" title="點擊設定或查看雲端後台連線">
+                    <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span id="syncText">本機模式 (點擊連線後台)</span>
+                </button>
 
                 <!-- Navigation Tabs -->
                 <nav class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
@@ -392,6 +392,96 @@
         </div>
     </div>
 
+    <!-- Modal for Cloud Backend Settings -->
+    <div id="backendModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
+            <button onclick="closeBackendModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-brand-50 rounded-xl text-brand-600">
+                    <i class="fa-solid fa-database text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-brand-700 uppercase tracking-wide">後台系統設定</span>
+                    <h4 class="text-lg font-bold text-slate-900">雲端資料庫 (Firebase) 連線設定</h4>
+                </div>
+            </div>
+            
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
+                預設為離線本機儲存（LocalStorage）。若要連結您專屬的 Firebase 雲端後台，請直接貼上 Firebase 設定 JSON 物件或手動輸入 Project ID：
+            </p>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">貼上 Firebase Config JSON</label>
+                    <textarea id="firebaseJsonInput" rows="4" placeholder='{&#10;  "apiKey": "AIzaSy...",&#10;  "authDomain": "myproject.firebaseapp.com",&#10;  "projectId": "myproject",&#10;  "storageBucket": "...",&#10;  "messagingSenderId": "...",&#10;  "appId": "..."&#10;}' class="w-full px-3 py-2 border border-slate-300 rounded-xl font-mono text-[11px] focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+                </div>
+
+                <div class="flex items-center gap-2 text-slate-400 my-2">
+                    <hr class="flex-1 border-slate-200">
+                    <span class="text-[10px]">或手動輸入核心參數</span>
+                    <hr class="flex-1 border-slate-200">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-600 mb-0.5">Project ID</label>
+                        <input type="text" id="fbProjectId" placeholder="my-project-id" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-600 mb-0.5">API Key</label>
+                        <input type="text" id="fbApiKey" placeholder="AIzaSy..." class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-brand-500">
+                    </div>
+                </div>
+            </div>
+
+            <div id="backendConnectStatus" class="text-xs p-2.5 rounded-lg hidden"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <button onclick="clearCustomBackend()" class="px-3 py-1.5 text-xs text-red-600 hover:text-red-800 font-medium transition flex items-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>重置為本機模式</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeBackendModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition">取消</button>
+                    <button onclick="saveAndTestBackend()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plug"></i>
+                        <span>儲存並測試連線</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Trainee Delete Confirmation -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
+            <button onclick="closeDeleteConfirmModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-red-50 rounded-xl text-red-600">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-red-700 uppercase tracking-wide">警告操作</span>
+                    <h4 class="text-base font-bold text-slate-900">刪除新人培訓檔案</h4>
+                </div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                您確定要刪除 <span id="deleteTargetName" class="font-bold text-slate-900"></span> 的培訓檔案嗎？刪除後相關檢核記錄與簽核資料將無法復原。
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeDeleteConfirmModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition">取消</button>
+                <button onclick="executeDeleteTrainee()" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>確認刪除</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
         <i class="fa-solid fa-circle-check text-brand-400 text-lg"></i>
@@ -402,16 +492,29 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global Firebase Configuration & State Management
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'warehouse-training-app';
+
+        // Preset Firebase Config (Default)
+        const DEFAULT_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBfWhr9XHYgE91dAeS2vNBI67sry4xsqwU",
+            authDomain: "newwork-5aff3.firebaseapp.com",
+            databaseURL: "https://newwork-5aff3-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "newwork-5aff3",
+            storageBucket: "newwork-5aff3.firebasestorage.app",
+            messagingSenderId: "22068640852",
+            appId: "1:22068640852:web:3faf608dbc5c22084e01c1",
+            measurementId: "G-LGFR7TSBCC"
+        };
+
         let db = null;
         let auth = null;
         let currentUserData = null;
         let currentUserId = null;
         let allTraineesCache = {};
-
+        let targetDeleteUid = null;
         // Complete 26 Checklist Items Data Definition
         const CHECKLIST_ITEMS = [
             // Category 1: 用具學習 (3項)
@@ -451,11 +554,30 @@
         async function initApp() {
             try {
                 let firebaseConfig = null;
-                if (typeof __firebase_config !== 'undefined') {
-                    firebaseConfig = JSON.parse(__firebase_config);
+
+                // Priority 1: User custom configured Firebase
+                const storedCustomConfig = localStorage.getItem('custom_firebase_config');
+                if (storedCustomConfig) {
+                    try {
+                        firebaseConfig = JSON.parse(storedCustomConfig);
+                    } catch(e) {
+                        console.error("Invalid custom firebase config format", e);
+                    }
                 }
 
-                if (firebaseConfig) {
+                // Priority 2: System environment provided config
+                if (!firebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    try {
+                        firebaseConfig = JSON.parse(__firebase_config);
+                    } catch(e) {}
+                }
+
+                // Priority 3: Fallback to Preset Firebase Config
+                if (!firebaseConfig || !firebaseConfig.projectId) {
+                    firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+                }
+
+                if (firebaseConfig && firebaseConfig.projectId) {
                     const app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
                     auth = getAuth(app);
@@ -465,13 +587,15 @@
                     } else {
                         await signInAnonymously(auth);
                     }
-                    console.log("Firebase initialized successfully.");
-                    document.getElementById('syncBadge').classList.remove('hidden');
+                    console.log("Firebase initialized successfully with project:", firebaseConfig.projectId);
+                    updateSyncBadgeStatus('connected', `雲端後台已連線 (${firebaseConfig.projectId})`);
                 } else {
                     console.log("Operating in local mode (LocalStorage).");
+                    updateSyncBadgeStatus('local', '本機模式 (點擊連線後台)');
                 }
             } catch (err) {
                 console.warn("Cloud setup skipped, defaulting to local storage:", err);
+                updateSyncBadgeStatus('error', '雲端連線失敗 (點擊重試)');
             }
 
             // Default User Profile ID
@@ -479,6 +603,107 @@
             renderTableRows();
             loadUserData(currentUserId);
             setupRealtimeSync();
+        }
+
+        function updateSyncBadgeStatus(status, text) {
+            const badge = document.getElementById('syncBadge');
+            const dot = document.getElementById('syncDot');
+            const textEl = document.getElementById('syncText');
+
+            if (!badge || !dot || !textEl) return;
+
+            textEl.innerText = text;
+
+            if (status === 'connected') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-emerald-950 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900 transition shadow-sm cursor-pointer";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+            } else if (status === 'error') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-red-950 text-red-300 border border-red-700/60 hover:bg-red-900 transition shadow-sm cursor-pointer";
+                dot.className = "w-2 h-2 rounded-full bg-red-400";
+            } else {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-slate-800 text-amber-300 border border-slate-700 hover:bg-slate-700 transition shadow-sm cursor-pointer";
+                dot.className = "w-2 h-2 rounded-full bg-amber-400";
+            }
+        }
+
+        window.openBackendModal = function() {
+            const stored = localStorage.getItem('custom_firebase_config');
+            if (stored) {
+                document.getElementById('firebaseJsonInput').value = stored;
+                try {
+                    const parsed = JSON.parse(stored);
+                    document.getElementById('fbProjectId').value = parsed.projectId || '';
+                    document.getElementById('fbApiKey').value = parsed.apiKey || '';
+                } catch(e){}
+            } else {
+                document.getElementById('firebaseJsonInput').value = '';
+                document.getElementById('fbProjectId').value = '';
+                document.getElementById('fbApiKey').value = '';
+            }
+            document.getElementById('backendConnectStatus').classList.add('hidden');
+            document.getElementById('backendModal').classList.remove('hidden');
+        }
+
+        window.closeBackendModal = function() {
+            document.getElementById('backendModal').classList.add('hidden');
+        }
+
+        window.saveAndTestBackend = async function() {
+            const jsonText = document.getElementById('firebaseJsonInput').value.trim();
+            const projectId = document.getElementById('fbProjectId').value.trim();
+            const apiKey = document.getElementById('fbApiKey').value.trim();
+            const statusBox = document.getElementById('backendConnectStatus');
+
+            statusBox.className = "text-xs p-2.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2";
+            statusBox.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 正在驗證並設定雲端連線...`;
+            statusBox.classList.remove('hidden');
+
+            let configToSave = null;
+
+            if (jsonText) {
+                try {
+                    configToSave = JSON.parse(jsonText);
+                } catch (e) {
+                    statusBox.className = "text-xs p-2.5 rounded-lg bg-red-50 text-red-700 border border-red-200";
+                    statusBox.innerText = "❌ JSON 格式不正確，請檢查語法格式！";
+                    return;
+                }
+            } else if (projectId && apiKey) {
+                configToSave = {
+                    apiKey: apiKey,
+                    authDomain: `${projectId}.firebaseapp.com`,
+                    projectId: projectId,
+                    storageBucket: `${projectId}.appspot.com`,
+                    messagingSenderId: "",
+                    appId: ""
+                };
+            } else {
+                statusBox.className = "text-xs p-2.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200";
+                statusBox.innerText = "⚠️ 請輸入 Firebase Config JSON 或寫入 Project ID 與 API Key！";
+                return;
+            }
+
+            try {
+                localStorage.setItem('custom_firebase_config', JSON.stringify(configToSave));
+                statusBox.className = "text-xs p-2.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200";
+                statusBox.innerHTML = `✅ 設定成功！頁面即將自動重載以連線雲端...`;
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } catch (err) {
+                statusBox.className = "text-xs p-2.5 rounded-lg bg-red-50 text-red-700 border border-red-200";
+                statusBox.innerText = "❌ 設定失敗: " + err.message;
+            }
+        }
+
+        window.clearCustomBackend = function() {
+            localStorage.removeItem('custom_firebase_config');
+            showToast('已重置為本機 LocalStorage 模式');
+            closeBackendModal();
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
         }
 
         function createNewUserData(id, name = "新進員工") {
@@ -798,6 +1023,7 @@
 
                 if (percent >= 100 || uData.supervisorSign) certifiedCount++;
 
+                const safeName = (uData.empName || '未命名').replace(/'/g, "\\'");
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
                 tr.innerHTML = `
@@ -819,9 +1045,14 @@
                             '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-full text-[11px]"><i class="fa-solid fa-clock"></i> 待主管審核</span>'}
                     </td>
                     <td class="py-3 px-4 text-right">
-                        <button onclick="adminInspectUser('${uData.id}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold transition">
-                            開啟審核
-                        </button>
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="adminInspectUser('${uData.id}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold transition">
+                                開啟審核
+                            </button>
+                            <button onclick="deleteTraineePrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition" title="刪除檔案">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -831,6 +1062,59 @@
             document.getElementById('adminAvgProgress').innerText = total > 0 ? `${Math.round(totalProgressSum / total)}%` : '0%';
             document.getElementById('adminCertifiedCount').innerText = certifiedCount;
             document.getElementById('adminInTrainingCount').innerText = total - certifiedCount;
+        }
+
+        window.deleteTraineePrompt = function(uid, name) {
+            if (!isAdminUnlocked) {
+                openAdminAuthModal();
+                return;
+            }
+            targetDeleteUid = uid;
+            document.getElementById('deleteTargetName').innerText = name || '此員工';
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        }
+
+        window.closeDeleteConfirmModal = function() {
+            targetDeleteUid = null;
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+        }
+
+        window.executeDeleteTrainee = async function() {
+            if (!targetDeleteUid) return;
+            const uidToDelete = targetDeleteUid;
+            closeDeleteConfirmModal();
+
+            // 1. 本機快取與 LocalStorage 刪除
+            localStorage.removeItem(`trainee_data_${uidToDelete}`);
+            delete allTraineesCache[uidToDelete];
+
+            // 2. 雲端 Firebase 同步刪除
+            if (db && auth && auth.currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', uidToDelete);
+                    await deleteDoc(docRef);
+                } catch (err) {
+                    console.warn("Cloud delete failed:", err);
+                }
+            }
+
+            // 3. 若刪除的是當前正打開的人員，切換至其他人或建立新預設檔
+            if (currentUserId === uidToDelete) {
+                const remainingKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
+                if (remainingKeys.length > 0) {
+                    const nextUid = remainingKeys[0].replace('trainee_data_', '');
+                    loadUserData(nextUid);
+                } else {
+                    const defaultUid = 'trainee_' + Date.now();
+                    const defaultData = createNewUserData(defaultUid, '新進員工');
+                    localStorage.setItem(`trainee_data_${defaultUid}`, JSON.stringify(defaultData));
+                    loadUserData(defaultUid);
+                }
+            }
+
+            renderAdminDashboard();
+            updateUserSelectorOptions();
+            showToast('已成功刪除該培訓檔案');
         }
 
         window.adminInspectUser = function(uid) {
