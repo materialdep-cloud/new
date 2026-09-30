@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SOP version: 2026-09-30-firebase-roster-fix-2 -->
     <title>綠園生活倉管新人培訓系統</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1128,24 +1129,24 @@
                     categoryItemNumber = 0;
                 }
                 categoryItemNumber++;
-                    const catRow = document.createElement('tr');
-                    catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
-                    const categoryExtraButton = currentCategory === '進貨' ? `
-                        <a href="https://drive.google.com/file/d/1Lr8VxiCOnpZw8i1mOFb5Xho1W0uT4yGy/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-2 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition font-semibold no-underline">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            <span>進貨參考資料</span>
-                        </a>` : '';
-                    catRow.innerHTML = `
-                        <td colspan="8" class="py-2.5 px-4">
-                            <div class="flex items-center gap-2 text-brand-800">
-                                <i class="fa-solid fa-folder-open"></i>
-                                <span>【${currentCategory}】類別</span>
-                                ${categoryExtraButton}
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(catRow);
-                }
+                const catRow = document.createElement('tr');
+                catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
+                const categoryExtraButton = currentCategory === '進貨' ? `
+                    <a href="https://drive.google.com/file/d/1Lr8VxiCOnpZw8i1mOFb5Xho1W0uT4yGy/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-2 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition font-semibold no-underline">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>進貨參考資料</span>
+                    </a>` : '';
+                catRow.innerHTML = `
+                    <td colspan="8" class="py-2.5 px-4">
+                        <div class="flex items-center gap-2 text-brand-800">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <span>【${currentCategory}】類別</span>
+                            ${categoryExtraButton}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(catRow);
+            }
 
                 if (item.subgroup && item.subgroup !== currentSubgroup) {
                     currentSubgroup = item.subgroup;
@@ -1548,26 +1549,8 @@
             if (!db) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'trainees');
 
-            // 自動將本機儲存的歷史資料上傳同步至 Firebase 雲端
-            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
-            userKeys.forEach(async (key) => {
-                try {
-                    const localData = JSON.parse(localStorage.getItem(key) || '{}');
-                    if (localData && localData.id) {
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', localData.id);
-                        const docSnap = await getDoc(docRef);
-                        if (!docSnap || !docSnap.exists()) {
-                            await setDoc(docRef, localData);
-                            console.log(`已自動同步本機歷史檔案 [${localData.empName || localData.id}] 至雲端`);
-                        } else if (localData.loginPassword && !(docSnap.data() || {}).loginPassword) {
-                            await setDoc(docRef, { loginPassword: localData.loginPassword, updatedAt: localData.updatedAt || new Date().toISOString() }, { merge: true });
-                            console.log(`已補同步 [${localData.empName || localData.id}] 的登入密碼至雲端`);
-                        }
-                    }
-                } catch(e) {
-                    console.warn("自動同步本機資料至雲端失敗:", e);
-                }
-            });
+            // Firebase 雲端名單為正式名單來源。
+            // 不再自動把 LocalStorage 的舊帳號上傳回 Firebase，避免主管刪除帳號後又被舊暫存復活。
 
             onSnapshot(colRef, (snapshot) => {
                 let count = 0;
@@ -1590,18 +1573,16 @@
                     }
                 });
 
-                // 注意：第一次連線時，如果 Firebase 尚未有資料，不能把瀏覽器裡既有的新人資料全部清掉。
-                // 否則會造成「姓名選單空白」。先保留本機資料，等雲端資料確認存在後再同步。
-                // 真正刪除的人員會由 deleteTraineePrompt / executeDeleteTrainee 同時清除本機資料。
-                if (snapshot.size > 0) {
-                    Object.keys(allTraineesCache).forEach(uid => {
-                        if (!cloudIds.has(uid)) delete allTraineesCache[uid];
-                    });
-                    Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).forEach(key => {
-                        const uid = key.replace('trainee_data_', '');
-                        if (!cloudIds.has(uid)) localStorage.removeItem(key);
-                    });
-                }
+                // Firebase 讀取成功後，以雲端名單為準。
+                // snapshot.size === 0 代表雲端確實沒有新人資料，因此清除舊的本機帳號，避免已刪除帳號復活。
+                // 如果是權限/網路錯誤，會直接進入 error callback，不會執行這段清除。
+                Object.keys(allTraineesCache).forEach(uid => {
+                    if (!cloudIds.has(uid)) delete allTraineesCache[uid];
+                });
+                Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).forEach(key => {
+                    const uid = key.replace('trainee_data_', '');
+                    if (!cloudIds.has(uid)) localStorage.removeItem(key);
+                });
 
                 updateSyncBadgeStatus('connected', `雲端後台已連線 (${count} 筆資料同步中)`);
                 
