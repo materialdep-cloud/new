@@ -151,15 +151,15 @@
                     <div class="flex gap-4 text-xs">
                         <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
                             <span class="text-slate-500 block">觀念理解</span>
-                            <span class="font-bold text-slate-800 text-sm" id="c1Count">0 / 26</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c1Count">0 / 28</span>
                         </div>
                         <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
                             <span class="text-slate-500 block">帶教示範</span>
-                            <span class="font-bold text-slate-800 text-sm" id="c2Count">0 / 26</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c2Count">0 / 28</span>
                         </div>
                         <div class="text-center px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800">
                             <span class="block">獨立操作認證</span>
-                            <span class="font-bold text-emerald-700 text-sm" id="c3Count">0 / 26</span>
+                            <span class="font-bold text-emerald-700 text-sm" id="c3Count">0 / 28</span>
                         </div>
                     </div>
                 </div>
@@ -174,7 +174,7 @@
                 <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-brand-600"></i>
-                        <span>培訓檢核項目表 (共 26 個獨立項目)</span>
+                        <span>培訓檢核項目表 (共 28 個獨立項目)</span>
                     </h3>
                     <div class="flex items-center gap-2 text-xs text-slate-500">
                         <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-slate-200 rounded"></span> 一階: 觀念理解</span>
@@ -553,39 +553,41 @@
         let allTraineesCache = {};
         let targetDeleteUid = null;
         let isTraineeAuthenticated = false;
-        // Complete 26 Checklist Items Data Definition
+        // Complete 28 Checklist Items Data Definition
         const CHECKLIST_ITEMS = [
-            // Category 1: 用具學習 (3項)
-            { id: 1, category: "用具學習", name: "拖板車使用", sop: "安全承載檢查、壓桿升降操作、轉彎行進安全角度與固定靜置擺放規範。" },
-            { id: 2, category: "用具學習", name: "烏龜車使用", sop: "多層疊加規範、載重平衡拿捏、通道平穩推行與空車歸位管理。" },
-            { id: 3, category: "用具學習", name: "堆高機使用", sop: "發動前安全檢查、牙叉調寬與高低升降、載貨視線注意、充電作業與安全帶配戴。" },
+            // Category 1: 用具學習 (4項)
+            { id: 1, category: "用具學習", name: "拖板車使用", sop: "了解拖板車基本操作、升降方式、推行方向與使用安全。" },
+            { id: 2, category: "用具學習", name: "烏龜車使用", sop: "了解烏龜車基本操作、載貨平衡、推行方式與使用安全。" },
+            { id: 3, category: "用具學習", name: "綁貨黑色束繩使用", sop: "了解黑色束繩的正確使用方式、固定貨物與收納方式。" },
+            { id: 4, category: "用具學習", name: "堆高機使用(需有執照)", sop: "了解堆高機基本使用與安全規範；實際操作前須確認持有合法堆高機操作相關執照。" },
 
-            // Category 2: 產品認識 (3項)
-            { id: 4, category: "產品認識", name: "香菇分級", sop: "區分大/中/小朵等級、菇傘開度、蕈褶顏色判別、水份瑕疵與發黴剔除基準。" },
-            { id: 5, category: "產品認識", name: "杏鮑菇分級", sop: "區分 A/B 級、蕈柄粗細度、切口平整度、質地彈性與表面壓傷檢視。" },
-            { id: 6, category: "產品認識", name: "其他菇品項分級", sop: "金針菇、木耳、秀珍菇、鴻喜菇等品質規範、包裝完整性與失水耗損辨識。" },
+            // Category 2: 產品認識 (4項)
+            { id: 5, category: "產品認識", name: "菇類認識", sop: "只要知道這是什麼就好，先以認識菇類品項為主，品規先不用。" },
+            { id: 6, category: "產品認識", name: "生菜類認識", sop: "只要知道這是什麼就好，先以認識生菜類品項為主，品規先不用。" },
+            { id: 7, category: "產品認識", name: "其餘產品認識", sop: "只要知道這是什麼就好，依全品項目錄認識其他產品，品規先不用。" },
+            { id: 8, category: "產品認識", name: "包材認識", sop: "只要知道這是什麼就好，先認識倉庫常用包材，品規先不用。" },
 
             // Category 3: 現場實作 (20項)
-            { id: 7, category: "現場實作", name: "上午接駁車備貨", sop: "確認早班車次預估單、棧板核對、標籤張貼與準時拉貨上車。" },
-            { id: 8, category: "現場實作", name: "下午接駁車備貨", sop: "午後溫控防護、車次品項確認、點交數量與送達對接作業。" },
-            { id: 9, category: "現場實作", name: "家樂福大園倉出貨備貨及明確知道備貨數量", sop: "核對大園倉物流單號、嚴格複核總箱數與品規、溫控棧板包覆與驗貨無誤。" },
-            { id: 10, category: "現場實作", name: "家樂福西螺倉出貨備貨及明確知道備貨數量", sop: "對應西螺倉出貨表、確實掌握正確件數、溫控封膜與交接單據清點。" },
-            { id: 11, category: "現場實作", name: "盤商出貨-順益(劉家瑜)", sop: "確認順益指定品質規格、核對聯絡人品項數量、專用標籤粘貼與點交。" },
-            { id: 12, category: "現場實作", name: "盤商出貨-名間(澎湖有限)", sop: "核對名間指定菇類等級、重量與件數精準對齊、出貨聯單記錄。" },
-            { id: 13, category: "現場實作", name: "盤商出貨-有來", sop: "有來訂單明細核對、裝箱規範檢視與出貨放行。" },
-            { id: 14, category: "現場實作", name: "盤商出貨-鋒圓", sop: "鋒圓訂單清單確認、庫存批號扣抵與實際備貨件數對齊。" },
-            { id: 15, category: "現場實作", name: "盤商出貨-子信", sop: "子信指定出貨項目清點、標籤複核與專車載運安排。" },
-            { id: 16, category: "現場實作", name: "特殊出貨-零售客(需收錢)", sop: "開立零售單據、核對現場點交數量、現場當面收妥款項並註記銷帳。" },
-            { id: 17, category: "現場實作", name: "特殊出貨-零售客(不用收錢)", sop: "核對月結/公關或主管特批簽核單據，點交貨品後簽收留存。" },
-            { id: 18, category: "現場實作", name: "特殊出貨-商田", sop: "商田專用包裝與規格複核、出貨單據簽章與司機點交。" },
-            { id: 19, category: "現場實作", name: "特殊進貨-包材", sop: "核對進貨紙箱/袋類數量、外觀瑕疵抽驗、入庫定位與數量登錄。" },
-            { id: 20, category: "現場實作", name: "特殊進貨-盤商進貨(順益)", sop: "順益進貨數量檢驗、品質抽檢、進貨單簽核與進貨區歸位。" },
-            { id: 21, category: "現場實作", name: "特殊進貨-盤商進貨(名間)", sop: "名間進貨驗收、溫度與品質檢查、過磅記錄與入庫。" },
-            { id: 22, category: "現場實作", name: "銷退貨處理", sop: "銷退菇類品質檢驗、區分為可可處理或廢棄、填寫退貨單據。" },
-            { id: 23, category: "現場實作", name: "待處理倉處理", sop: "待處理產品標示分類、每日庫存盤點、配合品保做不良品後續處置。" },
-            { id: 24, category: "現場實作", name: "調撥單發料(63-7)-香菇", sop: "系統開立 63-7 調撥單、核對香菇數量與等級、實體發料並系統扣帳。" },
-            { id: 25, category: "現場實作", name: "調撥單發料(63-7)-雜菇", sop: "系統開立 63-7 調撥單、核對雜菇各品項數量、實際發料與單據歸檔。" },
-            { id: 26, category: "現場實作", name: "63-6理貨倉補貨", sop: "檢查理貨倉 63-6 安全庫存量、開立補貨需求、實體搬運補滿與系統紀錄。" }
+            { id: 9, category: "現場實作", name: "上午接駁車備貨", sop: "確認早班車次預估單、棧板核對、標籤張貼與準時拉貨上車。" },
+            { id: 10, category: "現場實作", name: "下午接駁車備貨", sop: "午後溫控防護、車次品項確認、點交數量與送達對接作業。" },
+            { id: 11, category: "現場實作", name: "家樂福大園倉出貨備貨及明確知道備貨數量", sop: "核對大園倉物流單號、嚴格複核總箱數與品規、溫控棧板包覆與驗貨無誤。" },
+            { id: 12, category: "現場實作", name: "家樂福西螺倉出貨備貨及明確知道備貨數量", sop: "對應西螺倉出貨表、確實掌握正確件數、溫控封膜與交接單據清點。" },
+            { id: 13, category: "現場實作", name: "盤商出貨-順益(劉家瑜)", sop: "確認順益指定品質規格、核對聯絡人品項數量、專用標籤粘貼與點交。" },
+            { id: 14, category: "現場實作", name: "盤商出貨-名間(澎湖有限)", sop: "核對名間指定菇類等級、重量與件數精準對齊、出貨聯單記錄。" },
+            { id: 15, category: "現場實作", name: "盤商出貨-有來", sop: "有來訂單明細核對、裝箱規範檢視與出貨放行。" },
+            { id: 16, category: "現場實作", name: "盤商出貨-鋒圓", sop: "鋒圓訂單清單確認、庫存批號扣抵與實際備貨件數對齊。" },
+            { id: 17, category: "現場實作", name: "盤商出貨-子信", sop: "子信指定出貨項目清點、標籤複核與專車載運安排。" },
+            { id: 18, category: "現場實作", name: "特殊出貨-零售客(需收錢)", sop: "開立零售單據、核對現場點交數量、現場當面收妥款項並註記銷帳。" },
+            { id: 19, category: "現場實作", name: "特殊出貨-零售客(不用收錢)", sop: "核對月結/公關或主管特批簽核單據，點交貨品後簽收留存。" },
+            { id: 20, category: "現場實作", name: "特殊出貨-商田", sop: "商田專用包裝與規格複核、出貨單據簽章與司機點交。" },
+            { id: 21, category: "現場實作", name: "特殊進貨-包材", sop: "核對進貨紙箱/袋類數量、外觀瑕疵抽驗、入庫定位與數量登錄。" },
+            { id: 22, category: "現場實作", name: "特殊進貨-盤商進貨(順益)", sop: "順益進貨數量檢驗、品質抽檢、進貨單簽核與進貨區歸位。" },
+            { id: 23, category: "現場實作", name: "特殊進貨-盤商進貨(名間)", sop: "名間進貨驗收、溫度與品質檢查、過磅記錄與入庫。" },
+            { id: 24, category: "現場實作", name: "銷退貨處理", sop: "銷退菇類品質檢驗、區分為可可處理或廢棄、填寫退貨單據。" },
+            { id: 25, category: "現場實作", name: "待處理倉處理", sop: "待處理產品標示分類、每日庫存盤點、配合品保做不良品後續處置。" },
+            { id: 26, category: "現場實作", name: "調撥單發料(63-7)-香菇", sop: "系統開立 63-7 調撥單、核對香菇數量與等級、實體發料並系統扣帳。" },
+            { id: 27, category: "現場實作", name: "調撥單發料(63-7)-雜菇", sop: "系統開立 63-7 調撥單、核對雜菇各品項數量、實際發料與單據歸檔。" },
+            { id: 28, category: "現場實作", name: "63-6理貨倉補貨", sop: "檢查理貨倉 63-6 安全庫存量、開立補貨需求、實體搬運補滿與系統紀錄。" }
         ];
 
         // Initialize Firebase
@@ -839,11 +841,11 @@
                 if (document.getElementById(`chk_${item.id}_3`)?.checked) c3++;
             });
 
-            document.getElementById('c1Count').innerText = `${c1} / 26`;
-            document.getElementById('c2Count').innerText = `${c2} / 26`;
-            document.getElementById('c3Count').innerText = `${c3} / 26`;
+            document.getElementById('c1Count').innerText = `${c1} / 28`;
+            document.getElementById('c2Count').innerText = `${c2} / 28`;
+            document.getElementById('c3Count').innerText = `${c3} / 28`;
 
-            const percent = Math.round((c3 / 26) * 100);
+            const percent = Math.round((c3 / 28) * 100);
             document.getElementById('overallPercentText').innerText = `${percent}%`;
             document.getElementById('progressBar').style.width = `${percent}%`;
         }
@@ -1306,7 +1308,7 @@
                     if (uData.checks?.[item.id]?.c3) c3Count++;
                 });
 
-                const percent = Math.round((c3Count / 26) * 100);
+                const percent = Math.round((c3Count / 28) * 100);
                 totalProgressSum += percent;
 
                 if (percent >= 100 || uData.supervisorSign) certifiedCount++;
