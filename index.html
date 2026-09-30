@@ -895,6 +895,12 @@
             const currentValue = selector.value;
             selector.innerHTML = '<option value="">-- 請選擇自己的姓名 --</option>';
 
+            // 管理者登入選項：使用主管管理密碼 1021
+            const managerOpt = document.createElement('option');
+            managerOpt.value = '__manager__';
+            managerOpt.innerText = '管理者';
+            selector.appendChild(managerOpt);
+
             const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
             const cloudKeys = Object.keys(allTraineesCache);
             const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
@@ -928,6 +934,21 @@
             const uid = document.getElementById('traineeLoginSelector').value;
             const pwd = document.getElementById('traineeLoginPassword').value;
             const errorEl = document.getElementById('traineeLoginError');
+
+            // 管理者：直接使用主管管理密碼 1021 進入主管後台
+            if (uid === '__manager__') {
+                if (pwd === '1021') {
+                    isAdminUnlocked = true;
+                    isTraineeAuthenticated = false;
+                    document.getElementById('traineeLoginModal').classList.add('hidden');
+                    switchView('admin');
+                    showToast('管理者登入成功！');
+                } else {
+                    errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 管理者密碼錯誤，請重新輸入！';
+                    errorEl.classList.remove('hidden');
+                }
+                return;
+            }
 
             if (!uid || !pwd) {
                 errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 請選擇自己的姓名並輸入密碼！';
