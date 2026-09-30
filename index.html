@@ -365,6 +365,38 @@
         </div>
     </div>
 
+    <!-- Modal for Trainee Login -->
+    <div id="traineeLoginModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-brand-50 rounded-xl text-brand-600">
+                    <i class="fa-solid fa-user-lock text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-brand-700 uppercase tracking-wide">新人登入</span>
+                    <h4 class="text-base font-bold text-slate-900">請先選擇自己的姓名</h4>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500">選擇姓名並輸入主管建立的登入密碼後，才能開始填寫培訓檢核表。</p>
+            <div>
+                <label for="traineeLoginSelector" class="block text-xs font-bold text-slate-600 mb-1">培訓人員</label>
+                <select id="traineeLoginSelector" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">-- 請選擇自己的姓名 --</option>
+                </select>
+            </div>
+            <div>
+                <label for="traineeLoginPassword" class="block text-xs font-bold text-slate-600 mb-1">登入密碼</label>
+                <input type="password" id="traineeLoginPassword" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter') verifyTraineeLogin()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand-500">
+                <p id="traineeLoginError" class="text-xs text-red-500 mt-1 hidden"><i class="fa-solid fa-circle-exclamation"></i> 姓名或密碼錯誤，請重新輸入！</p>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="verifyTraineeLogin()" class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition shadow">
+                    <i class="fa-solid fa-right-to-bracket mr-1"></i> 開始使用
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal for Admin Password Verification -->
     <div id="adminAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
@@ -472,6 +504,11 @@
             <p class="text-xs text-slate-600 leading-relaxed">
                 您確定要刪除 <span id="deleteTargetName" class="font-bold text-slate-900"></span> 的培訓檔案嗎？刪除後相關檢核記錄與簽核資料將無法復原。
             </p>
+            <div>
+                <label for="deleteConfirmPassword" class="block text-xs font-bold text-slate-600 mb-1">再次輸入刪除密碼</label>
+                <input type="password" id="deleteConfirmPassword" placeholder="請輸入刪除密碼" onkeydown="if(event.key==='Enter') executeDeleteTrainee()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-red-500">
+                <p id="deletePasswordError" class="text-xs text-red-500 mt-1 hidden"><i class="fa-solid fa-circle-exclamation"></i> 刪除密碼錯誤，請重新輸入！</p>
+            </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeDeleteConfirmModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition">取消</button>
                 <button onclick="executeDeleteTrainee()" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition shadow flex items-center gap-1.5">
@@ -515,6 +552,7 @@
         let currentUserId = null;
         let allTraineesCache = {};
         let targetDeleteUid = null;
+        let isTraineeAuthenticated = false;
         // Complete 26 Checklist Items Data Definition
         const CHECKLIST_ITEMS = [
             // Category 1: 用具學習 (3項)
@@ -602,8 +640,11 @@
             // Default User Profile ID
             currentUserId = localStorage.getItem('active_trainee_id') || 'trainee_default';
             renderTableRows();
-            loadUserData(currentUserId);
             setupRealtimeSync();
+            setTimeout(() => {
+                updateTraineeLoginOptions();
+                openTraineeLoginModal();
+            }, 300);
         }
 
         function updateSyncBadgeStatus(status, text) {
@@ -716,6 +757,7 @@
             return {
                 id: id,
                 empName: name,
+                loginPassword: "",
                 startDate: new Date().toISOString().split('T')[0],
                 mentorName: "",
                 supervisorName: "",
@@ -847,6 +889,86 @@
             showToast('進度儲存成功！');
         }
 
+        function updateTraineeLoginOptions() {
+            const selector = document.getElementById('traineeLoginSelector');
+            if (!selector) return;
+            const currentValue = selector.value;
+            selector.innerHTML = '<option value="">-- 請選擇自己的姓名 --</option>';
+
+            const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
+            const cloudKeys = Object.keys(allTraineesCache);
+            const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+
+            allIds.forEach(uid => {
+                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+                if (!uData.empName || uData.empName === '新進員工') return;
+                const opt = document.createElement('option');
+                opt.value = uid;
+                opt.innerText = `${uData.empName}${uData.startDate ? ` (${uData.startDate})` : ''}`;
+                selector.appendChild(opt);
+            });
+
+            if (currentValue && [...selector.options].some(o => o.value === currentValue)) {
+                selector.value = currentValue;
+            }
+        }
+
+        function openTraineeLoginModal() {
+            isTraineeAuthenticated = false;
+            const modal = document.getElementById('traineeLoginModal');
+            if (!modal) return;
+            updateTraineeLoginOptions();
+            document.getElementById('traineeLoginPassword').value = '';
+            document.getElementById('traineeLoginError').classList.add('hidden');
+            updateTraineeAccessUI();
+            modal.classList.remove('hidden');
+        }
+
+        window.verifyTraineeLogin = function() {
+            const uid = document.getElementById('traineeLoginSelector').value;
+            const pwd = document.getElementById('traineeLoginPassword').value;
+            const errorEl = document.getElementById('traineeLoginError');
+
+            if (!uid || !pwd) {
+                errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 請選擇自己的姓名並輸入密碼！';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const userData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+            if (!userData.loginPassword) {
+                errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 此人員尚未設定登入密碼，請請主管設定後再登入！';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (String(userData.loginPassword) !== String(pwd)) {
+                errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 密碼錯誤，請重新輸入！';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            isTraineeAuthenticated = true;
+            loadUserData(uid);
+            updateTraineeAccessUI();
+            document.getElementById('traineeLoginModal').classList.add('hidden');
+            showToast(`歡迎 ${userData.empName || '新人'}，登入成功！`);
+        }
+
+        window.logoutTrainee = function() {
+            isTraineeAuthenticated = false;
+            openTraineeLoginModal();
+        }
+
+        function updateTraineeAccessUI() {
+            const selector = document.getElementById('userSelector');
+            if (!selector) return;
+            const traineeLocked = !isAdminUnlocked && isTraineeAuthenticated;
+            selector.disabled = traineeLocked;
+            selector.classList.toggle('opacity-60', traineeLocked);
+            selector.classList.toggle('cursor-not-allowed', traineeLocked);
+        }
+
         function loadUserData(userId) {
             currentUserId = userId;
             localStorage.setItem('active_trainee_id', userId);
@@ -918,6 +1040,19 @@
 
         window.loadSelectedUser = function(uid) {
             if (!uid) return;
+            if (isAdminUnlocked) {
+                loadUserData(uid);
+                return;
+            }
+            if (!isTraineeAuthenticated) {
+                openTraineeLoginModal();
+                return;
+            }
+            if (uid !== currentUserId) {
+                showToast('目前登入的新人只能查看自己的培訓檔案');
+                updateTraineeAccessUI();
+                return;
+            }
             loadUserData(uid);
         }
 
@@ -929,8 +1064,20 @@
             const newName = prompt("請輸入新員工姓名：", "張小明");
             if (!newName) return;
 
+            const newPassword = prompt(`請替 ${newName} 設定登入密碼：`, "");
+            if (!newPassword) {
+                showToast('未設定登入密碼，已取消新增');
+                return;
+            }
+            const confirmPassword = prompt("請再次輸入登入密碼確認：", "");
+            if (newPassword !== confirmPassword) {
+                showToast('兩次密碼不一致，已取消新增');
+                return;
+            }
+
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
+            newData.loginPassword = newPassword;
             localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
             allTraineesCache[newId] = newData;
 
@@ -939,8 +1086,9 @@
                 setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
             }
 
-            loadUserData(newId);
-            showToast(`已建立 ${newName} 的培訓檔案`);
+            updateUserSelectorOptions();
+            updateTraineeLoginOptions();
+            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼`);
         }
 
         // Realtime Listener & Multi-Device Sync
@@ -986,8 +1134,9 @@
                 }
 
                 updateUserSelectorOptions();
+                updateTraineeLoginOptions();
 
-                if (currentUserId && allTraineesCache[currentUserId]) {
+                if ((isTraineeAuthenticated || isAdminUnlocked) && currentUserId && allTraineesCache[currentUserId]) {
                     loadUserData(currentUserId);
                 }
 
@@ -1002,6 +1151,19 @@
 
         window.loadSelectedUser = function(uid) {
             if (!uid) return;
+            if (isAdminUnlocked) {
+                loadUserData(uid);
+                return;
+            }
+            if (!isTraineeAuthenticated) {
+                openTraineeLoginModal();
+                return;
+            }
+            if (uid !== currentUserId) {
+                showToast('目前登入的新人只能查看自己的培訓檔案');
+                updateTraineeAccessUI();
+                return;
+            }
             loadUserData(uid);
         }
 
@@ -1013,8 +1175,20 @@
             const newName = prompt("請輸入新員工姓名：", "張小明");
             if (!newName) return;
 
+            const newPassword = prompt(`請替 ${newName} 設定登入密碼：`, "");
+            if (!newPassword) {
+                showToast('未設定登入密碼，已取消新增');
+                return;
+            }
+            const confirmPassword = prompt("請再次輸入登入密碼確認：", "");
+            if (newPassword !== confirmPassword) {
+                showToast('兩次密碼不一致，已取消新增');
+                return;
+            }
+
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
+            newData.loginPassword = newPassword;
             localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
             allTraineesCache[newId] = newData;
 
@@ -1023,8 +1197,9 @@
                 setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
             }
 
-            loadUserData(newId);
-            showToast(`已建立 ${newName} 的培訓檔案`);
+            updateUserSelectorOptions();
+            updateTraineeLoginOptions();
+            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼`);
         }
 
         // Admin Auth & Lock Logic
@@ -1051,6 +1226,7 @@
             } else {
                 adminView.classList.add('hidden');
                 formView.classList.remove('hidden');
+                updateTraineeAccessUI();
 
                 tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
                 tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
@@ -1082,7 +1258,10 @@
 
         window.lockAdminPanel = function() {
             isAdminUnlocked = false;
+            isTraineeAuthenticated = false;
             switchView('form');
+            updateTraineeAccessUI();
+            openTraineeLoginModal();
             showToast('主管後台已重新鎖定');
         }
 
@@ -1137,6 +1316,9 @@
                             <button onclick="adminInspectUser('${uData.id}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold transition">
                                 開啟審核
                             </button>
+                            <button onclick="setTraineePasswordPrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 rounded-lg text-xs font-bold transition" title="設定/修改登入密碼">
+                                <i class="fa-solid fa-key"></i>
+                            </button>
                             <button onclick="deleteTraineePrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition" title="刪除檔案">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
@@ -1152,6 +1334,40 @@
             document.getElementById('adminInTrainingCount').innerText = total - certifiedCount;
         }
 
+        window.setTraineePasswordPrompt = async function(uid, name) {
+            if (!isAdminUnlocked) {
+                openAdminAuthModal();
+                return;
+            }
+
+            const newPassword = prompt(`請為「${name || '此員工'}」設定新登入密碼：`, "");
+            if (!newPassword) return;
+            const confirmPassword = prompt("請再次輸入新登入密碼：", "");
+            if (newPassword !== confirmPassword) {
+                showToast('兩次密碼不一致，未修改密碼');
+                return;
+            }
+
+            const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+            uData.loginPassword = newPassword;
+            uData.updatedAt = new Date().toISOString();
+            allTraineesCache[uid] = uData;
+            localStorage.setItem(`trainee_data_${uid}`, JSON.stringify(uData));
+
+            if (db && auth && auth.currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', uid);
+                    await setDoc(docRef, { loginPassword: newPassword, updatedAt: uData.updatedAt }, { merge: true });
+                } catch (err) {
+                    console.warn("Cloud password update failed:", err);
+                }
+            }
+
+            updateTraineeLoginOptions();
+            renderAdminDashboard();
+            showToast(`已設定 ${name || '此員工'} 的登入密碼`);
+        }
+
         window.deleteTraineePrompt = function(uid, name) {
             if (!isAdminUnlocked) {
                 openAdminAuthModal();
@@ -1159,16 +1375,28 @@
             }
             targetDeleteUid = uid;
             document.getElementById('deleteTargetName').innerText = name || '此員工';
+            document.getElementById('deleteConfirmPassword').value = '';
+            document.getElementById('deletePasswordError').classList.add('hidden');
             document.getElementById('deleteConfirmModal').classList.remove('hidden');
         }
 
         window.closeDeleteConfirmModal = function() {
             targetDeleteUid = null;
+            document.getElementById('deleteConfirmPassword').value = '';
+            document.getElementById('deletePasswordError').classList.add('hidden');
             document.getElementById('deleteConfirmModal').classList.add('hidden');
         }
 
         window.executeDeleteTrainee = async function() {
             if (!targetDeleteUid) return;
+            const deletePassword = document.getElementById('deleteConfirmPassword').value;
+            const errorEl = document.getElementById('deletePasswordError');
+
+            if (deletePassword !== '0724') {
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
             const uidToDelete = targetDeleteUid;
             closeDeleteConfirmModal();
 
@@ -1206,7 +1434,9 @@
         }
 
         window.adminInspectUser = function(uid) {
+            isTraineeAuthenticated = true;
             loadUserData(uid);
+            updateTraineeAccessUI();
             switchView('form');
             showToast(`已切換至 ${currentUserData.empName || '員工'} 的檢核表`);
         }
