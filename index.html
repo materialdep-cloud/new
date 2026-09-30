@@ -47,301 +47,122 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        /* ===== 手機介面優化：只調整版面，不改動功能 ===== */
-        * { -webkit-tap-highlight-color: transparent; }
-        html { scroll-behavior: smooth; }
-        body { overflow-x: hidden; }
-        button, select, input, textarea { -webkit-appearance: none; }
-        button, select { touch-action: manipulation; }
-        input, select, textarea { font-size: 16px; } /* 避免 iPhone 點輸入框自動放大 */
-
+        /* 手機版：只調整檢核表顯示方式，不修改任何訓練內容 */
         @media (max-width: 767px) {
-            body {
-                padding-bottom: 24px;
-                background: #f8fafc;
-            }
-
-            /* 頂部導覽 */
-            header > div {
-                height: auto !important;
-                min-height: 64px;
-                padding: 10px 12px !important;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-            header > div > div:first-child {
-                flex: 1 1 100%;
-                min-width: 0;
-            }
-            header h1 {
-                font-size: 15px !important;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            header > div > div:last-child {
-                width: 100%;
+            #checklistTableBody .checklist-item-row {
                 display: grid !important;
-                grid-template-columns: 1fr auto;
-                gap: 7px !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0;
+                padding: 10px 8px;
+                background: #fff;
             }
-            #syncBadge {
-                min-width: 0;
-                width: 100%;
-                justify-content: center;
-                padding: 9px 10px !important;
-                border-radius: 10px !important;
-                overflow: hidden;
+            #checklistTableBody .checklist-item-row td {
+                width: auto !important;
+                min-width: 0 !important;
+                border: 0 !important;
+                padding: 7px 5px !important;
             }
-            #syncText {
-                max-width: calc(100vw - 105px);
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            header nav {
+            #checklistTableBody .checklist-item-row td:nth-child(1) {
                 grid-column: 1 / -1;
-                width: 100%;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr;
-                padding: 3px !important;
-                gap: 3px;
+                padding-bottom: 2px !important;
+                text-align: left !important;
+                color: #94a3b8;
             }
-            header nav button {
-                min-height: 40px;
-                justify-content: center;
-                padding: 8px 6px !important;
-            }
-            header > div > div:last-child > button:last-child {
-                min-height: 40px;
-                padding: 8px 12px !important;
-            }
-
-            /* 主內容 */
-            main {
-                margin-top: 12px !important;
-                padding-left: 10px !important;
-                padding-right: 10px !important;
-            }
-            #formView, #adminView { gap: 12px !important; }
-
-            /* 所有主要卡片 */
-            #formView > div,
-            #adminView > div {
-                border-radius: 16px !important;
-            }
-            #formView .p-6,
-            #adminView .p-6 { padding: 16px !important; }
-
-            /* 員工資料卡 */
-            #formView > div:first-child > div:first-child {
-                align-items: stretch !important;
-            }
-            #formView > div:first-child > div:first-child > div:first-child {
-                gap: 10px;
-            }
-            #formView h2 {
-                font-size: 18px !important;
-            }
-            #formView > div:first-child > div:first-child > div:last-child {
-                width: 100%;
-                display: grid !important;
-                grid-template-columns: 1fr;
-                gap: 8px !important;
-            }
-            #userSelector,
-            #formView > div:first-child button {
-                width: 100%;
-                min-height: 44px;
-            }
-            #formView > div:first-child .grid {
-                gap: 10px !important;
-            }
-            #formView label {
-                font-size: 12px !important;
-            }
-            #formView input[type="text"],
-            #formView input[type="date"],
-            #formView textarea,
-            #formView select {
-                min-height: 44px;
-                border-radius: 10px !important;
-            }
-
-            /* 達成率 */
-            #formView > div:nth-child(2) {
-                padding: 16px !important;
-            }
-            #formView > div:nth-child(2) .flex.gap-4 {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 6px !important;
-                width: 100%;
-            }
-            #formView > div:nth-child(2) .flex.gap-4 > div {
-                padding: 8px 4px !important;
-                min-width: 0;
-            }
-            #formView > div:nth-child(2) .flex.gap-4 span:first-child {
-                font-size: 10px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            #overallPercentText { font-size: 28px !important; }
-
-            /* 檢核表標題 */
-            #formView > div:nth-child(3) > div:first-child {
-                padding: 14px !important;
-            }
-            #formView > div:nth-child(3) > div:first-child h3 {
-                font-size: 14px !important;
-                line-height: 1.45;
-            }
-            #formView > div:nth-child(3) > div:first-child > div:last-child {
-                display: grid !important;
-                grid-template-columns: 1fr;
-                gap: 5px !important;
-            }
-
-            /* 檢核表：保留完整欄位，但手機用舒服的橫向滑動 */
-            #formView .overflow-x-auto {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-            }
-            #checklistTableBody,
-            #formView table {
-                min-width: 980px;
-            }
-            #formView table th,
-            #formView table td {
-                padding-top: 11px !important;
-                padding-bottom: 11px !important;
-            }
-            #formView table input[type="checkbox"] {
-                width: 22px !important;
-                height: 22px !important;
-            }
-            #formView table input[type="text"],
-            #formView table input[type="date"] {
-                min-height: 42px;
+            #checklistTableBody .checklist-item-row td:nth-child(2) {
+                grid-column: 1 / -1;
+                padding-top: 0 !important;
+                padding-bottom: 5px !important;
                 font-size: 15px !important;
-                padding: 8px !important;
-                border-radius: 9px !important;
             }
-            #formView table button {
-                min-height: 42px;
+            #checklistTableBody .checklist-item-row td:nth-child(3) {
+                grid-column: 1 / -1;
+                padding-top: 4px !important;
+                padding-bottom: 9px !important;
+                line-height: 1.55;
+                font-size: 12px !important;
+                color: #475569;
             }
-
-            /* 評語與簽核 */
-            #formView > div:nth-child(4) {
-                padding: 16px !important;
-            }
-            #formView textarea {
-                min-height: 92px;
-                line-height: 1.5;
-            }
-            #formView > div:nth-child(4) .grid {
-                gap: 10px !important;
-            }
-            #formView > div:nth-child(4) .grid:last-child > div {
-                padding: 12px !important;
-            }
-
-            /* 主管後台 */
-            #adminView > div:first-child {
-                padding: 16px !important;
-            }
-            #adminView > div:first-child h2 {
-                font-size: 19px !important;
-                line-height: 1.4;
-            }
-            #adminView > div:first-child > div:last-child {
-                width: 100%;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr;
-                gap: 7px !important;
-            }
-            #adminView > div:first-child button {
-                width: 100%;
-                min-height: 44px;
-                justify-content: center;
-            }
-            #adminView .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
-                gap: 8px !important;
-            }
-            #adminView .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > div {
-                padding: 13px !important;
-                border-radius: 14px !important;
-            }
-            #adminView .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 .text-2xl {
-                font-size: 22px !important;
-            }
-            #adminView table {
-                min-width: 860px;
-            }
-
-            /* Modal：手機改成接近底部的抽屜感，方便單手操作 */
-            #traineeLoginModal,
-            #adminAuthModal,
-            #backendModal,
-            #deleteConfirmModal,
-            #sopModal {
-                padding: 10px !important;
-                align-items: flex-end !important;
-            }
-            #traineeLoginModal > div,
-            #adminAuthModal > div,
-            #backendModal > div,
-            #deleteConfirmModal > div,
-            #sopModal > div {
-                width: 100% !important;
-                max-width: 100% !important;
-                max-height: 88vh;
-                overflow-y: auto;
-                border-radius: 20px 20px 14px 14px !important;
-                padding: 18px !important;
-            }
-            #traineeLoginModal input,
-            #traineeLoginModal select,
-            #traineeLoginModal button,
-            #adminAuthModal input,
-            #adminAuthModal button {
-                min-height: 46px;
-                font-size: 16px !important;
-            }
-            #traineeLoginModal button[onclick="verifyTraineeLogin()"] {
-                font-size: 16px !important;
-                font-weight: 700;
-            }
-
-            /* Toast */
-            #toast {
-                left: 10px !important;
-                right: 10px !important;
-                bottom: 12px !important;
-                justify-content: center;
-                text-align: center;
-                max-width: calc(100vw - 20px);
-            }
-        }
-
-        @media (max-width: 420px) {
-            header > div { padding: 8px 10px !important; }
-            header h1 { font-size: 14px !important; }
-            #formView > div:nth-child(2) .flex.gap-4 {
-                grid-template-columns: 1fr;
-            }
-            #formView > div:nth-child(2) .flex.gap-4 > div {
+            #checklistTableBody .checklist-item-row td:nth-child(4),
+            #checklistTableBody .checklist-item-row td:nth-child(5),
+            #checklistTableBody .checklist-item-row td:nth-child(6) {
+                grid-column: span 1;
+                text-align: center !important;
+                border: 1px solid #e2e8f0 !important;
+                background: #f8fafc;
+                border-radius: 10px;
+                margin: 2px;
+                min-height: 54px;
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
-                padding: 8px 10px !important;
+                justify-content: center;
             }
-            #adminView > div:first-child > div:last-child {
-                grid-template-columns: 1fr;
+            #checklistTableBody .checklist-item-row td:nth-child(6) {
+                background: #ecfdf5;
+                border-color: #bbf7d0 !important;
             }
+            #checklistTableBody .checklist-item-row td:nth-child(4)::before { content: '一階\A觀念理解'; white-space: pre; }
+            #checklistTableBody .checklist-item-row td:nth-child(5)::before { content: '二階\A帶教示範'; white-space: pre; }
+            #checklistTableBody .checklist-item-row td:nth-child(6)::before { content: '三階\A獨立操作'; white-space: pre; }
+            #checklistTableBody .checklist-item-row td:nth-child(4) input,
+            #checklistTableBody .checklist-item-row td:nth-child(5) input,
+            #checklistTableBody .checklist-item-row td:nth-child(6) input {
+                margin-left: 5px;
+                width: 20px;
+                height: 20px;
+            }
+            #checklistTableBody .checklist-item-row td:nth-child(7),
+            #checklistTableBody .checklist-item-row td:nth-child(8) {
+                grid-column: 1 / -1;
+                text-align: left !important;
+                padding-top: 8px !important;
+                padding-bottom: 2px !important;
+            }
+            #checklistTableBody .checklist-item-row td:nth-child(7)::before {
+                content: '教導員/主管簽認';
+                display: block;
+                font-weight: 700;
+                font-size: 11px;
+                color: #64748b;
+                margin-bottom: 4px;
+            }
+            #checklistTableBody .checklist-item-row td:nth-child(8)::before {
+                content: '完成日期';
+                display: block;
+                font-weight: 700;
+                font-size: 11px;
+                color: #64748b;
+                margin-bottom: 4px;
+            }
+            #checklistTableBody .checklist-item-row td:nth-child(7) input,
+            #checklistTableBody .checklist-item-row td:nth-child(8) input {
+                width: 100% !important;
+                min-height: 38px;
+                box-sizing: border-box;
+            }
+            #checklistTableBody .bg-slate-100\/80,
+            #checklistTableBody .bg-slate-50 {
+                display: table-row !important;
+            }
+            #checklistTableBody .bg-slate-100\/80 td,
+            #checklistTableBody .bg-slate-50 td {
+                display: table-cell !important;
+                padding: 10px 12px !important;
+            }
+            #checklistTableBody .bg-slate-50 td { padding-left: 20px !important; }
+            #checklistTableBody .checklist-item-row + .checklist-item-row {
+                border-top: 1px solid #e2e8f0 !important;
+            }
+            #checklistTableBody .checklist-item-row td:nth-child(2) button { max-width: 100%; }
+            #checklistTableBody .checklist-item-row td:nth-child(3) { overflow-wrap: anywhere; }
+            #checklistTableBody .checklist-item-row input[type='text'],
+            #checklistTableBody .checklist-item-row input[type='date'] { font-size: 13px !important; }
+            #checklistTableBody .checklist-item-row td:nth-child(4),
+            #checklistTableBody .checklist-item-row td:nth-child(5),
+            #checklistTableBody .checklist-item-row td:nth-child(6) { font-size: 11px; }
+            #checklistTableBody .checklist-item-row td:nth-child(4)::before,
+            #checklistTableBody .checklist-item-row td:nth-child(5)::before,
+            #checklistTableBody .checklist-item-row td:nth-child(6)::before { line-height: 1.35; }
+            .overflow-x-auto:has(#checklistTableBody) { overflow-x: visible !important; }
         }
     </style>
 </head>
@@ -973,8 +794,13 @@
                 updateSyncBadgeStatus('error', errMsg);
             }
 
-            // Default User Profile ID
-            currentUserId = localStorage.getItem('active_trainee_id') || 'trainee_default';
+            // 清除舊版本留下的新人資料快取；之後人員資料只以 Firebase 為唯一來源
+            Object.keys(localStorage)
+                .filter(key => key.startsWith('trainee_data_'))
+                .forEach(key => localStorage.removeItem(key));
+
+            // 人員資料不再從瀏覽器恢復；登入後才從 Firebase 取得
+            currentUserId = null;
             renderTableRows();
             setupRealtimeSync();
             setTimeout(() => {
@@ -1215,6 +1041,7 @@
             const mentorNameEl = document.getElementById('mentorName');
             currentUserData.mentorName = mentorNameEl ? mentorNameEl.value : (currentUserData.mentorName || '');
             currentUserData.supervisorName = document.getElementById('supervisorName').value;
+            currentUserData.mentorComments = document.getElementById('mentorComments').value;
             currentUserData.supervisorComments = document.getElementById('supervisorComments').value;
             currentUserData.traineeSign = document.getElementById('traineeSign').value;
             currentUserData.mentorSign = document.getElementById('mentorSign').value;
@@ -1232,8 +1059,8 @@
 
             currentUserData.updatedAt = new Date().toISOString();
 
-            // LocalStorage Backup
-            localStorage.setItem(`trainee_data_${currentUserId}`, JSON.stringify(currentUserData));
+            // Firebase 是唯一的人員資料來源；瀏覽器不再儲存 trainee_data
+            allTraineesCache[currentUserId] = currentUserData;
             updateUserSelectorOptions();
 
             // Cloud Async Push
@@ -1260,12 +1087,11 @@
             managerOpt.innerText = '管理者';
             selector.appendChild(managerOpt);
 
-            const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
-            const cloudKeys = Object.keys(allTraineesCache);
-            const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+            // 人員名單只讀 Firebase，不再合併瀏覽器 LocalStorage
+            const allIds = Object.keys(allTraineesCache);
 
             allIds.forEach(uid => {
-                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+                const uData = allTraineesCache[uid];
                 if (!uData.empName || uData.empName === '新進員工') return;
                 const opt = document.createElement('option');
                 opt.value = uid;
@@ -1315,7 +1141,7 @@
                 return;
             }
 
-            const userData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+            const userData = allTraineesCache[uid];
             if (!userData.loginPassword) {
                 errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 此人員尚未設定登入密碼，請請主管設定後再登入！';
                 errorEl.classList.remove('hidden');
@@ -1350,21 +1176,13 @@
         }
 
         function loadUserData(userId) {
-            currentUserId = userId;
-            localStorage.setItem('active_trainee_id', userId);
-
-            // 優先讀取雲端快取，次之讀取本機，無紀錄則建立預設
-            if (allTraineesCache[userId]) {
-                currentUserData = allTraineesCache[userId];
-                localStorage.setItem(`trainee_data_${userId}`, JSON.stringify(currentUserData));
-            } else {
-                const saved = localStorage.getItem(`trainee_data_${userId}`);
-                if (saved) {
-                    currentUserData = JSON.parse(saved);
-                } else {
-                    currentUserData = createNewUserData(userId);
-                }
+            if (!userId || !allTraineesCache[userId]) {
+                showToast('找不到此人員的 Firebase 雲端資料');
+                return;
             }
+
+            currentUserId = userId;
+            currentUserData = allTraineesCache[userId];
 
             // Fill UI Fields
             document.getElementById('empName').value = currentUserData.empName || '';
@@ -1372,6 +1190,8 @@
             const mentorNameEl = document.getElementById('mentorName');
             if (mentorNameEl) mentorNameEl.value = currentUserData.mentorName || '';
             document.getElementById('supervisorName').value = currentUserData.supervisorName || '';
+            const mentorCommentsEl = document.getElementById('mentorComments');
+            if (mentorCommentsEl) mentorCommentsEl.value = currentUserData.mentorComments || '';
             document.getElementById('supervisorComments').value = currentUserData.supervisorComments || '';
             document.getElementById('traineeSign').value = currentUserData.traineeSign || '';
             document.getElementById('mentorSign').value = currentUserData.mentorSign || '';
@@ -1395,21 +1215,19 @@
             if (!selector) return;
             selector.innerHTML = '';
 
-            // 整合本機與雲端的所有 Key，確保跨裝置資料全部列出
-            const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
-            const cloudKeys = Object.keys(allTraineesCache);
-            const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+            const allIds = Object.keys(allTraineesCache);
 
             if (allIds.length === 0) {
                 const opt = document.createElement('option');
-                opt.value = currentUserId;
-                opt.innerText = "新進員工";
+                opt.value = '';
+                opt.innerText = '目前沒有可用的人員資料';
                 selector.appendChild(opt);
                 return;
             }
 
             allIds.forEach(uid => {
-                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+                const uData = allTraineesCache[uid];
+                if (!uData) return;
                 const opt = document.createElement('option');
                 opt.value = uid;
                 opt.innerText = `${uData.empName || '新進員工'} (${uData.startDate || '未設定'})`;
@@ -1458,7 +1276,6 @@
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
             newData.loginPassword = newPassword;
-            localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
             allTraineesCache[newId] = newData;
 
             if (db && auth.currentUser) {
@@ -1476,43 +1293,20 @@
             if (!db) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'trainees');
 
-            // 自動將本機儲存的歷史資料上傳同步至 Firebase 雲端
-            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
-            userKeys.forEach(async (key) => {
-                try {
-                    const localData = JSON.parse(localStorage.getItem(key) || '{}');
-                    if (localData && localData.id) {
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', localData.id);
-                        const docSnap = await getDoc(docRef);
-                        if (!docSnap || !docSnap.exists()) {
-                            await setDoc(docRef, localData);
-                            console.log(`已自動同步本機歷史檔案 [${localData.empName || localData.id}] 至雲端`);
-                        }
-                    }
-                } catch(e) {
-                    console.warn("自動同步本機資料至雲端失敗:", e);
-                }
-            });
-
             onSnapshot(colRef, (snapshot) => {
+                // snapshot 是 Firebase 目前完整名單；先清空舊快取，避免已刪除人員殘留
+                allTraineesCache = {};
                 let count = 0;
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
                     if (data && data.id) {
                         count++;
                         allTraineesCache[data.id] = data;
-                        localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
                     }
                 });
 
                 updateSyncBadgeStatus('connected', `雲端後台已連線 (${count} 筆資料同步中)`);
                 
-                // 跨裝置自動匹配：若新裝置當前 ID 為空或預設值，自動切換至雲端現有第一個員工
-                const cloudIds = Object.keys(allTraineesCache);
-                if (cloudIds.length > 0 && (!currentUserId || currentUserId === 'trainee_default' || !allTraineesCache[currentUserId])) {
-                    currentUserId = cloudIds[0];
-                }
-
                 updateUserSelectorOptions();
                 updateTraineeLoginOptions();
 
@@ -1569,7 +1363,6 @@
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
             newData.loginPassword = newPassword;
-            localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
             allTraineesCache[newId] = newData;
 
             if (db && auth.currentUser) {
@@ -1646,9 +1439,7 @@
         }
 
         window.renderAdminDashboard = function() {
-            const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
-            const cloudKeys = Object.keys(allTraineesCache);
-            const userIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+            const userIds = Object.keys(allTraineesCache);
 
             let total = userIds.length;
             let certifiedCount = 0;
@@ -1659,7 +1450,7 @@
             tbody.innerHTML = '';
 
             userIds.forEach(uid => {
-                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+                const uData = allTraineesCache[uid];
                 let c3Count = 0;
                 CHECKLIST_ITEMS.forEach(item => {
                     if (uData.checks?.[item.id]?.c3) c3Count++;
@@ -1728,11 +1519,10 @@
                 return;
             }
 
-            const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+            const uData = allTraineesCache[uid];
             uData.loginPassword = newPassword;
             uData.updatedAt = new Date().toISOString();
             allTraineesCache[uid] = uData;
-            localStorage.setItem(`trainee_data_${uid}`, JSON.stringify(uData));
 
             if (db && auth && auth.currentUser) {
                 try {
@@ -1780,8 +1570,7 @@
             const uidToDelete = targetDeleteUid;
             closeDeleteConfirmModal();
 
-            // 1. 本機快取與 LocalStorage 刪除
-            localStorage.removeItem(`trainee_data_${uidToDelete}`);
+            // 1. 先從記憶體快取移除
             delete allTraineesCache[uidToDelete];
 
             // 2. 雲端 Firebase 同步刪除
@@ -1794,18 +1583,10 @@
                 }
             }
 
-            // 3. 若刪除的是當前正打開的人員，切換至其他人或建立新預設檔
+            // 3. 若刪除的是目前人員，不再從瀏覽器找舊資料
             if (currentUserId === uidToDelete) {
-                const remainingKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
-                if (remainingKeys.length > 0) {
-                    const nextUid = remainingKeys[0].replace('trainee_data_', '');
-                    loadUserData(nextUid);
-                } else {
-                    const defaultUid = 'trainee_' + Date.now();
-                    const defaultData = createNewUserData(defaultUid, '新進員工');
-                    localStorage.setItem(`trainee_data_${defaultUid}`, JSON.stringify(defaultData));
-                    loadUserData(defaultUid);
-                }
+                currentUserId = null;
+                currentUserData = null;
             }
 
             renderAdminDashboard();
