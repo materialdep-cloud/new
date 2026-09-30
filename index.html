@@ -1170,7 +1170,12 @@
 
             if (db && auth.currentUser) {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
-                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
+                setDoc(docRef, newData, { merge: true }).then(() => {
+                    console.log(`已將 ${newName} 與登入密碼同步至 Firebase`);
+                }).catch(err => {
+                    console.warn("Cloud add user error:", err);
+                    showToast('新人已建立，但密碼尚未同步到雲端，請檢查 Firebase Rules');
+                });
             }
 
             updateUserSelectorOptions();
@@ -1194,6 +1199,9 @@
                         if (!docSnap || !docSnap.exists()) {
                             await setDoc(docRef, localData);
                             console.log(`已自動同步本機歷史檔案 [${localData.empName || localData.id}] 至雲端`);
+                        } else if (localData.loginPassword && !docSnap.data().loginPassword) {
+                            await setDoc(docRef, { loginPassword: localData.loginPassword, updatedAt: localData.updatedAt || new Date().toISOString() }, { merge: true });
+                            console.log(`已補同步 [${localData.empName || localData.id}] 的登入密碼至雲端`);
                         }
                     }
                 } catch(e) {
@@ -1207,6 +1215,13 @@
                     const data = docSnap.data();
                     if (data && data.id) {
                         count++;
+                        // 若雲端舊資料沒有 loginPassword，但本機已有密碼，保留本機密碼，避免登入密碼被舊資料覆蓋
+                        const localSaved = localStorage.getItem(`trainee_data_${data.id}`);
+                        let localData = {};
+                        try { localData = localSaved ? JSON.parse(localSaved) : {}; } catch(e) {}
+                        if (!data.loginPassword && localData.loginPassword) {
+                            data.loginPassword = localData.loginPassword;
+                        }
                         allTraineesCache[data.id] = data;
                         localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
                     }
