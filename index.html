@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>綠園生活資材新人培訓系統</title>
-    <!-- Tailwind CSS CDN -->
+    <title>農產品倉管新人培訓與雲端管理系統</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome CDN -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -18,6 +19,7 @@
                         brand: {
                             50: '#f0fdf4',
                             100: '#dcfce7',
+                            200: '#bbf7d0',
                             500: '#22c55e',
                             600: '#16a34a',
                             700: '#15803d',
@@ -33,387 +35,214 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Inter', 'Microsoft JhengHei', sans-serif;
-            background-color: #f8fafc;
-        }
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .stage-checkbox {
-            appearance: none;
-            width: 1.25rem;
-            height: 1.25rem;
-            border: 2px solid #cbd5e1;
-            border-radius: 0.375rem;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .stage-checkbox:checked {
-            background-color: #16a34a;
-            border-color: #16a34a;
-        }
-        .stage-checkbox:checked::after {
-            content: '✓';
-            position: absolute;
-            color: white;
-            font-size: 0.875rem;
-            font-weight: bold;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
         @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                background: white !important;
-                color: black !important;
-                font-size: 10pt;
-            }
-            .print-container {
-                width: 100% !important;
-                max-width: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .card-shadow {
-                box-shadow: none !important;
-                border: 1px solid #e2e8f0 !important;
-            }
-            .break-inside-avoid {
-                page-break-inside: avoid;
-            }
-            input[type="text"], input[type="date"] {
-                border-bottom: 1px solid #000 !important;
-                border-top: none !important;
-                border-left: none !important;
-                border-right: none !important;
-                border-radius: 0 !important;
-                padding: 0 !important;
-            }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .shadow-xl, .shadow-2xl, .shadow-md, .shadow-sm { box-shadow: none !important; }
+            .border { border-color: #cbd5e1 !important; }
+            .page-break { page-break-before: always; }
         }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
-    <!-- Navbar -->
-    <header class="bg-brand-900 text-white shadow-lg sticky top-0 z-30 no-print">
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-brand-800 rounded-xl border border-brand-700 shadow-inner">
-                    <i class="fa-solid fa-boxes-packing text-xl text-emerald-300"></i>
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-md">
+                    <i class="fa-solid fa-boxes-packing text-white"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="font-bold text-lg leading-tight tracking-wide">綠園倉儲</h1>
-                        <span id="cloudStatusBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 雲端連線中
-                        </span>
-                    </div>
-                    <p class="text-xs text-brand-200">倉管新人培訓與實務作業管理系統</p>
+                    <h1 class="font-bold text-base sm:text-lg tracking-wide leading-tight">農產品倉管新人培訓管理系統</h1>
+                    <p class="text-xs text-slate-400">實務檢核表與主管線上決簽後台</p>
                 </div>
             </div>
             
-            <!-- View Mode Switcher -->
-            <div class="flex items-center bg-brand-800 p-1 rounded-xl border border-brand-700">
-                <button id="tabFormBtn" onclick="switchView('form')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <span>實務檢核表</span>
-                </button>
-                <button id="tabAdminBtn" onclick="switchView('admin')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-brand-200 hover:text-white">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span>主管管理後台</span>
-                </button>
-            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Sync Status Indicator -->
+                <div id="syncBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-emerald-950 text-emerald-400 border border-emerald-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="syncText">雲端自動同步中</span>
+                </div>
 
-            <!-- Action Buttons -->
-            <div class="hidden md:flex items-center space-x-2">
-                <button onclick="saveCurrentRecord()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-white shadow-sm">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span>同步至雲端</span>
-                </button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-white text-slate-800 hover:bg-slate-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <!-- Navigation Tabs -->
+                <nav class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                    <button id="tabFormBtn" onclick="switchView('form')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>實務檢核表</span>
+                    </button>
+                    <button id="tabAdminBtn" onclick="switchView('admin')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>主管管理後台</span>
+                    </button>
+                </nav>
+
+                <button onclick="window.print()" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition border border-slate-700" title="列印或導出PDF">
                     <i class="fa-solid fa-print"></i>
-                    <span>列印 / 匯出 PDF</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print-container space-y-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
 
         <!-- ========================================== -->
-        <!-- VIEW 1: 實務檢核表填報視角 (Form View) -->
+        <!-- VIEW 1: 新人實務檢核表 (Trainee Checklist View) -->
         <!-- ========================================== -->
         <div id="formView" class="space-y-6">
 
-            <!-- Title Banner -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2">
-                        <i class="fa-solid fa-circle-check"></i> 標準作業流程 雙簽認證制
+            <!-- Employee Info Header Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2.5 bg-brand-50 text-brand-600 rounded-xl">
+                            <i class="fa-solid fa-id-card text-xl"></i>
+                        </span>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">倉管人員培訓檔案</h2>
+                            <p class="text-xs text-slate-500">請完成三階段（觀念理解、帶教示範、獨立操作）訓練與檢核認證</p>
+                        </div>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">倉管新人培訓與實務檢核表</h2>
-                    <p class="text-xs text-slate-500 mt-1">涵蓋用具操作、產品分級、現場備貨出貨與系統調撥發料實務（共 26 項獨立條目）</p>
-                </div>
-                <!-- Training 3-Step Legend -->
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1 w-full md:w-auto">
-                    <div class="font-semibold text-slate-800 mb-1 flex items-center gap-1">
-                        <i class="fa-solid fa-graduation-cap text-brand-600"></i> 三階段帶教與認證標準：
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <span class="bg-emerald-100/60 text-emerald-800 px-2 py-1 rounded font-medium">一階：觀念理解</span>
-                        <span class="bg-blue-100/60 text-blue-800 px-2 py-1 rounded font-medium">二階：帶教示範</span>
-                        <span class="bg-purple-100/60 text-purple-800 px-2 py-1 rounded font-medium">三階：獨立操作</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Employee Selector / Basic Info Form -->
-            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow">
-                <div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-id-card text-brand-600"></i> 新人培訓基本資料
-                    </h3>
+                    
+                    <!-- Record Switcher Dropdown & Actions -->
                     <div class="flex items-center gap-2 no-print">
-                        <span class="text-xs text-slate-400">選擇或切換人員檔案：</span>
-                        <select id="recordSelect" onchange="loadSelectedRecord(this.value)" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 font-medium">
-                            <option value="new">+ 開立新培訓檔案</option>
+                        <select id="userSelector" onchange="loadSelectedUser(this.value)" class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500 outline-none">
+                            <option value="">-- 選擇培訓人員檔案 --</option>
                         </select>
+                        <button onclick="createNewUserPrompt()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition border border-slate-300 flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-brand-600"></i>
+                            <span>建立新檔案</span>
+                        </button>
+                        <button onclick="saveCurrentProgress()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold transition shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>儲存進度</span>
+                        </button>
                     </div>
                 </div>
-                
+
+                <!-- Input Fields Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">員工姓名 <span class="text-red-500">*</span></label>
-                        <input type="text" id="empName" placeholder="請輸入姓名" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">員工姓名</label>
+                        <input type="text" id="empName" placeholder="請輸入姓名" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">到職日期</label>
-                        <input type="date" id="hireDate" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">到職日期</label>
+                        <input type="date" id="startDate" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">帶教員</label>
-                        <input type="text" id="mentorName" placeholder="請輸入帶教員姓名" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">帶教員姓名</label>
+                        <input type="text" id="mentorName" placeholder="請輸入帶教員" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">部門主管</label>
-                        <input type="text" id="managerName" placeholder="請輸入主管姓名" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">部門主管</label>
+                        <input type="text" id="supervisorName" placeholder="請輸入主管" oninput="autoSaveField()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
                 </div>
-            </section>
-
-            <!-- Progress Overview Bar -->
-            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow no-print">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-brand-600"></i> 培訓考核整體進度
-                        </h3>
-                        <p class="text-xs text-slate-500">獨立操作（三階）完成率將決定是否通過試用考核</p>
-                    </div>
-                    <div class="text-right">
-                        <span id="progressPercent" class="text-2xl font-black text-brand-600">0%</span>
-                        <span class="text-xs text-slate-500 font-medium ml-1">(<span id="completedCount">0</span> / <span id="totalItemsCount">26</span> 項獨立完成)</span>
-                    </div>
-                </div>
-                
-                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                    <div id="progressBar" class="bg-brand-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
-                </div>
-
-                <!-- Stage counters summary -->
-                <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-center">
-                    <div class="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
-                        <span class="block text-xs text-emerald-700 font-medium">一階：觀念理解</span>
-                        <span id="countL1" class="text-lg font-bold text-emerald-800">0</span>
-                    </div>
-                    <div class="bg-blue-50 rounded-lg p-2 border border-blue-100">
-                        <span class="block text-xs text-blue-700 font-medium">二階：帶教示範</span>
-                        <span id="countL2" class="text-lg font-bold text-blue-800">0</span>
-                    </div>
-                    <div class="bg-purple-100/60 rounded-lg p-2 border border-purple-200">
-                        <span class="block text-xs text-purple-700 font-medium">三階：獨立完成</span>
-                        <span id="countL3" class="text-lg font-bold text-purple-800">0</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Filter Section -->
-            <section class="flex flex-col sm:flex-row gap-3 justify-between items-center no-print">
-                <div class="relative w-full sm:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="searchInput" onkeyup="filterChecklist()" placeholder="搜尋訓練項目、關鍵字..." class="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm">
-                </div>
-                <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
-                    <button onclick="filterCategory('all')" class="cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-800 text-white shadow-sm transition">全部 26 項</button>
-                    <button onclick="filterCategory('cat-tools')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">一、用具學習</button>
-                    <button onclick="filterCategory('cat-products')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">二、產品認識</button>
-                    <button onclick="filterCategory('cat-field')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">三、現場實作出貨</button>
-                    <button onclick="filterCategory('cat-erp')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">四、特殊進出與單據</button>
-                </div>
-            </section>
-
-            <!-- Checklist Containers -->
-            <div id="checklistContainer" class="space-y-6">
-
-                <!-- Category 1: 用具學習 -->
-                <section class="checklist-category cat-tools bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                        <h3 class="font-bold text-base flex items-center gap-2">
-                            <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i> 一、 用具學習與安全操作
-                        </h3>
-                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">安全第一 / 載重限制 / 設備維護</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                    <th class="py-3 px-4 w-12 text-center">序</th>
-                                    <th class="py-3 px-4 w-56">訓練項目</th>
-                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
-                                    <th class="py-3 px-2 text-center w-12" title="一階：觀念理解">一階</th>
-                                    <th class="py-3 px-2 text-center w-12" title="二階：帶教示範">二階</th>
-                                    <th class="py-3 px-2 text-center w-12" title="三階：獨立操作">三階</th>
-                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
-                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-tools-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Category 2: 產品認識 -->
-                <section class="checklist-category cat-products bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                        <h3 class="font-bold text-base flex items-center gap-2">
-                            <i class="fa-solid fa-seedling text-emerald-400"></i> 二、 產品認識與鮮菇分級
-                        </h3>
-                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">品質判讀 / 規格選別 / 瑕疵管控</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                    <th class="py-3 px-4 w-12 text-center">序</th>
-                                    <th class="py-3 px-4 w-56">訓練項目</th>
-                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
-                                    <th class="py-3 px-2 text-center w-12">一階</th>
-                                    <th class="py-3 px-2 text-center w-12">二階</th>
-                                    <th class="py-3 px-2 text-center w-12">三階</th>
-                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
-                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-products-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Category 3: 現場實作 - 出貨備貨 -->
-                <section class="checklist-category cat-field bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                        <h3 class="font-bold text-base flex items-center gap-2">
-                            <i class="fa-solid fa-truck-fast text-emerald-400"></i> 三、 現場實作 - 班車與通路備貨
-                        </h3>
-                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">時間效能 / 數量精準 / 標籤比對</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                    <th class="py-3 px-4 w-12 text-center">序</th>
-                                    <th class="py-3 px-4 w-56">訓練項目</th>
-                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
-                                    <th class="py-3 px-2 text-center w-12">一階</th>
-                                    <th class="py-3 px-2 text-center w-12">二階</th>
-                                    <th class="py-3 px-2 text-center w-12">三階</th>
-                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
-                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-field-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Category 4: 特殊進出貨與系統發料 -->
-                <section class="checklist-category cat-erp bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                        <h3 class="font-bold text-base flex items-center gap-2">
-                            <i class="fa-solid fa-arrows-spin text-emerald-400"></i> 四、 特殊進出貨、退貨與系統單據作業
-                        </h3>
-                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">帳實相符 / 現金清點 / 系統流程</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                    <th class="py-3 px-4 w-12 text-center">序</th>
-                                    <th class="py-3 px-4 w-56">訓練項目</th>
-                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
-                                    <th class="py-3 px-2 text-center w-12">一階</th>
-                                    <th class="py-3 px-2 text-center w-12">二階</th>
-                                    <th class="py-3 px-2 text-center w-12">三階</th>
-                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
-                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-erp-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
             </div>
 
-            <!-- Signatures Section -->
-            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow break-inside-avoid">
-                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
-                    <i class="fa-solid fa-file-signature text-brand-600"></i> 試用期滿實務考核評語與雙簽
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Overall Progress KPI Bar -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">帶教員 評語與簽核</label>
-                        <textarea id="mentorComment" onchange="autoSyncRecord()" rows="3" placeholder="請填寫新人工作態度、學習進度與建議..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
-                        <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
-                            <span>帶教員簽名：__________________</span>
-                            <span>日期：____年__月__日</span>
-                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">培訓整體達成率</span>
+                        <h3 class="text-2xl font-black text-slate-900 mt-1" id="overallPercentText">0%</h3>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">倉儲部門主管 綜合評定與決簽</label>
-                        <textarea id="managerComment" onchange="autoSyncRecord()" rows="3" placeholder="核准通過獨立上崗 / 延後審核 / 其他審查意見..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
-                        <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
-                            <span>主管簽名：__________________</span>
-                            <span>日期：____年__月__日</span>
+                    <div class="flex gap-4 text-xs">
+                        <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="text-slate-500 block">觀念理解</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c1Count">0 / 26</span>
+                        </div>
+                        <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="text-slate-500 block">帶教示範</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c2Count">0 / 26</span>
+                        </div>
+                        <div class="text-center px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800">
+                            <span class="block">獨立操作認證</span>
+                            <span class="font-bold text-emerald-700 text-sm" id="c3Count">0 / 26</span>
                         </div>
                     </div>
                 </div>
-            </section>
+                <!-- Progress bar graphics -->
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
+                    <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-emerald-600 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Main Checklist Sections Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i>
+                        <span>培訓檢核項目表 (共 26 個獨立項目)</span>
+                    </h3>
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-slate-200 rounded"></span> 一階: 觀念理解</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-blue-200 rounded"></span> 二階: 帶教示範</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-emerald-200 rounded"></span> 三階: 獨立操作</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-700 font-bold text-xs uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-4 w-12 text-center">編號</th>
+                                <th class="py-3.5 px-4 w-52">訓練項目名稱</th>
+                                <th class="py-3.5 px-4">標準作業流程重點與細節規範</th>
+                                <th class="py-3.5 px-2 w-20 text-center">一階<br><span class="text-[10px] text-slate-500 font-normal">觀念理解</span></th>
+                                <th class="py-3.5 px-2 w-20 text-center">二階<br><span class="text-[10px] text-slate-500 font-normal">帶教示範</span></th>
+                                <th class="py-3.5 px-2 w-20 text-center">三階<br><span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded font-normal">獨立操作</span></th>
+                                <th class="py-3.5 px-3 w-28 text-center">帶教員簽認</th>
+                                <th class="py-3.5 px-3 w-28 text-center">完成日期</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checklistTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamically generated items -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Signatures & Supervisor Evaluation Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-signature text-brand-600"></i>
+                    <span>考核總評與簽認核准</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-2">帶教員實務觀察評語</label>
+                        <textarea id="mentorComments" rows="3" oninput="autoSaveField()" placeholder="請帶教員填寫新人學習態度、操作熟練度與改善建議..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-2">主管試用期決簽意見</label>
+                        <textarea id="supervisorComments" rows="3" oninput="autoSaveField()" placeholder="主管批核意見 (如：同意獨立操作、延長帶教時數等)..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Sign Off Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                        <span class="text-xs text-slate-500 block mb-1">受訓新人確認簽章</span>
+                        <input type="text" id="traineeSign" placeholder="請輸入新人姓名" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-slate-300 focus:border-brand-500 outline-none text-slate-800 text-sm py-1">
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                        <span class="text-xs text-slate-500 block mb-1">帶教員評核簽認</span>
+                        <input type="text" id="mentorSign" placeholder="請輸入帶教員姓名" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-slate-300 focus:border-brand-500 outline-none text-slate-800 text-sm py-1">
+                    </div>
+                    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+                        <span class="text-xs text-emerald-700 block mb-1">部門主管審核蓋章</span>
+                        <input type="text" id="supervisorSign" placeholder="請主管簽核" oninput="autoSaveField()" class="w-full text-center font-bold bg-transparent border-b border-emerald-300 focus:border-emerald-600 outline-none text-emerald-900 text-sm py-1">
+                    </div>
+                </div>
+            </div>
 
         </div>
 
@@ -425,92 +254,90 @@
             <!-- Admin Header -->
             <div class="bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-800/50">管理員控制台</span>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-800/50">管理員控制台 (已驗證)</span>
                     <h2 class="text-2xl font-bold tracking-tight mt-1">倉管新人培訓彙整與審核後台</h2>
                     <p class="text-xs text-slate-400 mt-1">即時檢視團隊所有新人受訓進度、獨立操作達成率與考核決簽</p>
                 </div>
-                <button onclick="createNewRecordFromAdmin()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-user-plus text-sm"></i>
-                    <span>新增新人培訓檔案</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="createNewUserPrompt()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-user-plus text-sm"></i>
+                        <span>新增新人培訓檔案</span>
+                    </button>
+                    <button onclick="lockAdminPanel()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>鎖定後台</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Dashboard Overview KPI Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400">總受訓人數</p>
-                        <h4 id="statTotalEmps" class="text-2xl font-black text-slate-800 mt-1">0</h4>
-                        <span class="text-[11px] text-slate-500">人列入培訓計畫</span>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-slate-100 text-slate-700 rounded-xl text-xl">
+                        <i class="fa-solid fa-users"></i>
                     </div>
-                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                        <i class="fa-solid fa-users text-xl"></i>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">總培訓新人人數</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminTotalTrainees">0</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400">平均獨立操作率</p>
-                        <h4 id="statAvgProgress" class="text-2xl font-black text-brand-600 mt-1">0%</h4>
-                        <span class="text-[11px] text-slate-500">達到 100% 即可獨立上崗</span>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-brand-50 text-brand-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-chart-line"></i>
                     </div>
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                        <i class="fa-solid fa-chart-line text-xl"></i>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">團隊平均獨立操作率</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminAvgProgress">0%</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400">完成試用考核</p>
-                        <h4 id="statPassedCount" class="text-2xl font-black text-purple-600 mt-1">0</h4>
-                        <span class="text-[11px] text-slate-500">位主管已綜合決簽</span>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-user-check"></i>
                     </div>
-                    <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
-                        <i class="fa-solid fa-user-check text-xl"></i>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">考試合格/獨立檢核認證</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminCertifiedCount">0</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400">帶教進行中</p>
-                        <h4 id="statActiveCount" class="text-2xl font-black text-amber-600 mt-1">0</h4>
-                        <span class="text-[11px] text-slate-500">位正在累積獨立項目</span>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-hourglass-half"></i>
                     </div>
-                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                        <i class="fa-solid fa-chalkboard-user text-xl"></i>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">帶教進行中</span>
+                        <span class="text-2xl font-bold text-slate-900" id="adminInTrainingCount">0</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Employee List Table -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-base">新人培訓動態列表</h3>
-                        <p class="text-xs text-slate-400">點擊任一新人可快速開啟檢核表或進行評語審核</p>
-                    </div>
-                    <div class="relative w-full sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="adminSearchInput" onkeyup="filterAdminTable()" placeholder="搜尋姓名、帶教員..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
+            <!-- Trainee Management List -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-brand-600"></i>
+                        <span>受訓新人檔案總覽表</span>
+                    </h3>
+                    <span class="text-xs text-slate-500">點擊列存取該員工完整勾選表與簽核</span>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                <th class="py-3 px-4">員工姓名</th>
-                                <th class="py-3 px-4">到職日期</th>
-                                <th class="py-3 px-4">帶教員</th>
-                                <th class="py-3 px-4">部門主管</th>
-                                <th class="py-3 px-4 text-center">獨立完成 (三階)</th>
-                                <th class="py-3 px-4">進度條</th>
-                                <th class="py-3 px-4">最後更新</th>
-                                <th class="py-3 px-4 text-center">操作</th>
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-700 font-bold text-xs uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-4">員工姓名</th>
+                                <th class="py-3.5 px-4">到職日期</th>
+                                <th class="py-3.5 px-4">帶教員</th>
+                                <th class="py-3.5 px-4">主管</th>
+                                <th class="py-3.5 px-4 w-48">獨立操作達成率 (三階)</th>
+                                <th class="py-3.5 px-4 text-center">主管審核狀態</th>
+                                <th class="py-3.5 px-4 text-right">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="adminRecordsTableBody" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- Dynamic rendering -->
+                        <tbody id="adminTraineeTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamic admin rows -->
                         </tbody>
                     </table>
                 </div>
@@ -520,7 +347,7 @@
 
     </main>
 
-    <!-- Modal for Details -->
+    <!-- Modal for Detailed SOP Description -->
     <div id="sopModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
@@ -543,576 +370,374 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 no-print">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span id="toastMsg">進度已成功儲存！</span>
+    <!-- Modal for Admin Password Verification -->
+    <div id="adminAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-slate-100 rounded-xl text-slate-800">
+                    <i class="fa-solid fa-lock text-xl text-brand-600"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-brand-700 uppercase tracking-wide">權限控管</span>
+                    <h4 class="text-base font-bold text-slate-900">主管管理後台驗證</h4>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500">此區域僅限主管存取，請輸入通行密碼以繼續：</p>
+            <div>
+                <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none">
+                <p id="adminAuthError" class="text-xs text-red-500 mt-1 hidden"><i class="fa-solid fa-circle-exclamation"></i> 密碼錯誤，請重新輸入！</p>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAdminAuthModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition">取消</button>
+                <button onclick="verifyAdminPassword()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold transition">解鎖進入</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Firebase Script Integration -->
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
+        <i class="fa-solid fa-circle-check text-brand-400 text-lg"></i>
+        <span id="toastMsg" class="text-xs font-medium">進度已儲存</span>
+    </div>
+
+    <!-- Application Logic & Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration setup
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'warehouse-onboarding-app';
+        // Global Firebase Configuration & State Management
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'warehouse-training-app';
         let db = null;
         let auth = null;
-        let currentUser = null;
+        let currentUserData = null;
+        let currentUserId = null;
+        let allTraineesCache = {};
 
-        async function initCloudDatabase() {
+        // Complete 26 Checklist Items Data Definition
+        const CHECKLIST_ITEMS = [
+            // Category 1: 用具學習 (3項)
+            { id: 1, category: "用具學習", name: "拖板車使用", sop: "安全承載檢查、壓桿升降操作、轉彎行進安全角度與固定靜置擺放規範。" },
+            { id: 2, category: "用具學習", name: "烏龜車使用", sop: "多層疊加規範、載重平衡拿捏、通道平穩推行與空車歸位管理。" },
+            { id: 3, category: "用具學習", name: "堆高機使用", sop: "發動前安全檢查、牙叉調寬與高低升降、載貨視線注意、充電作業與安全帶配戴。" },
+
+            // Category 2: 產品認識 (3項)
+            { id: 4, category: "產品認識", name: "香菇分級", sop: "區分大/中/小朵等級、菇傘開度、蕈褶顏色判別、水份瑕疵與發黴剔除基準。" },
+            { id: 5, category: "產品認識", name: "杏鮑菇分級", sop: "區分 A/B 級、蕈柄粗細度、切口平整度、質地彈性與表面壓傷檢視。" },
+            { id: 6, category: "產品認識", name: "其他菇品項分級", sop: "金針菇、木耳、秀珍菇、鴻喜菇等品質規範、包裝完整性與失水耗損辨識。" },
+
+            // Category 3: 現場實作 (20項)
+            { id: 7, category: "現場實作", name: "上午接駁車備貨", sop: "確認早班車次預估單、棧板核對、標籤張貼與準時拉貨上車。" },
+            { id: 8, category: "現場實作", name: "下午接駁車備貨", sop: "午後溫控防護、車次品項確認、點交數量與送達對接作業。" },
+            { id: 9, category: "現場實作", name: "家樂福大園倉出貨備貨及明確知道備貨數量", sop: "核對大園倉物流單號、嚴格複核總箱數與品規、溫控棧板包覆與驗貨無誤。" },
+            { id: 10, category: "現場實作", name: "家樂福西螺倉出貨備貨及明確知道備貨數量", sop: "對應西螺倉出貨表、確實掌握正確件數、溫控封膜與交接單據清點。" },
+            { id: 11, category: "現場實作", name: "盤商出貨-順益(劉家瑜)", sop: "確認順益指定品質規格、核對聯絡人品項數量、專用標籤粘貼與點交。" },
+            { id: 12, category: "現場實作", name: "盤商出貨-名間(澎湖有限)", sop: "核對名間指定菇類等級、重量與件數精準對齊、出貨聯單記錄。" },
+            { id: 13, category: "現場實作", name: "盤商出貨-有來", sop: "有來訂單明細核對、裝箱規範檢視與出貨放行。" },
+            { id: 14, category: "現場實作", name: "盤商出貨-鋒圓", sop: "鋒圓訂單清單確認、庫存批號扣抵與實際備貨件數對齊。" },
+            { id: 15, category: "現場實作", name: "盤商出貨-子信", sop: "子信指定出貨項目清點、標籤複核與專車載運安排。" },
+            { id: 16, category: "現場實作", name: "特殊出貨-零售客(需收錢)", sop: "開立零售單據、核對現場點交數量、現場當面收妥款項並註記銷帳。" },
+            { id: 17, category: "現場實作", name: "特殊出貨-零售客(不用收錢)", sop: "核對月結/公關或主管特批簽核單據，點交貨品後簽收留存。" },
+            { id: 18, category: "現場實作", name: "特殊出貨-商田", sop: "商田專用包裝與規格複核、出貨單據簽章與司機點交。" },
+            { id: 19, category: "現場實作", name: "特殊進貨-包材", sop: "核對進貨紙箱/袋類數量、外觀瑕疵抽驗、入庫定位與數量登錄。" },
+            { id: 20, category: "現場實作", name: "特殊進貨-盤商進貨(順益)", sop: "順益進貨數量檢驗、品質抽檢、進貨單簽核與進貨區歸位。" },
+            { id: 21, category: "現場實作", name: "特殊進貨-盤商進貨(名間)", sop: "名間進貨驗收、溫度與品質檢查、過磅記錄與入庫。" },
+            { id: 22, category: "現場實作", name: "銷退貨處理", sop: "銷退菇類品質檢驗、區分為可可處理或廢棄、填寫退貨單據。" },
+            { id: 23, category: "現場實作", name: "待處理倉處理", sop: "待處理產品標示分類、每日庫存盤點、配合品保做不良品後續處置。" },
+            { id: 24, category: "現場實作", name: "調撥單發料(63-7)-香菇", sop: "系統開立 63-7 調撥單、核對香菇數量與等級、實體發料並系統扣帳。" },
+            { id: 25, category: "現場實作", name: "調撥單發料(63-7)-雜菇", sop: "系統開立 63-7 調撥單、核對雜菇各品項數量、實際發料與單據歸檔。" },
+            { id: 26, category: "現場實作", name: "63-6理貨倉補貨", sop: "檢查理貨倉 63-6 安全庫存量、開立補貨需求、實體搬運補滿與系統紀錄。" }
+        ];
+
+        // Initialize Firebase
+        async function initApp() {
             try {
+                let firebaseConfig = null;
                 if (typeof __firebase_config !== 'undefined') {
-                    const firebaseConfig = JSON.parse(__firebase_config);
+                    firebaseConfig = JSON.parse(__firebase_config);
+                }
+
+                if (firebaseConfig) {
                     const app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
                     auth = getAuth(app);
 
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        const userCred = await signInWithCustomToken(auth, __initial_auth_token);
-                        currentUser = userCred.user;
+                        await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        const userCred = await signInAnonymously(auth);
-                        currentUser = userCred.user;
+                        await signInAnonymously(auth);
                     }
-
-                    document.getElementById('cloudStatusBadge').innerHTML = `
-                        <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 雲端連線同步中
-                    `;
-
-                    // Real-time listener for onboarding records
-                    const recordsCol = collection(db, 'artifacts', appId, 'public', 'data', 'onboarding_records');
-                    onSnapshot(recordsCol, (snapshot) => {
-                        window.cloudDataStore = {};
-                        snapshot.forEach((doc) => {
-                            window.cloudDataStore[doc.id] = doc.data();
-                        });
-                        window.updateRecordSelectOptions();
-                        window.renderAdminDashboard();
-                    }, (err) => {
-                        console.warn("Cloud listener fallback:", err);
-                    });
-
+                    console.log("Firebase initialized successfully.");
+                    document.getElementById('syncBadge').classList.remove('hidden');
                 } else {
-                    document.getElementById('cloudStatusBadge').innerHTML = `
-                        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> 本地儲存模式
-                    `;
+                    console.log("Operating in local mode (LocalStorage).");
                 }
             } catch (err) {
-                console.warn("Firebase initialization error, using local storage fallback", err);
-                document.getElementById('cloudStatusBadge').innerHTML = `
-                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span> 本地離線模式
-                `;
-            }
-        }
-
-        window.saveRecordToCloud = async function(recordId, recordData) {
-            if (db && currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'onboarding_records', recordId);
-                    await setDoc(docRef, recordData, { merge: true });
-                    return true;
-                } catch (e) {
-                    console.error("Cloud save failed", e);
-                }
-            }
-            return false;
-        };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initCloudDatabase();
-        });
-    </script>
-
-    <script>
-        // Master Data Array for Checklist - Exactly 26 Uncondensed Items
-        const checklistData = [
-            // 一、用具學習 (3項)
-            {
-                id: "tool_1",
-                category: "cat-tools",
-                name: "拖板車使用",
-                details: "檢查煞車與輪軸、掌握壓桿升高與降下機制、行進間平穩推拉、嚴禁超載、停放歸位。",
-                sopFull: "1. 操作前確認拉桿升降功能正常，輪子無異物卡死。<br>2. 載貨時棧板需完全插到底，重心居中。<br>3. 轉彎時應減速，嚴禁急轉或以高速度下坡。<br>4. 停止使用後需降低至最低位並推至指定黃線停車區。"
-            },
-            {
-                id: "tool_2",
-                category: "cat-tools",
-                name: "烏龜車使用",
-                details: "籃框堆疊限高（建議不超過5籃）、留意轉向輪方向、推行視線維持清晰、定點擺放避免阻礙通道。",
-                sopFull: "1. 堆疊籃框前檢查烏龜車四輪是否平穩、塑料底盤有無裂痕。<br>2. 菇籃堆高原則上以 5 籃為限，避免重心過高傾倒。<br>3. 通道推行時需保持直視前方，嚴禁拉動時後退行走以防跌倒。"
-            },
-            {
-                id: "tool_3",
-                category: "cat-tools",
-                name: "堆高機使用",
-                details: "安全帽與安全帶配戴、發動前檢查（油/電/煞車/蜂鳴器）、貨叉升降角度控制、充換電池與停放規範。",
-                sopFull: "1. 必須具備合格堆高機操作證照方可獨立操作。<br>2. 每日作業前填寫自主檢查表（煞車、蜂鳴器、液壓油）。<br>3. 載貨行駛時貨叉距地面保持 15-20 公分，嚴禁超速與超載。<br>4. 充電完畢需將充電槍歸位並記錄充電時間。"
-            },
-
-            // 二、產品認識 (3項)
-            {
-                id: "prod_1",
-                category: "cat-products",
-                name: "香菇分級",
-                details: "特大/大/中/小菇直徑與蕈傘開度判讀、菇柄剪腳長度標準、發黴/破損/蟲蛀瑕疵揀除、大包與小包規格比對。",
-                sopFull: "1. 依據菌傘直徑區分：特大（6公分以上）/ 大（4.5-6公分）/ 中（3-4.5公分）/ 小。<br>2. 菌傘開度需維持在7分開以下，傘緣捲曲度良好。<br>3. 檢查菇柄切口是否平整，蕈褶無變黑、無異味或水傷爛點。"
-            },
-            {
-                id: "prod_2",
-                category: "cat-products",
-                name: "杏鮑菇分級",
-                details: "特級/優級/切片級外觀定義、長度與粗細比例、蕈傘完整度與蕈柄白皙度判定、冷藏溫控規範。",
-                sopFull: "1. 特級：蕈柄粗直白皙、蕈傘完整未開、無黃斑與水傷。<br>2. 優級：微彎曲或蕈傘輕微壓痕，但無腐爛。<br>3. 嚴禁將水傷包裝出貨，冷藏溫度保持在 2℃ - 5℃。"
-            },
-            {
-                id: "prod_3",
-                category: "cat-products",
-                name: "其他菇品項分級",
-                details: "金針菇、木耳、秀珍菇、鴻喜菇/雪白菇等品項規格認識、包裝完整性、失水率與保鮮期識別。",
-                sopFull: "1. 木耳：檢查厚度與背面絨毛，無黏液與變質。<br>2. 秀珍菇：菇朵完整無碎裂，袋裝無大量水蒸氣積聚。<br>3. 確保包裝袋封口密封完全，標籤日期清晰。"
-            },
-
-            // 三、現場實作 - 出貨備貨 (9項獨立項目)
-            {
-                id: "field_1",
-                category: "cat-field",
-                name: "上午接駁車備貨",
-                details: "核對上午班車發車時間與點收單、早班採收與預冷菇品清點、溫控疊車技巧、出貨明細簽核。",
-                sopFull: "1. 每日 08:30 前完成上午班車備貨清單確認。<br>2. 依據預冷先後順序「先進先出」拉貨。<br>3. 上車前再次核對棧板貼標與司機簽收單。"
-            },
-            {
-                id: "field_2",
-                category: "cat-field",
-                name: "下午接駁車備貨",
-                details: "午後場次庫存彙整、包裝線尾數補齊、冷藏車載重與空間分層分配、跨廠區調撥數量確認。",
-                sopFull: "1. 每日 14:30 前完成下午場次車次備貨。<br>2. 確保冷藏車後門關閉前檢查內部溫度已達 7℃ 以下。<br>3. 清點回程空籃與棧板回收數量。"
-            },
-            {
-                id: "field_3",
-                category: "cat-field",
-                name: "家樂福大園倉出貨備貨及明確知道備貨數量",
-                details: "明確掌握大園倉備貨總件數與棧板數、物流標籤條碼黏貼位置、家樂福專用進貨規範（品質與效期驗收）。",
-                sopFull: "1. 核對家樂福採購單據與大園倉送貨單之精準數量。<br>2. 外箱需黏貼家樂福指定格式配送標籤，掃描條碼需能正常讀取。<br>3. 棧板堆疊高度不得超過 1.5 公尺，並加強纏繞膜包覆。"
-            },
-            {
-                id: "field_4",
-                category: "cat-field",
-                name: "家樂福西螺倉出貨備貨及明確知道備貨數量",
-                details: "明確掌握西螺倉備貨數量、區域分配與到貨時間要求、交接單據與驗收異常預防。",
-                sopFull: "1. 比對西螺倉專屬品項數量與外箱重量。<br>2. 確保物流箱無破損、變形或濕損。<br>3. 發車前確認司機隨車攜帶三聯式銷貨單。"
-            },
-            {
-                id: "field_5",
-                category: "cat-field",
-                name: "盤商出貨 - 順益 (劉家瑜)",
-                details: "指定品項等級與重量規格比對、專屬價格與件數核對、現場點交與司機簽收單歸檔。",
-                sopFull: "1. 確認劉家瑜小姐指定之香菇等級與專屬包裝規格。<br>2. 出貨前過磅確認總重符合要求。<br>3. 簽收單需留存聯並交由行政人員入帳。"
-            },
-            {
-                id: "field_6",
-                category: "cat-field",
-                name: "盤商出貨 - 名間 (澎湖有限)",
-                details: "澎湖船班與陸運接駁時程對齊、冷鏈外箱加固、產品標示與箱數精準核對。",
-                sopFull: "1. 因涉及船班運輸，需特別注意外箱防潮與加固綁紮。<br>2. 比對「澎湖有限」出貨單，件數必須 100% 精準無誤。"
-            },
-            {
-                id: "field_7",
-                category: "cat-field",
-                name: "盤商出貨 - 有來",
-                details: "有來盤商偏好規格品質比對、提貨時間登記、箱數點交與簽單留底。",
-                sopFull: "1. 依據有來盤商訂單核對香菇與雜菇等級規格。<br>2. 提貨時需當面點交，並由司機於備貨單上手寫簽名。"
-            },
-            {
-                id: "field_8",
-                category: "cat-field",
-                name: "盤商出貨 - 鋒圓",
-                details: "鋒圓盤商指定產品規格篩選、箱數點交、包裝完善度檢視與提貨紀錄。",
-                sopFull: "1. 清點鋒圓盤商指定品項件數與外箱完整度。<br>2. 確認交貨單據無誤後安排上車。"
-            },
-            {
-                id: "field_9",
-                category: "cat-field",
-                name: "盤商出貨 - 子信",
-                details: "子信盤商專屬訂單規格核對、重量過磅抽檢、發貨單確認與點交。",
-                sopFull: "1. 比對子信盤商出貨明細與現場備貨棧板。<br>2. 當面與提貨司機核對件數並簽收。"
-            },
-
-            // 四、特殊進出貨與系統發料 (11項獨立項目)
-            {
-                id: "erp_1",
-                category: "cat-erp",
-                name: "特殊出貨 - 零售客 (需收錢)",
-                details: "現場零售顧客款項收取、開立收據或發票、現場現金清點與找零、日結交款流程。",
-                sopFull: "1. 核對現場零售品項與金額。<br>2. 當場收取現金或刷卡，開立收據/發票。<br>3. 當日營業結束後將款項交由會計或入金庫。"
-            },
-            {
-                id: "erp_2",
-                category: "cat-erp",
-                name: "特殊出貨 - 零售客 (不用收錢)",
-                details: "樣品領用或公務贈送核對、主管簽核授權單比對、出貨單註記與系統備註。",
-                sopFull: "1. 必須檢附主管簽核之「樣品/公關領用單」方可放行。<br>2. 於系統中選擇「公務出貨」項目扣抵庫存。"
-            },
-            {
-                id: "erp_3",
-                category: "cat-erp",
-                name: "特殊出貨 - 商田",
-                details: "商田指定規格產品揀貨、外箱特別標示要求、交貨簽收單憑證管理。",
-                sopFull: "1. 依據商田合約規格進行揀貨與選別。<br>2. 填寫專用送貨憑證並拍照留存備查。"
-            },
-            {
-                id: "erp_4",
-                category: "cat-erp",
-                name: "特殊進貨 - 包材",
-                details: "紙箱、塑膠盒、袋膜等包材數量點收、規格抽驗、放置指定資材區與系統進貨登記。",
-                sopFull: "1. 點收包材箱數與貼紙規格，確認無沾污濕損。<br>2. 抽驗規格與尺寸，確認無誤後移入資材倉庫並登記入帳。"
-            },
-            {
-                id: "erp_5",
-                category: "cat-erp",
-                name: "特殊進貨 - 盤商進貨 (順益)",
-                details: "順益進貨品質檢驗、重量過磅抽查、進貨單填寫與倉管系統過帳。",
-                sopFull: "1. 點收順益進貨數量，過磅抽檢重量與品質。<br>2. 填寫進貨點收單，送交品保並輸入倉管系統。"
-            },
-            {
-                id: "erp_6",
-                category: "cat-erp",
-                name: "特殊進貨 - 盤商進貨 (名間)",
-                details: "名間進貨品項清點、瑕疵率抽檢、過磅與進貨憑證登記。",
-                sopFull: "1. 點收名間進貨箱數與品項。<br>2. 檢查品質狀態，開立進貨單並入庫。"
-            },
-            {
-                id: "erp_7",
-                category: "cat-erp",
-                name: "銷退貨處理",
-                details: "客戶退貨原因判定（品質異常/運輸損壞/短少）、點收登記、隔離至待處理區、系統銷退扣帳。",
-                sopFull: "1. 收到退貨當天需完成點收與拍照紀錄。<br>2. 區分責任歸屬（品質問題或物流損壞）。<br>3. 開立銷退單交會計扣款，實物移至待處理區。"
-            },
-            {
-                id: "erp_8",
-                category: "cat-erp",
-                name: "待處理倉處理",
-                details: "待處理標籤黏貼、定期盤點清理、報廢流程申請或轉二次加工/肥料處理。",
-                sopFull: "1. 所有進入待處理區商品必須貼上紅色標示牌（註明日期與原因）。<br>2. 每週定時清空待處理倉，依決策進行報廢或降級處置。"
-            },
-            {
-                id: "erp_9",
-                category: "cat-erp",
-                name: "調撥單發料 (63-7) - 香菇",
-                details: "63-7 調撥單據核對、香菇發料數量實物過磅或點數、系統扣帳與領料人簽收。",
-                sopFull: "1. 登入系統核對 63-7 香菇調撥單號。<br>2. 比對庫存批號，發放相對應之香菇。<br>3. 系統執行過帳作業，完成庫存轉移。"
-            },
-            {
-                id: "erp_10",
-                category: "cat-erp",
-                name: "調撥單發料 (63-7) - 雜菇",
-                details: "63-7 調撥單據核對、杏鮑菇/金針菇/木耳等雜菇實物清點、單據列印與發料確認。",
-                sopFull: "1. 核對 63-7 雜菇調撥明細與品項。<br>2. 確保調撥數量與現場實際拉貨數量 100% 一致並系統過帳。"
-            },
-            {
-                id: "erp_11",
-                category: "cat-erp",
-                name: "63-6 理貨倉補貨",
-                details: "63-6 理貨倉安全庫存巡查、主倉至理貨倉補貨流程、系統庫存位置異動操作。",
-                sopFull: "1. 每日定時檢視 63-6 理貨倉水位。<br>2. 低於安全庫存時，自主倉開立補貨單拉貨過帳。"
-            }
-        ];
-
-        let currentRecordId = 'rec_' + Date.now();
-        window.cloudDataStore = {};
-
-        function renderChecklist() {
-            const categories = ['cat-tools', 'cat-products', 'cat-field', 'cat-erp'];
-
-            categories.forEach(cat => {
-                const bodyEl = document.getElementById(`${cat}-body`);
-                if(!bodyEl) return;
-                
-                const items = checklistData.filter(item => item.category === cat);
-                let html = '';
-
-                items.forEach((item, idx) => {
-                    html += `
-                    <tr class="hover:bg-slate-50/80 transition item-row" data-id="${item.id}">
-                        <td class="py-3 px-4 text-center font-semibold text-slate-400">${idx + 1}</td>
-                        <td class="py-3 px-4 font-bold text-slate-800">
-                            ${item.name}
-                        </td>
-                        <td class="py-3 px-4">
-                            <button onclick="showSopModal('${item.id}')" class="text-left group cursor-pointer focus:outline-none">
-                                <span class="text-xs text-slate-600 group-hover:text-brand-600 transition block">${item.details}</span>
-                                <span class="text-[11px] text-brand-600 font-medium inline-flex items-center gap-1 mt-0.5 group-hover:underline">
-                                    <i class="fa-solid fa-circle-info"></i> 點擊查看詳細說明指引
-                                </span>
-                            </button>
-                        </td>
-                        <td class="py-3 px-2 text-center">
-                            <input type="checkbox" id="${item.id}_l1" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l1-check" title="一階：觀念理解">
-                        </td>
-                        <td class="py-3 px-2 text-center">
-                            <input type="checkbox" id="${item.id}_l2" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l2-check" title="二階：帶教示範">
-                        </td>
-                        <td class="py-3 px-2 text-center">
-                            <input type="checkbox" id="${item.id}_l3" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l3-check" title="三階：獨立操作">
-                        </td>
-                        <td class="py-3 px-4 text-center">
-                            <input type="text" id="${item.id}_mentor" onchange="autoSyncRecord()" placeholder="帶教員" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
-                        </td>
-                        <td class="py-3 px-4 text-center">
-                            <input type="date" id="${item.id}_date" onchange="autoSyncRecord()" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
-                        </td>
-                    </tr>
-                    `;
-                });
-
-                bodyEl.innerHTML = html;
-            });
-
-            document.getElementById('totalItemsCount').innerText = checklistData.length;
-            loadLocalRecords();
-            updateProgress();
-        }
-
-        function handleCheckChange(itemId) {
-            const l1 = document.getElementById(`${itemId}_l1`);
-            const l2 = document.getElementById(`${itemId}_l2`);
-            const l3 = document.getElementById(`${itemId}_l3`);
-
-            if (event.target === l3 && l3.checked) {
-                l1.checked = true;
-                l2.checked = true;
-            } else if (event.target === l2 && l2.checked) {
-                l1.checked = true;
+                console.warn("Cloud setup skipped, defaulting to local storage:", err);
             }
 
-            updateProgress();
-            autoSyncRecord();
+            // Default User Profile ID
+            currentUserId = localStorage.getItem('active_trainee_id') || 'trainee_default';
+            renderTableRows();
+            loadUserData(currentUserId);
+            setupRealtimeSync();
         }
 
-        function updateProgress() {
-            let totalL1 = 0;
-            let totalL2 = 0;
-            let totalL3 = 0;
-
-            checklistData.forEach(item => {
-                if (document.getElementById(`${item.id}_l1`)?.checked) totalL1++;
-                if (document.getElementById(`${item.id}_l2`)?.checked) totalL2++;
-                if (document.getElementById(`${item.id}_l3`)?.checked) totalL3++;
+        function createNewUserData(id, name = "新進員工") {
+            const checks = {};
+            CHECKLIST_ITEMS.forEach(item => {
+                checks[item.id] = { c1: false, c2: false, c3: false, mentor: "", date: "" };
             });
-
-            document.getElementById('countL1').innerText = totalL1;
-            document.getElementById('countL2').innerText = totalL2;
-            document.getElementById('countL3').innerText = totalL3;
-
-            const total = checklistData.length;
-            const percent = total > 0 ? Math.round((totalL3 / total) * 100) : 0;
-
-            document.getElementById('progressPercent').innerText = `${percent}%`;
-            document.getElementById('completedCount').innerText = totalL3;
-            document.getElementById('progressBar').style.width = `${percent}%`;
-        }
-
-        function showSopModal(itemId) {
-            const item = checklistData.find(i => i.id === itemId);
-            if (!item) return;
-
-            document.getElementById('modalTitle').innerText = item.name;
-            document.getElementById('modalContent').innerHTML = `
-                <div class="mb-2">
-                    <strong class="text-slate-800">【核心訓練重點】</strong><br>
-                    ${item.details}
-                </div>
-                <hr class="my-2 border-slate-200">
-                <div>
-                    <strong class="text-brand-700">【標準作業步驟與守則】</strong><br>
-                    ${item.sopFull}
-                </div>
-            `;
-            document.getElementById('sopModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('sopModal').classList.add('hidden');
-        }
-
-        function filterCategory(catClass) {
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-brand-800', 'text-white');
-                btn.classList.add('bg-white', 'text-slate-600');
-            });
-            event.target.classList.remove('bg-white', 'text-slate-600');
-            event.target.classList.add('bg-brand-800', 'text-white');
-
-            const categories = document.querySelectorAll('.checklist-category');
-            categories.forEach(el => {
-                if (catClass === 'all' || el.classList.contains(catClass)) {
-                    el.style.display = 'block';
-                } else {
-                    el.style.display = 'none';
-                }
-            });
-        }
-
-        function filterChecklist() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('.item-row');
-
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                if (text.includes(query)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        function getCurrentRecordPayload() {
-            const itemsObj = {};
-            let l3Count = 0;
-
-            checklistData.forEach(item => {
-                const l3 = document.getElementById(`${item.id}_l3`)?.checked || false;
-                if(l3) l3Count++;
-
-                itemsObj[item.id] = {
-                    l1: document.getElementById(`${item.id}_l1`)?.checked || false,
-                    l2: document.getElementById(`${item.id}_l2`)?.checked || false,
-                    l3: l3,
-                    mentor: document.getElementById(`${item.id}_mentor`)?.value || '',
-                    date: document.getElementById(`${item.id}_date`)?.value || ''
-                };
-            });
-
-            const empName = document.getElementById('empName').value.trim() || '未命名新人';
 
             return {
-                id: currentRecordId,
-                empName: empName,
-                hireDate: document.getElementById('hireDate').value,
-                mentorName: document.getElementById('mentorName').value,
-                managerName: document.getElementById('managerName').value,
-                mentorComment: document.getElementById('mentorComment').value,
-                managerComment: document.getElementById('managerComment').value,
-                completedL3: l3Count,
-                totalItems: checklistData.length,
-                progressPercent: Math.round((l3Count / checklistData.length) * 100),
-                updatedAt: new Date().toLocaleString('zh-TW'),
-                items: itemsObj
+                id: id,
+                empName: name,
+                startDate: new Date().toISOString().split('T')[0],
+                mentorName: "",
+                supervisorName: "",
+                mentorComments: "",
+                supervisorComments: "",
+                traineeSign: "",
+                mentorSign: "",
+                supervisorSign: "",
+                checks: checks,
+                updatedAt: new Date().toISOString()
             };
         }
 
-        function autoSyncRecord() {
-            const payload = getCurrentRecordPayload();
-            saveRecordToLocalStore(payload);
+        // Render Table Rows
+        function renderTableRows() {
+            const tbody = document.getElementById('checklistTableBody');
+            tbody.innerHTML = '';
 
-            if (window.saveRecordToCloud) {
-                window.saveRecordToCloud(currentRecordId, payload);
-            }
+            let currentCategory = '';
+
+            CHECKLIST_ITEMS.forEach(item => {
+                // Category Header Separator
+                if (item.category !== currentCategory) {
+                    currentCategory = item.category;
+                    const catRow = document.createElement('tr');
+                    catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
+                    catRow.innerHTML = `
+                        <td colspan="8" class="py-2.5 px-4">
+                            <div class="flex items-center gap-2 text-brand-800">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <span>【${currentCategory}】類別</span>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(catRow);
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-400">${item.id}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900">
+                        <button onclick="openSopModal(${item.id})" class="text-left hover:text-brand-600 transition flex items-center gap-1.5 group">
+                            <span>${item.name}</span>
+                            <i class="fa-solid fa-circle-info text-slate-300 group-hover:text-brand-500 text-xs"></i>
+                        </button>
+                    </td>
+                    <td class="py-3 px-4 text-slate-600 text-xs leading-relaxed max-w-xs sm:max-w-md">${item.sop}</td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="checkbox" id="chk_${item.id}_1" onchange="onCheckChange(${item.id})" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="checkbox" id="chk_${item.id}_2" onchange="onCheckChange(${item.id})" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                    </td>
+                    <td class="py-3 px-2 text-center bg-emerald-50/40">
+                        <input type="checkbox" id="chk_${item.id}_3" onchange="onCheckChange(${item.id})" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <input type="text" id="mentor_${item.id}" oninput="autoSaveField()" placeholder="簽認" class="w-full text-center px-1.5 py-1 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <input type="date" id="date_${item.id}" onchange="autoSaveField()" class="w-full px-1 py-1 border border-slate-200 rounded text-[11px] focus:ring-1 focus:ring-brand-500 outline-none">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        function saveCurrentRecord() {
-            autoSyncRecord();
-            showToast('進度已同步保存至雲端與本機！');
+        window.onCheckChange = function(itemId) {
+            updateProgress();
+            autoSaveField();
         }
 
-        function saveRecordToLocalStore(payload) {
-            let records = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
-            records[payload.id] = payload;
-            localStorage.setItem('wh_onboarding_records', JSON.stringify(records));
-            updateRecordSelectOptions();
-        }
-
-        function loadLocalRecords() {
-            updateRecordSelectOptions();
-        }
-
-        window.updateRecordSelectOptions = function() {
-            const select = document.getElementById('recordSelect');
-            if(!select) return;
-
-            const localRecords = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
-            const merged = { ...localRecords, ...window.cloudDataStore };
-
-            let html = '<option value="new">+ 開立新培訓檔案</option>';
-            Object.values(merged).forEach(rec => {
-                html += `<option value="${rec.id}">${rec.empName} (${rec.progressPercent}%) - ${rec.hireDate || '未填日期'}</option>`;
+        function updateProgress() {
+            let c1 = 0, c2 = 0, c3 = 0;
+            CHECKLIST_ITEMS.forEach(item => {
+                if (document.getElementById(`chk_${item.id}_1`)?.checked) c1++;
+                if (document.getElementById(`chk_${item.id}_2`)?.checked) c2++;
+                if (document.getElementById(`chk_${item.id}_3`)?.checked) c3++;
             });
 
-            select.innerHTML = html;
-            if(merged[currentRecordId]) {
-                select.value = currentRecordId;
+            document.getElementById('c1Count').innerText = `${c1} / 26`;
+            document.getElementById('c2Count').innerText = `${c2} / 26`;
+            document.getElementById('c3Count').innerText = `${c3} / 26`;
+
+            const percent = Math.round((c3 / 26) * 100);
+            document.getElementById('overallPercentText').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        window.autoSaveField = function() {
+            if (!currentUserData) return;
+
+            currentUserData.empName = document.getElementById('empName').value;
+            currentUserData.startDate = document.getElementById('startDate').value;
+            currentUserData.mentorName = document.getElementById('mentorName').value;
+            currentUserData.supervisorName = document.getElementById('supervisorName').value;
+            currentUserData.mentorComments = document.getElementById('mentorComments').value;
+            currentUserData.supervisorComments = document.getElementById('supervisorComments').value;
+            currentUserData.traineeSign = document.getElementById('traineeSign').value;
+            currentUserData.mentorSign = document.getElementById('mentorSign').value;
+            currentUserData.supervisorSign = document.getElementById('supervisorSign').value;
+
+            CHECKLIST_ITEMS.forEach(item => {
+                currentUserData.checks[item.id] = {
+                    c1: document.getElementById(`chk_${item.id}_1`)?.checked || false,
+                    c2: document.getElementById(`chk_${item.id}_2`)?.checked || false,
+                    c3: document.getElementById(`chk_${item.id}_3`)?.checked || false,
+                    mentor: document.getElementById(`mentor_${item.id}`)?.value || '',
+                    date: document.getElementById(`date_${item.id}`)?.value || ''
+                };
+            });
+
+            currentUserData.updatedAt = new Date().toISOString();
+
+            // LocalStorage Backup
+            localStorage.setItem(`trainee_data_${currentUserId}`, JSON.stringify(currentUserData));
+            updateUserSelectorOptions();
+
+            // Cloud Async Push
+            if (db && auth.currentUser) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', currentUserId);
+                setDoc(docRef, currentUserData, { merge: true }).catch(err => console.warn("Cloud save error:", err));
             }
-        };
+        }
 
-        function loadSelectedRecord(recId) {
-            if (recId === 'new') {
-                currentRecordId = 'rec_' + Date.now();
-                resetFormFields();
-                showToast('已開啟全新培訓表單');
-                return;
+        window.saveCurrentProgress = function() {
+            autoSaveField();
+            showToast('進度儲存成功！');
+        }
+
+        function loadUserData(userId) {
+            currentUserId = userId;
+            localStorage.setItem('active_trainee_id', userId);
+
+            const saved = localStorage.getItem(`trainee_data_${userId}`);
+            if (saved) {
+                currentUserData = JSON.parse(saved);
+            } else {
+                currentUserData = createNewUserData(userId);
             }
 
-            const localRecords = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
-            const record = window.cloudDataStore[recId] || localRecords[recId];
+            // Fill UI Fields
+            document.getElementById('empName').value = currentUserData.empName || '';
+            document.getElementById('startDate').value = currentUserData.startDate || '';
+            document.getElementById('mentorName').value = currentUserData.mentorName || '';
+            document.getElementById('supervisorName').value = currentUserData.supervisorName || '';
+            document.getElementById('mentorComments').value = currentUserData.mentorComments || '';
+            document.getElementById('supervisorComments').value = currentUserData.supervisorComments || '';
+            document.getElementById('traineeSign').value = currentUserData.traineeSign || '';
+            document.getElementById('mentorSign').value = currentUserData.mentorSign || '';
+            document.getElementById('supervisorSign').value = currentUserData.supervisorSign || '';
 
-            if(!record) return;
+            CHECKLIST_ITEMS.forEach(item => {
+                const chk = currentUserData.checks?.[item.id] || {};
+                if (document.getElementById(`chk_${item.id}_1`)) document.getElementById(`chk_${item.id}_1`).checked = chk.c1 || false;
+                if (document.getElementById(`chk_${item.id}_2`)) document.getElementById(`chk_${item.id}_2`).checked = chk.c2 || false;
+                if (document.getElementById(`chk_${item.id}_3`)) document.getElementById(`chk_${item.id}_3`).checked = chk.c3 || false;
+                if (document.getElementById(`mentor_${item.id}`)) document.getElementById(`mentor_${item.id}`).value = chk.mentor || '';
+                if (document.getElementById(`date_${item.id}`)) document.getElementById(`date_${item.id}`).value = chk.date || '';
+            });
 
-            currentRecordId = record.id;
-            document.getElementById('empName').value = record.empName || '';
-            document.getElementById('hireDate').value = record.hireDate || '';
-            document.getElementById('mentorName').value = record.mentorName || '';
-            document.getElementById('managerName').value = record.managerName || '';
-            document.getElementById('mentorComment').value = record.mentorComment || '';
-            document.getElementById('managerComment').value = record.managerComment || '';
+            updateProgress();
+            updateUserSelectorOptions();
+        }
 
-            if (record.items) {
-                Object.keys(record.items).forEach(id => {
-                    const data = record.items[id];
-                    if (document.getElementById(`${id}_l1`)) document.getElementById(`${id}_l1`).checked = data.l1;
-                    if (document.getElementById(`${id}_l2`)) document.getElementById(`${id}_l2`).checked = data.l2;
-                    if (document.getElementById(`${id}_l3`)) document.getElementById(`${id}_l3`).checked = data.l3;
-                    if (document.getElementById(`${id}_mentor`)) document.getElementById(`${id}_mentor`).value = data.mentor || '';
-                    if (document.getElementById(`${id}_date`)) document.getElementById(`${id}_date`).value = data.date || '';
+        function updateUserSelectorOptions() {
+            const selector = document.getElementById('userSelector');
+            selector.innerHTML = '';
+
+            // Collect all local user IDs
+            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
+            if (userKeys.length === 0) {
+                userKeys.push(`trainee_data_${currentUserId}`);
+            }
+
+            userKeys.forEach(key => {
+                const uid = key.replace('trainee_data_', '');
+                const uData = JSON.parse(localStorage.getItem(key) || '{}');
+                const opt = document.createElement('option');
+                opt.value = uid;
+                opt.innerText = `${uData.empName || '新進員工'} (${uData.startDate || '未設定'})`;
+                if (uid === currentUserId) opt.selected = true;
+                selector.appendChild(opt);
+            });
+        }
+
+        window.loadSelectedUser = function(uid) {
+            if (!uid) return;
+            loadUserData(uid);
+        }
+
+        window.createNewUserPrompt = function() {
+            const newName = prompt("請輸入新員工姓名：", "張小明");
+            if (!newName) return;
+
+            const newId = 'trainee_' + Date.now();
+            const newData = createNewUserData(newId, newName);
+            localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
+            loadUserData(newId);
+            showToast(`已建立 ${newName} 的培訓檔案`);
+        }
+
+        // Realtime Listener
+        function setupRealtimeSync() {
+            if (!db) return;
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'trainees');
+            onSnapshot(colRef, (snapshot) => {
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data && data.id) {
+                        allTraineesCache[data.id] = data;
+                        localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
+                    }
                 });
-            }
-
-            updateProgress();
-            showToast(`已載入「${record.empName}」的檔案`);
-        }
-
-        function resetFormFields() {
-            document.getElementById('empName').value = '';
-            document.getElementById('hireDate').value = '';
-            document.getElementById('mentorName').value = '';
-            document.getElementById('managerName').value = '';
-            document.getElementById('mentorComment').value = '';
-            document.getElementById('managerComment').value = '';
-
-            checklistData.forEach(item => {
-                if (document.getElementById(`${item.id}_l1`)) document.getElementById(`${item.id}_l1`).checked = false;
-                if (document.getElementById(`${item.id}_l2`)) document.getElementById(`${item.id}_l2`).checked = false;
-                if (document.getElementById(`${item.id}_l3`)) document.getElementById(`${item.id}_l3`).checked = false;
-                if (document.getElementById(`${item.id}_mentor`)) document.getElementById(`${item.id}_mentor`).value = '';
-                if (document.getElementById(`${item.id}_date`)) document.getElementById(`${item.id}_date`).value = '';
+                updateUserSelectorOptions();
+                if (document.getElementById('adminView').classList.contains('hidden') === false) {
+                    renderAdminDashboard();
+                }
+            }, (error) => {
+                console.warn("Realtime sync warning:", error);
             });
-
-            updateProgress();
         }
 
-        function switchView(mode) {
+        // Admin Auth & Lock Logic
+        let isAdminUnlocked = false;
+
+        window.switchView = function(mode) {
             const formView = document.getElementById('formView');
             const adminView = document.getElementById('adminView');
             const tabFormBtn = document.getElementById('tabFormBtn');
             const tabAdminBtn = document.getElementById('tabAdminBtn');
 
             if (mode === 'admin') {
+                if (!isAdminUnlocked) {
+                    openAdminAuthModal();
+                    return;
+                }
                 formView.classList.add('hidden');
                 adminView.classList.remove('hidden');
 
                 tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
-                tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-brand-200 hover:text-white";
+                tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
 
                 renderAdminDashboard();
             } else {
@@ -1120,113 +745,140 @@
                 formView.classList.remove('hidden');
 
                 tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
-                tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-brand-200 hover:text-white";
+                tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
             }
+        }
+
+        function openAdminAuthModal() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminAuthError').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+        }
+
+        window.closeAdminAuthModal = function() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        window.verifyAdminPassword = function() {
+            const pwd = document.getElementById('adminPasswordInput').value;
+            if (pwd === '1021') {
+                isAdminUnlocked = true;
+                closeAdminAuthModal();
+                switchView('admin');
+                showToast('主管身分驗證成功！');
+            } else {
+                document.getElementById('adminAuthError').classList.remove('hidden');
+            }
+        }
+
+        window.lockAdminPanel = function() {
+            isAdminUnlocked = false;
+            switchView('form');
+            showToast('主管後台已重新鎖定');
         }
 
         window.renderAdminDashboard = function() {
-            const localRecords = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
-            const records = Object.values({ ...localRecords, ...window.cloudDataStore });
+            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
+            let total = userKeys.length;
+            let certifiedCount = 0;
+            let totalProgressSum = 0;
 
-            const tbody = document.getElementById('adminRecordsTableBody');
-            if(!tbody) return;
+            const tbody = document.getElementById('adminTraineeTableBody');
+            tbody.innerHTML = '';
 
-            document.getElementById('statTotalEmps').innerText = records.length;
+            userKeys.forEach(key => {
+                const uData = JSON.parse(localStorage.getItem(key) || '{}');
+                let c3Count = 0;
+                CHECKLIST_ITEMS.forEach(item => {
+                    if (uData.checks?.[item.id]?.c3) c3Count++;
+                });
 
-            let totalPercentSum = 0;
-            let passedCount = 0;
-            let activeCount = 0;
+                const percent = Math.round((c3Count / 26) * 100);
+                totalProgressSum += percent;
 
-            let html = '';
+                if (percent >= 100 || uData.supervisorSign) certifiedCount++;
 
-            records.forEach(rec => {
-                totalPercentSum += rec.progressPercent || 0;
-                if (rec.progressPercent === 100 && rec.managerComment) {
-                    passedCount++;
-                } else {
-                    activeCount++;
-                }
-
-                html += `
-                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                    <td class="py-3 px-4 font-bold text-slate-900">${rec.empName || '未命名'}</td>
-                    <td class="py-3 px-4 text-xs text-slate-500">${rec.hireDate || '-'}</td>
-                    <td class="py-3 px-4 text-xs font-medium text-slate-700">${rec.mentorName || '-'}</td>
-                    <td class="py-3 px-4 text-xs font-medium text-slate-700">${rec.managerName || '-'}</td>
-                    <td class="py-3 px-4 text-center font-bold text-brand-700">${rec.completedL3 || 0} / 26</td>
-                    <td class="py-3 px-4 w-40">
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-900">${uData.empName || '未命名'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${uData.startDate || '-'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${uData.mentorName || '-'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${uData.supervisorName || '-'}</td>
+                    <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-                            <div class="w-full bg-slate-200 rounded-full h-2">
-                                <div class="bg-brand-600 h-2 rounded-full" style="width: ${rec.progressPercent || 0}%"></div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-brand-500 h-full rounded-full" style="width: ${percent}%"></div>
                             </div>
-                            <span class="text-xs font-bold text-slate-600">${rec.progressPercent || 0}%</span>
+                            <span class="text-xs font-bold text-slate-700">${percent}%</span>
                         </div>
                     </td>
-                    <td class="py-3 px-4 text-[11px] text-slate-400">${rec.updatedAt || '-'}</td>
                     <td class="py-3 px-4 text-center">
-                        <button onclick="openRecordFromAdmin('${rec.id}')" class="px-2.5 py-1 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-lg text-xs font-semibold transition">
+                        ${uData.supervisorSign ? 
+                            '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-full text-[11px]"><i class="fa-solid fa-check"></i> 已主管核章</span>' : 
+                            '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-full text-[11px]"><i class="fa-solid fa-clock"></i> 待主管審核</span>'}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="adminInspectUser('${uData.id}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold transition">
                             開啟審核
                         </button>
                     </td>
-                </tr>
                 `;
+                tbody.appendChild(tr);
             });
 
-            if (records.length === 0) {
-                html = `
-                <tr>
-                    <td colspan="8" class="text-center py-8 text-slate-400 text-xs">
-                        目前尚無培訓檔案，點擊右上角「新增新人培訓檔案」開始建立！
-                    </td>
-                </tr>
-                `;
-            }
+            document.getElementById('adminTotalTrainees').innerText = total;
+            document.getElementById('adminAvgProgress').innerText = total > 0 ? `${Math.round(totalProgressSum / total)}%` : '0%';
+            document.getElementById('adminCertifiedCount').innerText = certifiedCount;
+            document.getElementById('adminInTrainingCount').innerText = total - certifiedCount;
+        }
 
-            tbody.innerHTML = html;
-
-            const avg = records.length > 0 ? Math.round(totalPercentSum / records.length) : 0;
-            document.getElementById('statAvgProgress').innerText = `${avg}%`;
-            document.getElementById('statPassedCount').innerText = passedCount;
-            document.getElementById('statActiveCount').innerText = activeCount;
-        };
-
-        function createNewRecordFromAdmin() {
+        window.adminInspectUser = function(uid) {
+            loadUserData(uid);
             switchView('form');
-            loadSelectedRecord('new');
+            showToast(`已切換至 ${currentUserData.empName || '員工'} 的檢核表`);
         }
 
-        function openRecordFromAdmin(recId) {
-            switchView('form');
-            loadSelectedRecord(recId);
+        // SOP Modal
+        window.openSopModal = function(id) {
+            const item = CHECKLIST_ITEMS.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('modalCatTag').innerText = item.category;
+            document.getElementById('modalTitle').innerText = `${item.id}. ${item.name}`;
+            document.getElementById('modalContent').innerHTML = `
+                <p class="font-bold text-slate-800 mb-1">【標準作業指引 (SOP)】</p>
+                <p class="text-slate-600 leading-relaxed">${item.sop}</p>
+                <div class="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg text-xs text-brand-900">
+                    <p class="font-bold">帶教重點提示：</p>
+                    <ul class="list-disc list-inside mt-1 space-y-1">
+                        <li>一階：清楚理解標準規範與安全要求。</li>
+                        <li>二階：能跟隨帶教員示範正確操作。</li>
+                        <li>三階：能無誤、獨立且安全地獨力完成。</li>
+                    </ul>
+                </div>
+            `;
+            document.getElementById('sopModal').classList.remove('hidden');
         }
 
-        function filterAdminTable() {
-            const query = document.getElementById('adminSearchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#adminRecordsTableBody tr');
-
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                if (text.includes(query)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+        window.closeModal = function() {
+            document.getElementById('sopModal').classList.add('hidden');
         }
 
+        // Toast Helper
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
             toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
             setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
             }, 2500);
         }
 
+        // On Load Entry Point
         window.onload = function() {
-            renderChecklist();
+            initApp();
         };
     </script>
 </body>
