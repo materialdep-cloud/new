@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>農產品倉管新人培訓與實務檢核表 (SOP)</title>
+    <title>綠園生活資材新人培訓系統</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -38,7 +38,6 @@
             background-color: #f8fafc;
         }
         
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -54,7 +53,6 @@
             background: #94a3b8;
         }
 
-        /* Checkbox custom style */
         .stage-checkbox {
             appearance: none;
             width: 1.25rem;
@@ -81,7 +79,6 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Print styles optimization */
         @media print {
             .no-print {
                 display: none !important;
@@ -89,7 +86,7 @@
             body {
                 background: white !important;
                 color: black !important;
-                font-size: 11pt;
+                font-size: 10pt;
             }
             .print-container {
                 width: 100% !important;
@@ -118,294 +115,414 @@
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <header class="bg-brand-800 text-white shadow-md sticky top-0 z-30 no-print">
+    <header class="bg-brand-900 text-white shadow-lg sticky top-0 z-30 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="p-2 bg-brand-700 rounded-lg">
+                <div class="p-2 bg-brand-800 rounded-xl border border-brand-700 shadow-inner">
                     <i class="fa-solid fa-boxes-packing text-xl text-emerald-300"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">鮮菇物流倉儲</h1>
-                    <p class="text-xs text-brand-100">新人培訓計畫與實務作業檢核系統</p>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg leading-tight tracking-wide">綠園倉儲</h1>
+                        <span id="cloudStatusBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 雲端連線中
+                        </span>
+                    </div>
+                    <p class="text-xs text-brand-200">倉管新人培訓與實務作業管理系統</p>
                 </div>
             </div>
             
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <button onclick="saveToLocalStorage()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-600 rounded-lg text-sm text-white font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span class="hidden sm:inline">儲存進度</span>
+            <!-- View Mode Switcher -->
+            <div class="flex items-center bg-brand-800 p-1 rounded-xl border border-brand-700">
+                <button id="tabFormBtn" onclick="switchView('form')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>實務檢核表</span>
                 </button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-white text-brand-800 hover:bg-emerald-50 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 shadow-sm">
+                <button id="tabAdminBtn" onclick="switchView('admin')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-brand-200 hover:text-white">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>主管管理後台</span>
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="hidden md:flex items-center space-x-2">
+                <button onclick="saveCurrentRecord()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-white shadow-sm">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>同步至雲端</span>
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-white text-slate-800 hover:bg-slate-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-print"></i>
-                    <span class="hidden sm:inline">列印 / 匯出 PDF</span>
-                </button>
-                <button onclick="resetForm()" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span class="hidden md:inline">重置</span>
+                    <span>列印 / 匯出 PDF</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
+    <!-- Main Content Area -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print-container space-y-6">
 
-        <!-- Title Banner for Print & Web -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2">
-                    <i class="fa-solid fa-circle-check"></i> 標準作業流程 (SOP) 雙簽認證制
-                </div>
-                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">倉管新人培訓與實務檢核表</h2>
-                <p class="text-sm text-slate-500 mt-1">涵蓋物流用具、鮮菇分級標準、通路與盤商備貨及 ERP 調撥作業實務</p>
-            </div>
-            <!-- Training 4-Step Legend -->
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1 w-full md:w-auto">
-                <div class="font-semibold text-slate-800 mb-1 flex items-center gap-1">
-                    <i class="fa-solid fa-graduation-cap text-brand-600"></i> 四階段帶教與認證標準：
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-center">
-                    <span class="bg-emerald-100/60 text-emerald-800 px-2 py-1 rounded font-medium">L1：觀念理解</span>
-                    <span class="bg-blue-100/60 text-blue-800 px-2 py-1 rounded font-medium">L2：帶教示範</span>
-                    <span class="bg-purple-100/60 text-purple-800 px-2 py-1 rounded font-medium">L3：獨立操作</span>
-                </div>
-            </div>
-        </div>
+        <!-- ========================================== -->
+        <!-- VIEW 1: 實務檢核表填報視角 (Form View) -->
+        <!-- ========================================== -->
+        <div id="formView" class="space-y-6">
 
-        <!-- Employee Info Form -->
-        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow">
-            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
-                <i class="fa-solid fa-id-card text-brand-600"></i> 新人培訓基本資料
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Title Banner -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">員工姓名</label>
-                    <input type="text" id="empName" placeholder="請輸入姓名" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2">
+                        <i class="fa-solid fa-circle-check"></i> 標準作業流程 雙簽認證制
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">倉管新人培訓與實務檢核表</h2>
+                    <p class="text-xs text-slate-500 mt-1">涵蓋用具操作、產品分級、現場備貨出貨與系統調撥發料實務（共 26 項獨立條目）</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">到職日期</label>
-                    <input type="date" id="hireDate" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">帶教導師 (Mentor)</label>
-                    <input type="text" id="mentorName" placeholder="請輸入導師姓名" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">部門主管</label>
-                    <input type="text" id="managerName" placeholder="請輸入主管姓名" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                <!-- Training 3-Step Legend -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1 w-full md:w-auto">
+                    <div class="font-semibold text-slate-800 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-graduation-cap text-brand-600"></i> 三階段帶教與認證標準：
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <span class="bg-emerald-100/60 text-emerald-800 px-2 py-1 rounded font-medium">一階：觀念理解</span>
+                        <span class="bg-blue-100/60 text-blue-800 px-2 py-1 rounded font-medium">二階：帶教示範</span>
+                        <span class="bg-purple-100/60 text-purple-800 px-2 py-1 rounded font-medium">三階：獨立操作</span>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Progress Overview Bar -->
-        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow no-print">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
-                <div>
+            <!-- Employee Selector / Basic Info Form -->
+            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-brand-600"></i> 培訓考核整體進度
+                        <i class="fa-solid fa-id-card text-brand-600"></i> 新人培訓基本資料
                     </h3>
-                    <p class="text-xs text-slate-500">獨立操作 (L3) 完成率將決定是否通過試用考核</p>
+                    <div class="flex items-center gap-2 no-print">
+                        <span class="text-xs text-slate-400">選擇或切換人員檔案：</span>
+                        <select id="recordSelect" onchange="loadSelectedRecord(this.value)" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 font-medium">
+                            <option value="new">+ 開立新培訓檔案</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <span id="progressPercent" class="text-2xl font-black text-brand-600">0%</span>
-                    <span class="text-xs text-slate-500 font-medium ml-1">(<span id="completedCount">0</span> / <span id="totalItemsCount">0</span> 項獨立完成)</span>
-                </div>
-            </div>
-            
-            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div id="progressBar" class="bg-brand-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
-            </div>
-
-            <!-- Stage counters summary -->
-            <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-center">
-                <div class="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
-                    <span class="block text-xs text-emerald-700 font-medium">L1 觀念理解</span>
-                    <span id="countL1" class="text-lg font-bold text-emerald-800">0</span>
-                </div>
-                <div class="bg-blue-50 rounded-lg p-2 border border-blue-100">
-                    <span class="block text-xs text-blue-700 font-medium">L2 帶教示範</span>
-                    <span id="countL2" class="text-lg font-bold text-blue-800">0</span>
-                </div>
-                <div class="bg-purple-50 rounded-lg p-2 border border-purple-100">
-                    <span class="block text-xs text-purple-700 font-medium">L3 獨立完成</span>
-                    <span id="countL3" class="text-lg font-bold text-purple-800">0</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Controls & Filter Section -->
-        <section class="flex flex-col sm:flex-row gap-3 justify-between items-center no-print">
-            <!-- Search bar -->
-            <div class="relative w-full sm:w-80">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput" onkeyup="filterChecklist()" placeholder="搜尋訓練項目、關鍵字..." class="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm">
-            </div>
-            <!-- Category Filter Buttons -->
-            <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
-                <button onclick="filterCategory('all')" class="cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-700 text-white shadow-sm transition">全部項目</button>
-                <button onclick="filterCategory('cat-tools')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">1. 用具操作</button>
-                <button onclick="filterCategory('cat-products')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">2. 產品分級</button>
-                <button onclick="filterCategory('cat-field')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">3. 現場實作與出貨</button>
-                <button onclick="filterCategory('cat-erp')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">4. 特殊進退貨與ERP</button>
-            </div>
-        </section>
-
-        <!-- Checklist Table Sections Container -->
-        <div id="checklistContainer" class="space-y-6">
-
-            <!-- Category 1: 用具與設備操作認證 -->
-            <section class="checklist-category cat-tools bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                    <h3 class="font-bold text-base flex items-center gap-2">
-                        <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i> 壹、 用具與設備操作認證
-                    </h3>
-                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">安全第一 / 載重限制 / 設備保養</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                <th class="py-3 px-4 w-12 text-center">序</th>
-                                <th class="py-3 px-4 w-48">訓練項目</th>
-                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
-                                <th class="py-3 px-2 text-center w-12" title="L1：理解觀念">L1</th>
-                                <th class="py-3 px-2 text-center w-12" title="L2：帶教示範">L2</th>
-                                <th class="py-3 px-2 text-center w-12" title="L3：獨立操作">L3</th>
-                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
-                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-tools-body">
-                            <!-- Items inserted dynamically or static -->
-                        </tbody>
-                    </table>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">員工姓名 <span class="text-red-500">*</span></label>
+                        <input type="text" id="empName" placeholder="請輸入姓名" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">到職日期</label>
+                        <input type="date" id="hireDate" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">帶教員</label>
+                        <input type="text" id="mentorName" placeholder="請輸入帶教員姓名" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">部門主管</label>
+                        <input type="text" id="managerName" placeholder="請輸入主管姓名" onchange="autoSyncRecord()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                    </div>
                 </div>
             </section>
 
-            <!-- Category 2: 菇類產品與規格分級 -->
-            <section class="checklist-category cat-products bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                    <h3 class="font-bold text-base flex items-center gap-2">
-                        <i class="fa-solid fa-seedling text-emerald-400"></i> 貳、 產品認識與鮮菇等級分級
-                    </h3>
-                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">品質判讀 / 規格選別 / 瑕疵品管控</span>
+            <!-- Progress Overview Bar -->
+            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow no-print">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-brand-600"></i> 培訓考核整體進度
+                        </h3>
+                        <p class="text-xs text-slate-500">獨立操作（三階）完成率將決定是否通過試用考核</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="progressPercent" class="text-2xl font-black text-brand-600">0%</span>
+                        <span class="text-xs text-slate-500 font-medium ml-1">(<span id="completedCount">0</span> / <span id="totalItemsCount">26</span> 項獨立完成)</span>
+                    </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                <th class="py-3 px-4 w-12 text-center">序</th>
-                                <th class="py-3 px-4 w-48">訓練項目</th>
-                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
-                                <th class="py-3 px-2 text-center w-12">L1</th>
-                                <th class="py-3 px-2 text-center w-12">L2</th>
-                                <th class="py-3 px-2 text-center w-12">L3</th>
-                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
-                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-products-body">
-                        </tbody>
-                    </table>
+                
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="bg-brand-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+
+                <!-- Stage counters summary -->
+                <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-center">
+                    <div class="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+                        <span class="block text-xs text-emerald-700 font-medium">一階：觀念理解</span>
+                        <span id="countL1" class="text-lg font-bold text-emerald-800">0</span>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-2 border border-blue-100">
+                        <span class="block text-xs text-blue-700 font-medium">二階：帶教示範</span>
+                        <span id="countL2" class="text-lg font-bold text-blue-800">0</span>
+                    </div>
+                    <div class="bg-purple-100/60 rounded-lg p-2 border border-purple-200">
+                        <span class="block text-xs text-purple-700 font-medium">三階：獨立完成</span>
+                        <span id="countL3" class="text-lg font-bold text-purple-800">0</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Category 3: 現場實作 - 出貨與備貨 -->
-            <section class="checklist-category cat-field bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                    <h3 class="font-bold text-base flex items-center gap-2">
-                        <i class="fa-solid fa-truck-fast text-emerald-400"></i> 參、 現場實作 - 班車與通路備貨
-                    </h3>
-                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">時間效能 / 數量精準 / 標籤比對</span>
+            <!-- Filter Section -->
+            <section class="flex flex-col sm:flex-row gap-3 justify-between items-center no-print">
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" onkeyup="filterChecklist()" placeholder="搜尋訓練項目、關鍵字..." class="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm">
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                <th class="py-3 px-4 w-12 text-center">序</th>
-                                <th class="py-3 px-4 w-48">訓練項目</th>
-                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
-                                <th class="py-3 px-2 text-center w-12">L1</th>
-                                <th class="py-3 px-2 text-center w-12">L2</th>
-                                <th class="py-3 px-2 text-center w-12">L3</th>
-                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
-                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-field-body">
-                        </tbody>
-                    </table>
+                <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
+                    <button onclick="filterCategory('all')" class="cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-800 text-white shadow-sm transition">全部 26 項</button>
+                    <button onclick="filterCategory('cat-tools')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">一、用具學習</button>
+                    <button onclick="filterCategory('cat-products')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">二、產品認識</button>
+                    <button onclick="filterCategory('cat-field')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">三、現場實作出貨</button>
+                    <button onclick="filterCategory('cat-erp')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">四、特殊進出與單據</button>
                 </div>
             </section>
 
-            <!-- Category 4: 特殊進退貨與 ERP 系統發料 -->
-            <section class="checklist-category cat-erp bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
-                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-                    <h3 class="font-bold text-base flex items-center gap-2">
-                        <i class="fa-solid fa-arrows-spin text-emerald-400"></i> 肆、 特殊進出貨、退貨與 ERP 系統單據作業
-                    </h3>
-                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">帳實相符 / 現金清點 / ERP系統流程</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                <th class="py-3 px-4 w-12 text-center">序</th>
-                                <th class="py-3 px-4 w-48">訓練項目</th>
-                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
-                                <th class="py-3 px-2 text-center w-12">L1</th>
-                                <th class="py-3 px-2 text-center w-12">L2</th>
-                                <th class="py-3 px-2 text-center w-12">L3</th>
-                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
-                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-erp-body">
-                        </tbody>
-                    </table>
+            <!-- Checklist Containers -->
+            <div id="checklistContainer" class="space-y-6">
+
+                <!-- Category 1: 用具學習 -->
+                <section class="checklist-category cat-tools bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                        <h3 class="font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i> 一、 用具學習與安全操作
+                        </h3>
+                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">安全第一 / 載重限制 / 設備維護</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                    <th class="py-3 px-4 w-12 text-center">序</th>
+                                    <th class="py-3 px-4 w-56">訓練項目</th>
+                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
+                                    <th class="py-3 px-2 text-center w-12" title="一階：觀念理解">一階</th>
+                                    <th class="py-3 px-2 text-center w-12" title="二階：帶教示範">二階</th>
+                                    <th class="py-3 px-2 text-center w-12" title="三階：獨立操作">三階</th>
+                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
+                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-tools-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Category 2: 產品認識 -->
+                <section class="checklist-category cat-products bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                        <h3 class="font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-seedling text-emerald-400"></i> 二、 產品認識與鮮菇分級
+                        </h3>
+                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">品質判讀 / 規格選別 / 瑕疵管控</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                    <th class="py-3 px-4 w-12 text-center">序</th>
+                                    <th class="py-3 px-4 w-56">訓練項目</th>
+                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
+                                    <th class="py-3 px-2 text-center w-12">一階</th>
+                                    <th class="py-3 px-2 text-center w-12">二階</th>
+                                    <th class="py-3 px-2 text-center w-12">三階</th>
+                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
+                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-products-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Category 3: 現場實作 - 出貨備貨 -->
+                <section class="checklist-category cat-field bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                        <h3 class="font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-truck-fast text-emerald-400"></i> 三、 現場實作 - 班車與通路備貨
+                        </h3>
+                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">時間效能 / 數量精準 / 標籤比對</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                    <th class="py-3 px-4 w-12 text-center">序</th>
+                                    <th class="py-3 px-4 w-56">訓練項目</th>
+                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
+                                    <th class="py-3 px-2 text-center w-12">一階</th>
+                                    <th class="py-3 px-2 text-center w-12">二階</th>
+                                    <th class="py-3 px-2 text-center w-12">三階</th>
+                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
+                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-field-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Category 4: 特殊進出貨與系統發料 -->
+                <section class="checklist-category cat-erp bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                    <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                        <h3 class="font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-spin text-emerald-400"></i> 四、 特殊進出貨、退貨與系統單據作業
+                        </h3>
+                        <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">帳實相符 / 現金清點 / 系統流程</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                    <th class="py-3 px-4 w-12 text-center">序</th>
+                                    <th class="py-3 px-4 w-56">訓練項目</th>
+                                    <th class="py-3 px-4">訓練重點與核心細節（點擊看說明）</th>
+                                    <th class="py-3 px-2 text-center w-12">一階</th>
+                                    <th class="py-3 px-2 text-center w-12">二階</th>
+                                    <th class="py-3 px-2 text-center w-12">三階</th>
+                                    <th class="py-3 px-4 w-28 text-center">帶教員簽認</th>
+                                    <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-erp-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Signatures Section -->
+            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow break-inside-avoid">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
+                    <i class="fa-solid fa-file-signature text-brand-600"></i> 試用期滿實務考核評語與雙簽
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">帶教員 評語與簽核</label>
+                        <textarea id="mentorComment" onchange="autoSyncRecord()" rows="3" placeholder="請填寫新人工作態度、學習進度與建議..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                        <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
+                            <span>帶教員簽名：__________________</span>
+                            <span>日期：____年__月__日</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">倉儲部門主管 綜合評定與決簽</label>
+                        <textarea id="managerComment" onchange="autoSyncRecord()" rows="3" placeholder="核准通過獨立上崗 / 延後審核 / 其他審查意見..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                        <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
+                            <span>主管簽名：__________________</span>
+                            <span>日期：____年__月__日</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
         </div>
 
-        <!-- Final Assessment Signatures -->
-        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow break-inside-avoid">
-            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
-                <i class="fa-solid fa-file-signature text-brand-600"></i> 試用期滿實務考核評語與雙簽
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- ========================================== -->
+        <!-- VIEW 2: 主管管理後台視角 (Admin Dashboard View) -->
+        <!-- ========================================== -->
+        <div id="adminView" class="space-y-6 hidden no-print">
+
+            <!-- Admin Header -->
+            <div class="bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">帶教導師 (Mentor) 評語與簽核</label>
-                    <textarea id="mentorComment" rows="3" placeholder="請填寫新人工作態度、學習進度與建議..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
-                    <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
-                        <span>導師簽名：__________________</span>
-                        <span>日期：____年__月__日</span>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-800/50">管理員控制台</span>
+                    <h2 class="text-2xl font-bold tracking-tight mt-1">倉管新人培訓彙整與審核後台</h2>
+                    <p class="text-xs text-slate-400 mt-1">即時檢視團隊所有新人受訓進度、獨立操作達成率與考核決簽</p>
+                </div>
+                <button onclick="createNewRecordFromAdmin()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-user-plus text-sm"></i>
+                    <span>新增新人培訓檔案</span>
+                </button>
+            </div>
+
+            <!-- Dashboard Overview KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400">總受訓人數</p>
+                        <h4 id="statTotalEmps" class="text-2xl font-black text-slate-800 mt-1">0</h4>
+                        <span class="text-[11px] text-slate-500">人列入培訓計畫</span>
+                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                        <i class="fa-solid fa-users text-xl"></i>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">倉儲部門主管 綜合評定與決簽</label>
-                    <textarea id="managerComment" rows="3" placeholder="核准通過獨立上崗 / 延後審核 / 其他審查意見..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
-                    <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
-                        <span>主管簽名：__________________</span>
-                        <span>日期：____年__月__日</span>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400">平均獨立操作率</p>
+                        <h4 id="statAvgProgress" class="text-2xl font-black text-brand-600 mt-1">0%</h4>
+                        <span class="text-[11px] text-slate-500">達到 100% 即可獨立上崗</span>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                        <i class="fa-solid fa-chart-line text-xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400">完成試用考核</p>
+                        <h4 id="statPassedCount" class="text-2xl font-black text-purple-600 mt-1">0</h4>
+                        <span class="text-[11px] text-slate-500">位主管已綜合決簽</span>
+                    </div>
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                        <i class="fa-solid fa-user-check text-xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400">帶教進行中</p>
+                        <h4 id="statActiveCount" class="text-2xl font-black text-amber-600 mt-1">0</h4>
+                        <span class="text-[11px] text-slate-500">位正在累積獨立項目</span>
+                    </div>
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                        <i class="fa-solid fa-chalkboard-user text-xl"></i>
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Employee List Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">新人培訓動態列表</h3>
+                        <p class="text-xs text-slate-400">點擊任一新人可快速開啟檢核表或進行評語審核</p>
+                    </div>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="adminSearchInput" onkeyup="filterAdminTable()" placeholder="搜尋姓名、帶教員..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <th class="py-3 px-4">員工姓名</th>
+                                <th class="py-3 px-4">到職日期</th>
+                                <th class="py-3 px-4">帶教員</th>
+                                <th class="py-3 px-4">部門主管</th>
+                                <th class="py-3 px-4 text-center">獨立完成 (三階)</th>
+                                <th class="py-3 px-4">進度條</th>
+                                <th class="py-3 px-4">最後更新</th>
+                                <th class="py-3 px-4 text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRecordsTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Dynamic rendering -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-10 no-print border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 text-center space-y-1">
-            <p>© 鮮菇倉儲管理系統 - 新人 SOP 培訓模組 | GitHub Hosted Page</p>
-            <p class="text-slate-500">建議使用 Chrome / Edge 瀏覽器以獲得最佳操作與列印體驗</p>
-        </div>
-    </footer>
-
-    <!-- Modal for SOP Details -->
+    <!-- Modal for Details -->
     <div id="sopModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative animate-fade-in">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
@@ -414,12 +531,11 @@
                     <i class="fa-solid fa-book-open text-xl"></i>
                 </div>
                 <div>
-                    <span id="modalCatTag" class="text-xs font-bold text-brand-700 uppercase tracking-wide">SOP 標準指引</span>
+                    <span id="modalCatTag" class="text-xs font-bold text-brand-700 uppercase tracking-wide">作業步驟指引</span>
                     <h4 id="modalTitle" class="text-lg font-bold text-slate-900">項目名稱</h4>
                 </div>
             </div>
             <div id="modalContent" class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 max-h-80 overflow-y-auto">
-                <!-- Content inserted via JS -->
             </div>
             <div class="pt-2 flex justify-end">
                 <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition">知道了</button>
@@ -433,167 +549,279 @@
         <span id="toastMsg">進度已成功儲存！</span>
     </div>
 
+    <!-- Firebase Script Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'warehouse-onboarding-app';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        async function initCloudDatabase() {
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        const userCred = await signInWithCustomToken(auth, __initial_auth_token);
+                        currentUser = userCred.user;
+                    } else {
+                        const userCred = await signInAnonymously(auth);
+                        currentUser = userCred.user;
+                    }
+
+                    document.getElementById('cloudStatusBadge').innerHTML = `
+                        <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 雲端連線同步中
+                    `;
+
+                    // Real-time listener for onboarding records
+                    const recordsCol = collection(db, 'artifacts', appId, 'public', 'data', 'onboarding_records');
+                    onSnapshot(recordsCol, (snapshot) => {
+                        window.cloudDataStore = {};
+                        snapshot.forEach((doc) => {
+                            window.cloudDataStore[doc.id] = doc.data();
+                        });
+                        window.updateRecordSelectOptions();
+                        window.renderAdminDashboard();
+                    }, (err) => {
+                        console.warn("Cloud listener fallback:", err);
+                    });
+
+                } else {
+                    document.getElementById('cloudStatusBadge').innerHTML = `
+                        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> 本地儲存模式
+                    `;
+                }
+            } catch (err) {
+                console.warn("Firebase initialization error, using local storage fallback", err);
+                document.getElementById('cloudStatusBadge').innerHTML = `
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span> 本地離線模式
+                `;
+            }
+        }
+
+        window.saveRecordToCloud = async function(recordId, recordData) {
+            if (db && currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'onboarding_records', recordId);
+                    await setDoc(docRef, recordData, { merge: true });
+                    return true;
+                } catch (e) {
+                    console.error("Cloud save failed", e);
+                }
+            }
+            return false;
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCloudDatabase();
+        });
+    </script>
+
     <script>
-        // Master Data Array for Checklist
+        // Master Data Array for Checklist - Exactly 26 Uncondensed Items
         const checklistData = [
-            // Category 1: 用具與設備
+            // 一、用具學習 (3項)
             {
                 id: "tool_1",
                 category: "cat-tools",
-                name: "拖板車使用 (Pallet Truck)",
-                details: "檢查煞車與輪軸、掌握壓桿升高與降下機制、行進間平穩推拉、禁超載（不超過標示載重）、停放時下壓踏板歸位。",
-                sopFull: "1. 操作前確認拉桿升降油壓正常，輪子無異物卡死。<br>2. 載貨時棧板需完全插到底，重心居中。<br>3. 轉彎時應減速，嚴禁急轉或以高速度下坡。<br>4. 停止使用後需降低至最低位並推至指定黃線停車區。"
+                name: "拖板車使用",
+                details: "檢查煞車與輪軸、掌握壓桿升高與降下機制、行進間平穩推拉、嚴禁超載、停放歸位。",
+                sopFull: "1. 操作前確認拉桿升降功能正常，輪子無異物卡死。<br>2. 載貨時棧板需完全插到底，重心居中。<br>3. 轉彎時應減速，嚴禁急轉或以高速度下坡。<br>4. 停止使用後需降低至最低位並推至指定黃線停車區。"
             },
             {
                 id: "tool_2",
                 category: "cat-tools",
-                name: "烏龜車使用 (Dolly Cart)",
-                details: "籃框堆疊限高（建議不超過 5 籃）、留意轉向輪方向、推行視線維持清晰、嚴禁當滑板嬉戲、定點擺放避免阻礙通道。",
+                name: "烏龜車使用",
+                details: "籃框堆疊限高（建議不超過5籃）、留意轉向輪方向、推行視線維持清晰、定點擺放避免阻礙通道。",
                 sopFull: "1. 堆疊籃框前檢查烏龜車四輪是否平穩、塑料底盤有無裂痕。<br>2. 菇籃堆高原則上以 5 籃為限，避免重心過高傾倒。<br>3. 通道推行時需保持直視前方，嚴禁拉動時後退行走以防跌倒。"
             },
             {
                 id: "tool_3",
                 category: "cat-tools",
-                name: "堆高機使用 (Forklift)",
-                details: "安全帽與安全帶配戴、發動前檢查 (油/電/煞車/喇叭)、考取證照或專人指導、貨叉升降角度控制、充/換電池與停放安全規範。",
-                sopFull: "1. 必須具備合格堆高機操作證照方可獨立操作。<br>2. 每日作業前填寫「堆高機自主檢查表」（煞車、蜂鳴器、液壓油）。<br>3. 載貨行駛時貨叉距地面保持 15-20 公分，嚴禁超速與超載。<br>4. 充完電需將充電槍歸位並記錄充電時間。"
+                name: "堆高機使用",
+                details: "安全帽與安全帶配戴、發動前檢查（油/電/煞車/蜂鳴器）、貨叉升降角度控制、充換電池與停放規範。",
+                sopFull: "1. 必須具備合格堆高機操作證照方可獨立操作。<br>2. 每日作業前填寫自主檢查表（煞車、蜂鳴器、液壓油）。<br>3. 載貨行駛時貨叉距地面保持 15-20 公分，嚴禁超速與超載。<br>4. 充電完畢需將充電槍歸位並記錄充電時間。"
             },
 
-            // Category 2: 產品認識
+            // 二、產品認識 (3項)
             {
                 id: "prod_1",
                 category: "cat-products",
-                name: "香菇分級 (Shiitake Grading)",
-                details: "特大/大/中/小菇直徑與蕈傘開度判讀、菇柄剪腳長度標準、發黴/破損/蟲蛀瑕疵揀除、大包裝與小包裝規格比對。",
-                sopFull: "1. 依據菌傘直徑區分：特大(6cm+)/大(4.5-6cm)/中(3-4.5cm)/小。<br>2. 菌傘開度需維持在7分開以下，傘緣捲曲度良好。<br>3. 檢查菇柄切口是否平整，蕈褶無變黑、無異味或水傷爛點。"
+                name: "香菇分級",
+                details: "特大/大/中/小菇直徑與蕈傘開度判讀、菇柄剪腳長度標準、發黴/破損/蟲蛀瑕疵揀除、大包與小包規格比對。",
+                sopFull: "1. 依據菌傘直徑區分：特大（6公分以上）/ 大（4.5-6公分）/ 中（3-4.5公分）/ 小。<br>2. 菌傘開度需維持在7分開以下，傘緣捲曲度良好。<br>3. 檢查菇柄切口是否平整，蕈褶無變黑、無異味或水傷爛點。"
             },
             {
                 id: "prod_2",
                 category: "cat-products",
-                name: "杏鮑菇分級 (King Oyster Grading)",
-                details: "A級/B級/切片級外觀定義、長度與粗細比例、蕈傘完整度與蕈柄白皙度判定、冷凍與冷藏溫控規範。",
-                sopFull: "1. A級：蕈柄粗直白皙、蕈傘完整未開、無黃斑與水傷。<br>2. B級：微彎曲或蕈傘輕微壓痕，但無腐爛。<br>3. 嚴禁將水傷包裝出貨，冷藏溫度保持在 2℃ - 5℃。"
+                name: "杏鮑菇分級",
+                details: "特級/優級/切片級外觀定義、長度與粗細比例、蕈傘完整度與蕈柄白皙度判定、冷藏溫控規範。",
+                sopFull: "1. 特級：蕈柄粗直白皙、蕈傘完整未開、無黃斑與水傷。<br>2. 優級：微彎曲或蕈傘輕微壓痕，但無腐爛。<br>3. 嚴禁將水傷包裝出貨，冷藏溫度保持在 2℃ - 5℃。"
             },
             {
                 id: "prod_3",
                 category: "cat-products",
-                name: "其他菇品項分級 (Other Mushrooms)",
-                details: "金針菇、木耳、秀珍菇、鴻喜菇/雪白菇等品項規格認識、包裝完整性（真空度）、失水率與保鮮期識別。",
+                name: "其他菇品項分級",
+                details: "金針菇、木耳、秀珍菇、鴻喜菇/雪白菇等品項規格認識、包裝完整性、失水率與保鮮期識別。",
                 sopFull: "1. 木耳：檢查厚度與背面絨毛，無黏液與變質。<br>2. 秀珍菇：菇朵完整無碎裂，袋裝無大量水蒸氣積聚。<br>3. 確保包裝袋封口密封完全，標籤日期清晰。"
             },
 
-            // Category 3: 現場實作 - 出貨備貨
+            // 三、現場實作 - 出貨備貨 (9項獨立項目)
             {
                 id: "field_1",
                 category: "cat-field",
-                name: "上午接駁車備貨 (Morning Shuttle)",
+                name: "上午接駁車備貨",
                 details: "核對上午班車發車時間與點收單、早班採收與預冷菇品清點、溫控疊車技巧、出貨明細簽核。",
-                sopFull: "1. 每日 08:30 前完成上午班車備貨清單確認。<br>2. 依據預冷先後順序「先進先出 (FIFO)」拉貨。<br>3. 上車前再次核對棧板貼標與司機簽收單。"
+                sopFull: "1. 每日 08:30 前完成上午班車備貨清單確認。<br>2. 依據預冷先後順序「先進先出」拉貨。<br>3. 上車前再次核對棧板貼標與司機簽收單。"
             },
             {
                 id: "field_2",
                 category: "cat-field",
-                name: "下午接駁車備貨 (Afternoon Shuttle)",
+                name: "下午接駁車備貨",
                 details: "午後場次庫存彙整、包裝線尾數補齊、冷藏車載重與空間分層分配、跨廠區調撥數量確認。",
                 sopFull: "1. 每日 14:30 前完成下午場次車次備貨。<br>2. 確保冷藏車後門關閉前檢查內部溫度已達 7℃ 以下。<br>3. 清點回程空籃與棧板回收數量。"
             },
             {
                 id: "field_3",
                 category: "cat-field",
-                name: "家樂福大園倉出貨備貨 (Carrefour Dayuan)",
-                details: "明確知道大園倉備貨總件數/棧板數、物流標籤 (BarCode) 黏貼位置、家樂福專用進貨規範 (品質/效期驗收標準)。",
-                sopFull: "1. 核對家樂福訂單 P.O. 號碼與大園倉送貨單。<br>2. 外箱需黏貼家樂福指定格式配送標籤，掃描條碼需能正常讀取。<br>3. 棧板堆疊高度不得超過 1.5 米，並加強纏繞膜包覆。"
+                name: "家樂福大園倉出貨備貨及明確知道備貨數量",
+                details: "明確掌握大園倉備貨總件數與棧板數、物流標籤條碼黏貼位置、家樂福專用進貨規範（品質與效期驗收）。",
+                sopFull: "1. 核對家樂福採購單據與大園倉送貨單之精準數量。<br>2. 外箱需黏貼家樂福指定格式配送標籤，掃描條碼需能正常讀取。<br>3. 棧板堆疊高度不得超過 1.5 公尺，並加強纏繞膜包覆。"
             },
             {
                 id: "field_4",
                 category: "cat-field",
-                name: "家樂福西螺倉出貨備貨 (Carrefour Xiluo)",
-                details: "明確知道西螺倉備貨數量、區域分配與到貨時間要求、交接單據與驗收異常預防。",
+                name: "家樂福西螺倉出貨備貨及明確知道備貨數量",
+                details: "明確掌握西螺倉備貨數量、區域分配與到貨時間要求、交接單據與驗收異常預防。",
                 sopFull: "1. 比對西螺倉專屬品項數量與外箱重量。<br>2. 確保物流箱無破損、變形或濕損。<br>3. 發車前確認司機隨車攜帶三聯式銷貨單。"
             },
             {
                 id: "field_5",
                 category: "cat-field",
-                name: "盤商出貨-順益 (劉家瑜)",
+                name: "盤商出貨 - 順益 (劉家瑜)",
                 details: "指定品項等級與重量規格比對、專屬價格與件數核對、現場點交與司機簽收單歸檔。",
-                sopFull: "1. 確認劉家瑜小姐指定之香菇等級與指定包裝規格。<br>2. 出貨前過磅確認總重符合要求。<br>3. 簽收單需留存聯並交由行政人員入帳。"
+                sopFull: "1. 確認劉家瑜小姐指定之香菇等級與專屬包裝規格。<br>2. 出貨前過磅確認總重符合要求。<br>3. 簽收單需留存聯並交由行政人員入帳。"
             },
             {
                 id: "field_6",
                 category: "cat-field",
-                name: "盤商出貨-名間 (澎湖有限)",
-                details: "澎湖船班或陸運接駁時程對齊、冷鏈外箱加固、產品標示與箱數精準核對。",
+                name: "盤商出貨 - 名間 (澎湖有限)",
+                details: "澎湖船班與陸運接駁時程對齊、冷鏈外箱加固、產品標示與箱數精準核對。",
                 sopFull: "1. 因涉及船班運輸，需特別注意外箱防潮與加固綁紮。<br>2. 比對「澎湖有限」出貨單，件數必須 100% 精準無誤。"
             },
             {
                 id: "field_7",
                 category: "cat-field",
-                name: "盤商出貨-有來、鋒圓、子信",
-                details: "三大盤商各自偏好規格 (大菇/中菇/雜菇) 區分、提貨時間登記、箱數點交與留底。",
-                sopFull: "1. 有來：著重香菇規格品質比對。<br>2. 鋒圓/子信：清點件數與包裝完善度。<br>3. 司機提貨時需當面點交並於備貨單上手寫簽名。"
+                name: "盤商出貨 - 有來",
+                details: "有來盤商偏好規格品質比對、提貨時間登記、箱數點交與簽單留底。",
+                sopFull: "1. 依據有來盤商訂單核對香菇與雜菇等級規格。<br>2. 提貨時需當面點交，並由司機於備貨單上手寫簽名。"
+            },
+            {
+                id: "field_8",
+                category: "cat-field",
+                name: "盤商出貨 - 鋒圓",
+                details: "鋒圓盤商指定產品規格篩選、箱數點交、包裝完善度檢視與提貨紀錄。",
+                sopFull: "1. 清點鋒圓盤商指定品項件數與外箱完整度。<br>2. 確認交貨單據無誤後安排上車。"
+            },
+            {
+                id: "field_9",
+                category: "cat-field",
+                name: "盤商出貨 - 子信",
+                details: "子信盤商專屬訂單規格核對、重量過磅抽檢、發貨單確認與點交。",
+                sopFull: "1. 比對子信盤商出貨明細與現場備貨棧板。<br>2. 當面與提貨司機核對件數並簽收。"
             },
 
-            // Category 4: 特殊進退貨與 ERP
+            // 四、特殊進出貨與系統發料 (11項獨立項目)
             {
                 id: "erp_1",
                 category: "cat-erp",
-                name: "特殊出貨-零售客 (需收錢 / 不收錢)",
-                details: "需收錢：開立收據/電子發票、現場現金清點與找零、日結交款；不收錢：樣品單/公務贈送授權簽核單比對。",
-                sopFull: "1. 現場零售客需收錢：核對金額後收款，交由會計或於收銀系統過卡。<br>2. 不收錢客：必須檢附主管簽核之「樣品/公關領用單」方可放行出貨。"
+                name: "特殊出貨 - 零售客 (需收錢)",
+                details: "現場零售顧客款項收取、開立收據或發票、現場現金清點與找零、日結交款流程。",
+                sopFull: "1. 核對現場零售品項與金額。<br>2. 當場收取現金或刷卡，開立收據/發票。<br>3. 當日營業結束後將款項交由會計或入金庫。"
             },
             {
                 id: "erp_2",
                 category: "cat-erp",
-                name: "特殊出貨-商田",
-                details: "商田指定規格產品揀貨、外箱特別標示要求、交貨簽收單憑證管理。",
-                sopFull: "1. 依據商田合約規格進行選別備貨。<br>2. 填寫專用送貨憑證並拍存備查。"
+                name: "特殊出貨 - 零售客 (不用收錢)",
+                details: "樣品領用或公務贈送核對、主管簽核授權單比對、出貨單註記與系統備註。",
+                sopFull: "1. 必須檢附主管簽核之「樣品/公關領用單」方可放行。<br>2. 於系統中選擇「公務出貨」項目扣抵庫存。"
             },
-
             {
                 id: "erp_3",
                 category: "cat-erp",
-                name: "特殊進貨-包材與盤商進貨 (順益/名間)",
-                details: "包材（紙箱/塑膠盒/膜）：數量點收、規格抽驗、放置指定資材區；盤商進貨：品質檢驗、重量抽查、進貨單登記。",
-                sopFull: "1. 包材進貨：點收箱數與貼紙規格，確認無沾污濕損。<br>2. 盤商進貨（順益/名間）：過磅抽檢，填寫進貨點收單並送交品保/倉管系統。"
+                name: "特殊出貨 - 商田",
+                details: "商田指定規格產品揀貨、外箱特別標示要求、交貨簽收單憑證管理。",
+                sopFull: "1. 依據商田合約規格進行揀貨與選別。<br>2. 填寫專用送貨憑證並拍照留存備查。"
             },
             {
                 id: "erp_4",
                 category: "cat-erp",
-                name: "銷退貨處理 (Customer Returns)",
-                details: "退貨原因判定 (品質異常/運輸損壞/短少)、退貨點收登記、隔離至待處理區、開立退貨單與 ERP 銷退扣帳。",
-                sopFull: "1. 收到客戶退貨當天需完成點收並拍照。<br>2. 區分責任（品質問題或物流撞傷）。<br>3. 開立銷退單交會計扣款，並將實物移至「待處理倉」。"
+                name: "特殊進貨 - 包材",
+                details: "紙箱、塑膠盒、袋膜等包材數量點收、規格抽驗、放置指定資材區與系統進貨登記。",
+                sopFull: "1. 點收包材箱數與貼紙規格，確認無沾污濕損。<br>2. 抽驗規格與尺寸，確認無誤後移入資材倉庫並登記入帳。"
             },
             {
                 id: "erp_5",
                 category: "cat-erp",
-                name: "待處理倉處理 (Pending Area Control)",
-                details: "待處理標籤黏貼、定期盤點清理、報廢流程申請或報廢品轉肥料/二次加工處理流程。",
-                sopFull: "1. 所有進入待處理區之商品必須貼上紅色標示牌（註明日期與原因）。<br>2. 每週五前進行待處理倉清空與決策（報廢或降級處理）。"
+                name: "特殊進貨 - 盤商進貨 (順益)",
+                details: "順益進貨品質檢驗、重量過磅抽查、進貨單填寫與倉管系統過帳。",
+                sopFull: "1. 點收順益進貨數量，過磅抽檢重量與品質。<br>2. 填寫進貨點收單，送交品保並輸入倉管系統。"
             },
             {
                 id: "erp_6",
                 category: "cat-erp",
-                name: "調撥單發料 (63-7) - 香菇",
-                details: "ERP 63-7 廠內調撥單核對、香菇發料數量實物過磅或點數、系統扣帳與領料人簽收。",
-                sopFull: "1. 登入 ERP 系統核對 63-7 調撥單據號碼。<br>2. 比對庫存批號，確實發放相對應批號之香菇。<br>3. 系統執行過帳作業，完成庫存轉移。"
+                name: "特殊進貨 - 盤商進貨 (名間)",
+                details: "名間進貨品項清點、瑕疵率抽檢、過磅與進貨憑證登記。",
+                sopFull: "1. 點收名間進貨箱數與品項。<br>2. 檢查品質狀態，開立進貨單並入庫。"
             },
             {
                 id: "erp_7",
                 category: "cat-erp",
-                name: "調撥單發料 (63-7) - 雜菇",
-                details: "杏鮑菇、木耳、秀珍菇等雜菇品項發料實物清點、ERP 63-7 單據列印與發料確認。",
-                sopFull: "1. 核對雜菇品項明細（杏鮑菇/金針菇/木耳等）。<br>2. 確保調撥數量與現場實際拉貨數量 100% 一致。"
+                name: "銷退貨處理",
+                details: "客戶退貨原因判定（品質異常/運輸損壞/短少）、點收登記、隔離至待處理區、系統銷退扣帳。",
+                sopFull: "1. 收到退貨當天需完成點收與拍照紀錄。<br>2. 區分責任歸屬（品質問題或物流損壞）。<br>3. 開立銷退單交會計扣款，實物移至待處理區。"
             },
             {
                 id: "erp_8",
                 category: "cat-erp",
-                name: "63-6 理貨倉補貨 (63-6 Replenishment)",
-                details: "63-6 理貨倉安全庫存巡查、主倉至理貨倉補貨流程、ERP 庫存位置異動操作。",
-                sopFull: "1. 每日定時檢視 63-6 理貨倉水位。<br>2. 低於安全庫存時，自主倉開立 63-6 補貨單拉貨過帳。"
+                name: "待處理倉處理",
+                details: "待處理標籤黏貼、定期盤點清理、報廢流程申請或轉二次加工/肥料處理。",
+                sopFull: "1. 所有進入待處理區商品必須貼上紅色標示牌（註明日期與原因）。<br>2. 每週定時清空待處理倉，依決策進行報廢或降級處置。"
+            },
+            {
+                id: "erp_9",
+                category: "cat-erp",
+                name: "調撥單發料 (63-7) - 香菇",
+                details: "63-7 調撥單據核對、香菇發料數量實物過磅或點數、系統扣帳與領料人簽收。",
+                sopFull: "1. 登入系統核對 63-7 香菇調撥單號。<br>2. 比對庫存批號，發放相對應之香菇。<br>3. 系統執行過帳作業，完成庫存轉移。"
+            },
+            {
+                id: "erp_10",
+                category: "cat-erp",
+                name: "調撥單發料 (63-7) - 雜菇",
+                details: "63-7 調撥單據核對、杏鮑菇/金針菇/木耳等雜菇實物清點、單據列印與發料確認。",
+                sopFull: "1. 核對 63-7 雜菇調撥明細與品項。<br>2. 確保調撥數量與現場實際拉貨數量 100% 一致並系統過帳。"
+            },
+            {
+                id: "erp_11",
+                category: "cat-erp",
+                name: "63-6 理貨倉補貨",
+                details: "63-6 理貨倉安全庫存巡查、主倉至理貨倉補貨流程、系統庫存位置異動操作。",
+                sopFull: "1. 每日定時檢視 63-6 理貨倉水位。<br>2. 低於安全庫存時，自主倉開立補貨單拉貨過帳。"
             }
         ];
 
-        // Initialize & Render dynamic table rows
+        let currentRecordId = 'rec_' + Date.now();
+        window.cloudDataStore = {};
+
         function renderChecklist() {
             const categories = ['cat-tools', 'cat-products', 'cat-field', 'cat-erp'];
 
@@ -615,24 +843,24 @@
                             <button onclick="showSopModal('${item.id}')" class="text-left group cursor-pointer focus:outline-none">
                                 <span class="text-xs text-slate-600 group-hover:text-brand-600 transition block">${item.details}</span>
                                 <span class="text-[11px] text-brand-600 font-medium inline-flex items-center gap-1 mt-0.5 group-hover:underline">
-                                    <i class="fa-solid fa-circle-info"></i> 點擊查看詳細 SOP 指引
+                                    <i class="fa-solid fa-circle-info"></i> 點擊查看詳細說明指引
                                 </span>
                             </button>
                         </td>
                         <td class="py-3 px-2 text-center">
-                            <input type="checkbox" id="${item.id}_l1" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l1-check" title="L1：理解觀念">
+                            <input type="checkbox" id="${item.id}_l1" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l1-check" title="一階：觀念理解">
                         </td>
                         <td class="py-3 px-2 text-center">
-                            <input type="checkbox" id="${item.id}_l2" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l2-check" title="L2：帶教示範">
+                            <input type="checkbox" id="${item.id}_l2" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l2-check" title="二階：帶教示範">
                         </td>
                         <td class="py-3 px-2 text-center">
-                            <input type="checkbox" id="${item.id}_l3" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l3-check" title="L3：獨立操作">
+                            <input type="checkbox" id="${item.id}_l3" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l3-check" title="三階：獨立操作">
                         </td>
                         <td class="py-3 px-4 text-center">
-                            <input type="text" id="${item.id}_mentor" oninput="saveToLocalStorage()" placeholder="導師簽名" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
+                            <input type="text" id="${item.id}_mentor" onchange="autoSyncRecord()" placeholder="帶教員" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
                         </td>
                         <td class="py-3 px-4 text-center">
-                            <input type="date" id="${item.id}_date" onchange="saveToLocalStorage()" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
+                            <input type="date" id="${item.id}_date" onchange="autoSyncRecord()" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
                         </td>
                     </tr>
                     `;
@@ -642,7 +870,7 @@
             });
 
             document.getElementById('totalItemsCount').innerText = checklistData.length;
-            loadFromLocalStorage();
+            loadLocalRecords();
             updateProgress();
         }
 
@@ -651,7 +879,6 @@
             const l2 = document.getElementById(`${itemId}_l2`);
             const l3 = document.getElementById(`${itemId}_l3`);
 
-            // Auto cascade logic if higher level checked
             if (event.target === l3 && l3.checked) {
                 l1.checked = true;
                 l2.checked = true;
@@ -660,7 +887,7 @@
             }
 
             updateProgress();
-            saveToLocalStorage();
+            autoSyncRecord();
         }
 
         function updateProgress() {
@@ -698,7 +925,7 @@
                 </div>
                 <hr class="my-2 border-slate-200">
                 <div>
-                    <strong class="text-brand-700">【SOP 標準作業步驟與守則】</strong><br>
+                    <strong class="text-brand-700">【標準作業步驟與守則】</strong><br>
                     ${item.sopFull}
                 </div>
             `;
@@ -710,13 +937,12 @@
         }
 
         function filterCategory(catClass) {
-            // Update button styles
             document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-brand-700', 'text-white');
+                btn.classList.remove('bg-brand-800', 'text-white');
                 btn.classList.add('bg-white', 'text-slate-600');
             });
             event.target.classList.remove('bg-white', 'text-slate-600');
-            event.target.classList.add('bg-brand-700', 'text-white');
+            event.target.classList.add('bg-brand-800', 'text-white');
 
             const categories = document.querySelectorAll('.checklist-category');
             categories.forEach(el => {
@@ -742,64 +968,250 @@
             });
         }
 
-        function saveToLocalStorage() {
-            const formData = {
-                empName: document.getElementById('empName').value,
-                hireDate: document.getElementById('hireDate').value,
-                mentorName: document.getElementById('mentorName').value,
-                managerName: document.getElementById('managerName').value,
-                mentorComment: document.getElementById('mentorComment').value,
-                managerComment: document.getElementById('managerComment').value,
-                items: {}
-            };
+        function getCurrentRecordPayload() {
+            const itemsObj = {};
+            let l3Count = 0;
 
             checklistData.forEach(item => {
-                formData.items[item.id] = {
+                const l3 = document.getElementById(`${item.id}_l3`)?.checked || false;
+                if(l3) l3Count++;
+
+                itemsObj[item.id] = {
                     l1: document.getElementById(`${item.id}_l1`)?.checked || false,
                     l2: document.getElementById(`${item.id}_l2`)?.checked || false,
-                    l3: document.getElementById(`${item.id}_l3`)?.checked || false,
+                    l3: l3,
                     mentor: document.getElementById(`${item.id}_mentor`)?.value || '',
                     date: document.getElementById(`${item.id}_date`)?.value || ''
                 };
             });
 
-            localStorage.setItem('warehouse_sop_onboarding', JSON.stringify(formData));
-            showToast('資料與進度已儲存！');
+            const empName = document.getElementById('empName').value.trim() || '未命名新人';
+
+            return {
+                id: currentRecordId,
+                empName: empName,
+                hireDate: document.getElementById('hireDate').value,
+                mentorName: document.getElementById('mentorName').value,
+                managerName: document.getElementById('managerName').value,
+                mentorComment: document.getElementById('mentorComment').value,
+                managerComment: document.getElementById('managerComment').value,
+                completedL3: l3Count,
+                totalItems: checklistData.length,
+                progressPercent: Math.round((l3Count / checklistData.length) * 100),
+                updatedAt: new Date().toLocaleString('zh-TW'),
+                items: itemsObj
+            };
         }
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('warehouse_sop_onboarding');
-            if (!saved) return;
+        function autoSyncRecord() {
+            const payload = getCurrentRecordPayload();
+            saveRecordToLocalStore(payload);
 
-            try {
-                const formData = JSON.parse(saved);
-                document.getElementById('empName').value = formData.empName || '';
-                document.getElementById('hireDate').value = formData.hireDate || '';
-                document.getElementById('mentorName').value = formData.mentorName || '';
-                document.getElementById('managerName').value = formData.managerName || '';
-                document.getElementById('mentorComment').value = formData.mentorComment || '';
-                document.getElementById('managerComment').value = formData.managerComment || '';
+            if (window.saveRecordToCloud) {
+                window.saveRecordToCloud(currentRecordId, payload);
+            }
+        }
 
-                if (formData.items) {
-                    Object.keys(formData.items).forEach(id => {
-                        const data = formData.items[id];
-                        if (document.getElementById(`${id}_l1`)) document.getElementById(`${id}_l1`).checked = data.l1;
-                        if (document.getElementById(`${id}_l2`)) document.getElementById(`${id}_l2`).checked = data.l2;
-                        if (document.getElementById(`${id}_l3`)) document.getElementById(`${id}_l3`).checked = data.l3;
-                        if (document.getElementById(`${id}_mentor`)) document.getElementById(`${id}_mentor`).value = data.mentor;
-                        if (document.getElementById(`${id}_date`)) document.getElementById(`${id}_date`).value = data.date;
-                    });
+        function saveCurrentRecord() {
+            autoSyncRecord();
+            showToast('進度已同步保存至雲端與本機！');
+        }
+
+        function saveRecordToLocalStore(payload) {
+            let records = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
+            records[payload.id] = payload;
+            localStorage.setItem('wh_onboarding_records', JSON.stringify(records));
+            updateRecordSelectOptions();
+        }
+
+        function loadLocalRecords() {
+            updateRecordSelectOptions();
+        }
+
+        window.updateRecordSelectOptions = function() {
+            const select = document.getElementById('recordSelect');
+            if(!select) return;
+
+            const localRecords = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
+            const merged = { ...localRecords, ...window.cloudDataStore };
+
+            let html = '<option value="new">+ 開立新培訓檔案</option>';
+            Object.values(merged).forEach(rec => {
+                html += `<option value="${rec.id}">${rec.empName} (${rec.progressPercent}%) - ${rec.hireDate || '未填日期'}</option>`;
+            });
+
+            select.innerHTML = html;
+            if(merged[currentRecordId]) {
+                select.value = currentRecordId;
+            }
+        };
+
+        function loadSelectedRecord(recId) {
+            if (recId === 'new') {
+                currentRecordId = 'rec_' + Date.now();
+                resetFormFields();
+                showToast('已開啟全新培訓表單');
+                return;
+            }
+
+            const localRecords = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
+            const record = window.cloudDataStore[recId] || localRecords[recId];
+
+            if(!record) return;
+
+            currentRecordId = record.id;
+            document.getElementById('empName').value = record.empName || '';
+            document.getElementById('hireDate').value = record.hireDate || '';
+            document.getElementById('mentorName').value = record.mentorName || '';
+            document.getElementById('managerName').value = record.managerName || '';
+            document.getElementById('mentorComment').value = record.mentorComment || '';
+            document.getElementById('managerComment').value = record.managerComment || '';
+
+            if (record.items) {
+                Object.keys(record.items).forEach(id => {
+                    const data = record.items[id];
+                    if (document.getElementById(`${id}_l1`)) document.getElementById(`${id}_l1`).checked = data.l1;
+                    if (document.getElementById(`${id}_l2`)) document.getElementById(`${id}_l2`).checked = data.l2;
+                    if (document.getElementById(`${id}_l3`)) document.getElementById(`${id}_l3`).checked = data.l3;
+                    if (document.getElementById(`${id}_mentor`)) document.getElementById(`${id}_mentor`).value = data.mentor || '';
+                    if (document.getElementById(`${id}_date`)) document.getElementById(`${id}_date`).value = data.date || '';
+                });
+            }
+
+            updateProgress();
+            showToast(`已載入「${record.empName}」的檔案`);
+        }
+
+        function resetFormFields() {
+            document.getElementById('empName').value = '';
+            document.getElementById('hireDate').value = '';
+            document.getElementById('mentorName').value = '';
+            document.getElementById('managerName').value = '';
+            document.getElementById('mentorComment').value = '';
+            document.getElementById('managerComment').value = '';
+
+            checklistData.forEach(item => {
+                if (document.getElementById(`${item.id}_l1`)) document.getElementById(`${item.id}_l1`).checked = false;
+                if (document.getElementById(`${item.id}_l2`)) document.getElementById(`${item.id}_l2`).checked = false;
+                if (document.getElementById(`${item.id}_l3`)) document.getElementById(`${item.id}_l3`).checked = false;
+                if (document.getElementById(`${item.id}_mentor`)) document.getElementById(`${item.id}_mentor`).value = '';
+                if (document.getElementById(`${item.id}_date`)) document.getElementById(`${item.id}_date`).value = '';
+            });
+
+            updateProgress();
+        }
+
+        function switchView(mode) {
+            const formView = document.getElementById('formView');
+            const adminView = document.getElementById('adminView');
+            const tabFormBtn = document.getElementById('tabFormBtn');
+            const tabAdminBtn = document.getElementById('tabAdminBtn');
+
+            if (mode === 'admin') {
+                formView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+
+                tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
+                tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-brand-200 hover:text-white";
+
+                renderAdminDashboard();
+            } else {
+                adminView.classList.add('hidden');
+                formView.classList.remove('hidden');
+
+                tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
+                tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-brand-200 hover:text-white";
+            }
+        }
+
+        window.renderAdminDashboard = function() {
+            const localRecords = JSON.parse(localStorage.getItem('wh_onboarding_records') || '{}');
+            const records = Object.values({ ...localRecords, ...window.cloudDataStore });
+
+            const tbody = document.getElementById('adminRecordsTableBody');
+            if(!tbody) return;
+
+            document.getElementById('statTotalEmps').innerText = records.length;
+
+            let totalPercentSum = 0;
+            let passedCount = 0;
+            let activeCount = 0;
+
+            let html = '';
+
+            records.forEach(rec => {
+                totalPercentSum += rec.progressPercent || 0;
+                if (rec.progressPercent === 100 && rec.managerComment) {
+                    passedCount++;
+                } else {
+                    activeCount++;
                 }
-            } catch (e) {
-                console.error("Error loading localStorage data", e);
+
+                html += `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="py-3 px-4 font-bold text-slate-900">${rec.empName || '未命名'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-500">${rec.hireDate || '-'}</td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-700">${rec.mentorName || '-'}</td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-700">${rec.managerName || '-'}</td>
+                    <td class="py-3 px-4 text-center font-bold text-brand-700">${rec.completedL3 || 0} / 26</td>
+                    <td class="py-3 px-4 w-40">
+                        <div class="flex items-center gap-2">
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-brand-600 h-2 rounded-full" style="width: ${rec.progressPercent || 0}%"></div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600">${rec.progressPercent || 0}%</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-[11px] text-slate-400">${rec.updatedAt || '-'}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="openRecordFromAdmin('${rec.id}')" class="px-2.5 py-1 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-lg text-xs font-semibold transition">
+                            開啟審核
+                        </button>
+                    </td>
+                </tr>
+                `;
+            });
+
+            if (records.length === 0) {
+                html = `
+                <tr>
+                    <td colspan="8" class="text-center py-8 text-slate-400 text-xs">
+                        目前尚無培訓檔案，點擊右上角「新增新人培訓檔案」開始建立！
+                    </td>
+                </tr>
+                `;
             }
+
+            tbody.innerHTML = html;
+
+            const avg = records.length > 0 ? Math.round(totalPercentSum / records.length) : 0;
+            document.getElementById('statAvgProgress').innerText = `${avg}%`;
+            document.getElementById('statPassedCount').innerText = passedCount;
+            document.getElementById('statActiveCount').innerText = activeCount;
+        };
+
+        function createNewRecordFromAdmin() {
+            switchView('form');
+            loadSelectedRecord('new');
         }
 
-        function resetForm() {
-            if (confirm("確定要重置所有勾選項目與填寫內容嗎？此動作無法復原。")) {
-                localStorage.removeItem('warehouse_sop_onboarding');
-                location.reload();
-            }
+        function openRecordFromAdmin(recId) {
+            switchView('form');
+            loadSelectedRecord(recId);
+        }
+
+        function filterAdminTable() {
+            const query = document.getElementById('adminSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#adminRecordsTableBody tr');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         function showToast(msg) {
@@ -813,7 +1225,6 @@
             }, 2500);
         }
 
-        // Initialize on load
         window.onload = function() {
             renderChecklist();
         };
