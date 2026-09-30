@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>農產品倉管新人培訓與實務檢核表 (SOP)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Microsoft JhengHei', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Microsoft JhengHei', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Checkbox custom style */
+        .stage-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .stage-checkbox:checked {
+            background-color: #16a34a;
+            border-color: #16a34a;
+        }
+        .stage-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Print styles optimization */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 11pt;
+            }
+            .print-container {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .card-shadow {
+                box-shadow: none !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            .break-inside-avoid {
+                page-break-inside: avoid;
+            }
+            input[type="text"], input[type="date"] {
+                border-bottom: 1px solid #000 !important;
+                border-top: none !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-brand-800 text-white shadow-md sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-700 rounded-lg">
+                    <i class="fa-solid fa-boxes-packing text-xl text-emerald-300"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">鮮菇物流倉儲</h1>
+                    <p class="text-xs text-brand-100">新人培訓計畫與實務作業檢核系統</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="saveToLocalStorage()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-600 rounded-lg text-sm text-white font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span class="hidden sm:inline">儲存進度</span>
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-white text-brand-800 hover:bg-emerald-50 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden sm:inline">列印 / 匯出 PDF</span>
+                </button>
+                <button onclick="resetForm()" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span class="hidden md:inline">重置</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print-container space-y-6">
+
+        <!-- Title Banner for Print & Web -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2">
+                    <i class="fa-solid fa-circle-check"></i> 標準作業流程 (SOP) 雙簽認證制
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">倉管新人培訓與實務檢核表</h2>
+                <p class="text-sm text-slate-500 mt-1">涵蓋物流用具、鮮菇分級標準、通路與盤商備貨及 ERP 調撥作業實務</p>
+            </div>
+            <!-- Training 4-Step Legend -->
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1 w-full md:w-auto">
+                <div class="font-semibold text-slate-800 mb-1 flex items-center gap-1">
+                    <i class="fa-solid fa-graduation-cap text-brand-600"></i> 四階段帶教與認證標準：
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <span class="bg-emerald-100/60 text-emerald-800 px-2 py-1 rounded font-medium">L1：觀念理解</span>
+                    <span class="bg-blue-100/60 text-blue-800 px-2 py-1 rounded font-medium">L2：帶教示範</span>
+                    <span class="bg-purple-100/60 text-purple-800 px-2 py-1 rounded font-medium">L3：獨立操作</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Info Form -->
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow">
+            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-id-card text-brand-600"></i> 新人培訓基本資料
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">員工姓名</label>
+                    <input type="text" id="empName" placeholder="請輸入姓名" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">到職日期</label>
+                    <input type="date" id="hireDate" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">帶教導師 (Mentor)</label>
+                    <input type="text" id="mentorName" placeholder="請輸入導師姓名" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">部門主管</label>
+                    <input type="text" id="managerName" placeholder="請輸入主管姓名" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Overview Bar -->
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-brand-600"></i> 培訓考核整體進度
+                    </h3>
+                    <p class="text-xs text-slate-500">獨立操作 (L3) 完成率將決定是否通過試用考核</p>
+                </div>
+                <div class="text-right">
+                    <span id="progressPercent" class="text-2xl font-black text-brand-600">0%</span>
+                    <span class="text-xs text-slate-500 font-medium ml-1">(<span id="completedCount">0</span> / <span id="totalItemsCount">0</span> 項獨立完成)</span>
+                </div>
+            </div>
+            
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div id="progressBar" class="bg-brand-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+
+            <!-- Stage counters summary -->
+            <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-center">
+                <div class="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+                    <span class="block text-xs text-emerald-700 font-medium">L1 觀念理解</span>
+                    <span id="countL1" class="text-lg font-bold text-emerald-800">0</span>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-2 border border-blue-100">
+                    <span class="block text-xs text-blue-700 font-medium">L2 帶教示範</span>
+                    <span id="countL2" class="text-lg font-bold text-blue-800">0</span>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-2 border border-purple-100">
+                    <span class="block text-xs text-purple-700 font-medium">L3 獨立完成</span>
+                    <span id="countL3" class="text-lg font-bold text-purple-800">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls & Filter Section -->
+        <section class="flex flex-col sm:flex-row gap-3 justify-between items-center no-print">
+            <!-- Search bar -->
+            <div class="relative w-full sm:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" onkeyup="filterChecklist()" placeholder="搜尋訓練項目、關鍵字..." class="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm">
+            </div>
+            <!-- Category Filter Buttons -->
+            <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
+                <button onclick="filterCategory('all')" class="cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-700 text-white shadow-sm transition">全部項目</button>
+                <button onclick="filterCategory('cat-tools')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">1. 用具操作</button>
+                <button onclick="filterCategory('cat-products')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">2. 產品分級</button>
+                <button onclick="filterCategory('cat-field')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">3. 現場實作與出貨</button>
+                <button onclick="filterCategory('cat-erp')" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">4. 特殊進退貨與ERP</button>
+            </div>
+        </section>
+
+        <!-- Checklist Table Sections Container -->
+        <div id="checklistContainer" class="space-y-6">
+
+            <!-- Category 1: 用具與設備操作認證 -->
+            <section class="checklist-category cat-tools bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i> 壹、 用具與設備操作認證
+                    </h3>
+                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">安全第一 / 載重限制 / 設備保養</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <th class="py-3 px-4 w-12 text-center">序</th>
+                                <th class="py-3 px-4 w-48">訓練項目</th>
+                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
+                                <th class="py-3 px-2 text-center w-12" title="L1：理解觀念">L1</th>
+                                <th class="py-3 px-2 text-center w-12" title="L2：帶教示範">L2</th>
+                                <th class="py-3 px-2 text-center w-12" title="L3：獨立操作">L3</th>
+                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
+                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-tools-body">
+                            <!-- Items inserted dynamically or static -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Category 2: 菇類產品與規格分級 -->
+            <section class="checklist-category cat-products bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-seedling text-emerald-400"></i> 貳、 產品認識與鮮菇等級分級
+                    </h3>
+                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">品質判讀 / 規格選別 / 瑕疵品管控</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <th class="py-3 px-4 w-12 text-center">序</th>
+                                <th class="py-3 px-4 w-48">訓練項目</th>
+                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
+                                <th class="py-3 px-2 text-center w-12">L1</th>
+                                <th class="py-3 px-2 text-center w-12">L2</th>
+                                <th class="py-3 px-2 text-center w-12">L3</th>
+                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
+                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-products-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Category 3: 現場實作 - 出貨與備貨 -->
+            <section class="checklist-category cat-field bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-truck-fast text-emerald-400"></i> 參、 現場實作 - 班車與通路備貨
+                    </h3>
+                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">時間效能 / 數量精準 / 標籤比對</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <th class="py-3 px-4 w-12 text-center">序</th>
+                                <th class="py-3 px-4 w-48">訓練項目</th>
+                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
+                                <th class="py-3 px-2 text-center w-12">L1</th>
+                                <th class="py-3 px-2 text-center w-12">L2</th>
+                                <th class="py-3 px-2 text-center w-12">L3</th>
+                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
+                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-field-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Category 4: 特殊進退貨與 ERP 系統發料 -->
+            <section class="checklist-category cat-erp bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-shadow break-inside-avoid">
+                <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-spin text-emerald-400"></i> 肆、 特殊進出貨、退貨與 ERP 系統單據作業
+                    </h3>
+                    <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">帳實相符 / 現金清點 / ERP系統流程</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <th class="py-3 px-4 w-12 text-center">序</th>
+                                <th class="py-3 px-4 w-48">訓練項目</th>
+                                <th class="py-3 px-4">訓練重點與核心細節 (點擊可看 SOP)</th>
+                                <th class="py-3 px-2 text-center w-12">L1</th>
+                                <th class="py-3 px-2 text-center w-12">L2</th>
+                                <th class="py-3 px-2 text-center w-12">L3</th>
+                                <th class="py-3 px-4 w-28 text-center">Mentor 簽認</th>
+                                <th class="py-3 px-4 w-28 text-center">完成日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700" id="cat-erp-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Final Assessment Signatures -->
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 card-shadow break-inside-avoid">
+            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-file-signature text-brand-600"></i> 試用期滿實務考核評語與雙簽
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">帶教導師 (Mentor) 評語與簽核</label>
+                    <textarea id="mentorComment" rows="3" placeholder="請填寫新人工作態度、學習進度與建議..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
+                        <span>導師簽名：__________________</span>
+                        <span>日期：____年__月__日</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">倉儲部門主管 綜合評定與決簽</label>
+                    <textarea id="managerComment" rows="3" placeholder="核准通過獨立上崗 / 延後審核 / 其他審查意見..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    <div class="mt-3 flex justify-between items-center text-xs text-slate-500">
+                        <span>主管簽名：__________________</span>
+                        <span>日期：____年__月__日</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-10 no-print border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-1">
+            <p>© 鮮菇倉儲管理系統 - 新人 SOP 培訓模組 | GitHub Hosted Page</p>
+            <p class="text-slate-500">建議使用 Chrome / Edge 瀏覽器以獲得最佳操作與列印體驗</p>
+        </div>
+    </footer>
+
+    <!-- Modal for SOP Details -->
+    <div id="sopModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 relative animate-fade-in">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-brand-50 rounded-xl text-brand-600">
+                    <i class="fa-solid fa-book-open text-xl"></i>
+                </div>
+                <div>
+                    <span id="modalCatTag" class="text-xs font-bold text-brand-700 uppercase tracking-wide">SOP 標準指引</span>
+                    <h4 id="modalTitle" class="text-lg font-bold text-slate-900">項目名稱</h4>
+                </div>
+            </div>
+            <div id="modalContent" class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 max-h-80 overflow-y-auto">
+                <!-- Content inserted via JS -->
+            </div>
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition">知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 no-print">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">進度已成功儲存！</span>
+    </div>
+
+    <script>
+        // Master Data Array for Checklist
+        const checklistData = [
+            // Category 1: 用具與設備
+            {
+                id: "tool_1",
+                category: "cat-tools",
+                name: "拖板車使用 (Pallet Truck)",
+                details: "檢查煞車與輪軸、掌握壓桿升高與降下機制、行進間平穩推拉、禁超載（不超過標示載重）、停放時下壓踏板歸位。",
+                sopFull: "1. 操作前確認拉桿升降油壓正常，輪子無異物卡死。<br>2. 載貨時棧板需完全插到底，重心居中。<br>3. 轉彎時應減速，嚴禁急轉或以高速度下坡。<br>4. 停止使用後需降低至最低位並推至指定黃線停車區。"
+            },
+            {
+                id: "tool_2",
+                category: "cat-tools",
+                name: "烏龜車使用 (Dolly Cart)",
+                details: "籃框堆疊限高（建議不超過 5 籃）、留意轉向輪方向、推行視線維持清晰、嚴禁當滑板嬉戲、定點擺放避免阻礙通道。",
+                sopFull: "1. 堆疊籃框前檢查烏龜車四輪是否平穩、塑料底盤有無裂痕。<br>2. 菇籃堆高原則上以 5 籃為限，避免重心過高傾倒。<br>3. 通道推行時需保持直視前方，嚴禁拉動時後退行走以防跌倒。"
+            },
+            {
+                id: "tool_3",
+                category: "cat-tools",
+                name: "堆高機使用 (Forklift)",
+                details: "安全帽與安全帶配戴、發動前檢查 (油/電/煞車/喇叭)、考取證照或專人指導、貨叉升降角度控制、充/換電池與停放安全規範。",
+                sopFull: "1. 必須具備合格堆高機操作證照方可獨立操作。<br>2. 每日作業前填寫「堆高機自主檢查表」（煞車、蜂鳴器、液壓油）。<br>3. 載貨行駛時貨叉距地面保持 15-20 公分，嚴禁超速與超載。<br>4. 充完電需將充電槍歸位並記錄充電時間。"
+            },
+
+            // Category 2: 產品認識
+            {
+                id: "prod_1",
+                category: "cat-products",
+                name: "香菇分級 (Shiitake Grading)",
+                details: "特大/大/中/小菇直徑與蕈傘開度判讀、菇柄剪腳長度標準、發黴/破損/蟲蛀瑕疵揀除、大包裝與小包裝規格比對。",
+                sopFull: "1. 依據菌傘直徑區分：特大(6cm+)/大(4.5-6cm)/中(3-4.5cm)/小。<br>2. 菌傘開度需維持在7分開以下，傘緣捲曲度良好。<br>3. 檢查菇柄切口是否平整，蕈褶無變黑、無異味或水傷爛點。"
+            },
+            {
+                id: "prod_2",
+                category: "cat-products",
+                name: "杏鮑菇分級 (King Oyster Grading)",
+                details: "A級/B級/切片級外觀定義、長度與粗細比例、蕈傘完整度與蕈柄白皙度判定、冷凍與冷藏溫控規範。",
+                sopFull: "1. A級：蕈柄粗直白皙、蕈傘完整未開、無黃斑與水傷。<br>2. B級：微彎曲或蕈傘輕微壓痕，但無腐爛。<br>3. 嚴禁將水傷包裝出貨，冷藏溫度保持在 2℃ - 5℃。"
+            },
+            {
+                id: "prod_3",
+                category: "cat-products",
+                name: "其他菇品項分級 (Other Mushrooms)",
+                details: "金針菇、木耳、秀珍菇、鴻喜菇/雪白菇等品項規格認識、包裝完整性（真空度）、失水率與保鮮期識別。",
+                sopFull: "1. 木耳：檢查厚度與背面絨毛，無黏液與變質。<br>2. 秀珍菇：菇朵完整無碎裂，袋裝無大量水蒸氣積聚。<br>3. 確保包裝袋封口密封完全，標籤日期清晰。"
+            },
+
+            // Category 3: 現場實作 - 出貨備貨
+            {
+                id: "field_1",
+                category: "cat-field",
+                name: "上午接駁車備貨 (Morning Shuttle)",
+                details: "核對上午班車發車時間與點收單、早班採收與預冷菇品清點、溫控疊車技巧、出貨明細簽核。",
+                sopFull: "1. 每日 08:30 前完成上午班車備貨清單確認。<br>2. 依據預冷先後順序「先進先出 (FIFO)」拉貨。<br>3. 上車前再次核對棧板貼標與司機簽收單。"
+            },
+            {
+                id: "field_2",
+                category: "cat-field",
+                name: "下午接駁車備貨 (Afternoon Shuttle)",
+                details: "午後場次庫存彙整、包裝線尾數補齊、冷藏車載重與空間分層分配、跨廠區調撥數量確認。",
+                sopFull: "1. 每日 14:30 前完成下午場次車次備貨。<br>2. 確保冷藏車後門關閉前檢查內部溫度已達 7℃ 以下。<br>3. 清點回程空籃與棧板回收數量。"
+            },
+            {
+                id: "field_3",
+                category: "cat-field",
+                name: "家樂福大園倉出貨備貨 (Carrefour Dayuan)",
+                details: "明確知道大園倉備貨總件數/棧板數、物流標籤 (BarCode) 黏貼位置、家樂福專用進貨規範 (品質/效期驗收標準)。",
+                sopFull: "1. 核對家樂福訂單 P.O. 號碼與大園倉送貨單。<br>2. 外箱需黏貼家樂福指定格式配送標籤，掃描條碼需能正常讀取。<br>3. 棧板堆疊高度不得超過 1.5 米，並加強纏繞膜包覆。"
+            },
+            {
+                id: "field_4",
+                category: "cat-field",
+                name: "家樂福西螺倉出貨備貨 (Carrefour Xiluo)",
+                details: "明確知道西螺倉備貨數量、區域分配與到貨時間要求、交接單據與驗收異常預防。",
+                sopFull: "1. 比對西螺倉專屬品項數量與外箱重量。<br>2. 確保物流箱無破損、變形或濕損。<br>3. 發車前確認司機隨車攜帶三聯式銷貨單。"
+            },
+            {
+                id: "field_5",
+                category: "cat-field",
+                name: "盤商出貨-順益 (劉家瑜)",
+                details: "指定品項等級與重量規格比對、專屬價格與件數核對、現場點交與司機簽收單歸檔。",
+                sopFull: "1. 確認劉家瑜小姐指定之香菇等級與指定包裝規格。<br>2. 出貨前過磅確認總重符合要求。<br>3. 簽收單需留存聯並交由行政人員入帳。"
+            },
+            {
+                id: "field_6",
+                category: "cat-field",
+                name: "盤商出貨-名間 (澎湖有限)",
+                details: "澎湖船班或陸運接駁時程對齊、冷鏈外箱加固、產品標示與箱數精準核對。",
+                sopFull: "1. 因涉及船班運輸，需特別注意外箱防潮與加固綁紮。<br>2. 比對「澎湖有限」出貨單，件數必須 100% 精準無誤。"
+            },
+            {
+                id: "field_7",
+                category: "cat-field",
+                name: "盤商出貨-有來、鋒圓、子信",
+                details: "三大盤商各自偏好規格 (大菇/中菇/雜菇) 區分、提貨時間登記、箱數點交與留底。",
+                sopFull: "1. 有來：著重香菇規格品質比對。<br>2. 鋒圓/子信：清點件數與包裝完善度。<br>3. 司機提貨時需當面點交並於備貨單上手寫簽名。"
+            },
+
+            // Category 4: 特殊進退貨與 ERP
+            {
+                id: "erp_1",
+                category: "cat-erp",
+                name: "特殊出貨-零售客 (需收錢 / 不收錢)",
+                details: "需收錢：開立收據/電子發票、現場現金清點與找零、日結交款；不收錢：樣品單/公務贈送授權簽核單比對。",
+                sopFull: "1. 現場零售客需收錢：核對金額後收款，交由會計或於收銀系統過卡。<br>2. 不收錢客：必須檢附主管簽核之「樣品/公關領用單」方可放行出貨。"
+            },
+            {
+                id: "erp_2",
+                category: "cat-erp",
+                name: "特殊出貨-商田",
+                details: "商田指定規格產品揀貨、外箱特別標示要求、交貨簽收單憑證管理。",
+                sopFull: "1. 依據商田合約規格進行選別備貨。<br>2. 填寫專用送貨憑證並拍存備查。"
+            },
+
+            {
+                id: "erp_3",
+                category: "cat-erp",
+                name: "特殊進貨-包材與盤商進貨 (順益/名間)",
+                details: "包材（紙箱/塑膠盒/膜）：數量點收、規格抽驗、放置指定資材區；盤商進貨：品質檢驗、重量抽查、進貨單登記。",
+                sopFull: "1. 包材進貨：點收箱數與貼紙規格，確認無沾污濕損。<br>2. 盤商進貨（順益/名間）：過磅抽檢，填寫進貨點收單並送交品保/倉管系統。"
+            },
+            {
+                id: "erp_4",
+                category: "cat-erp",
+                name: "銷退貨處理 (Customer Returns)",
+                details: "退貨原因判定 (品質異常/運輸損壞/短少)、退貨點收登記、隔離至待處理區、開立退貨單與 ERP 銷退扣帳。",
+                sopFull: "1. 收到客戶退貨當天需完成點收並拍照。<br>2. 區分責任（品質問題或物流撞傷）。<br>3. 開立銷退單交會計扣款，並將實物移至「待處理倉」。"
+            },
+            {
+                id: "erp_5",
+                category: "cat-erp",
+                name: "待處理倉處理 (Pending Area Control)",
+                details: "待處理標籤黏貼、定期盤點清理、報廢流程申請或報廢品轉肥料/二次加工處理流程。",
+                sopFull: "1. 所有進入待處理區之商品必須貼上紅色標示牌（註明日期與原因）。<br>2. 每週五前進行待處理倉清空與決策（報廢或降級處理）。"
+            },
+            {
+                id: "erp_6",
+                category: "cat-erp",
+                name: "調撥單發料 (63-7) - 香菇",
+                details: "ERP 63-7 廠內調撥單核對、香菇發料數量實物過磅或點數、系統扣帳與領料人簽收。",
+                sopFull: "1. 登入 ERP 系統核對 63-7 調撥單據號碼。<br>2. 比對庫存批號，確實發放相對應批號之香菇。<br>3. 系統執行過帳作業，完成庫存轉移。"
+            },
+            {
+                id: "erp_7",
+                category: "cat-erp",
+                name: "調撥單發料 (63-7) - 雜菇",
+                details: "杏鮑菇、木耳、秀珍菇等雜菇品項發料實物清點、ERP 63-7 單據列印與發料確認。",
+                sopFull: "1. 核對雜菇品項明細（杏鮑菇/金針菇/木耳等）。<br>2. 確保調撥數量與現場實際拉貨數量 100% 一致。"
+            },
+            {
+                id: "erp_8",
+                category: "cat-erp",
+                name: "63-6 理貨倉補貨 (63-6 Replenishment)",
+                details: "63-6 理貨倉安全庫存巡查、主倉至理貨倉補貨流程、ERP 庫存位置異動操作。",
+                sopFull: "1. 每日定時檢視 63-6 理貨倉水位。<br>2. 低於安全庫存時，自主倉開立 63-6 補貨單拉貨過帳。"
+            }
+        ];
+
+        // Initialize & Render dynamic table rows
+        function renderChecklist() {
+            const categories = ['cat-tools', 'cat-products', 'cat-field', 'cat-erp'];
+
+            categories.forEach(cat => {
+                const bodyEl = document.getElementById(`${cat}-body`);
+                if(!bodyEl) return;
+                
+                const items = checklistData.filter(item => item.category === cat);
+                let html = '';
+
+                items.forEach((item, idx) => {
+                    html += `
+                    <tr class="hover:bg-slate-50/80 transition item-row" data-id="${item.id}">
+                        <td class="py-3 px-4 text-center font-semibold text-slate-400">${idx + 1}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800">
+                            ${item.name}
+                        </td>
+                        <td class="py-3 px-4">
+                            <button onclick="showSopModal('${item.id}')" class="text-left group cursor-pointer focus:outline-none">
+                                <span class="text-xs text-slate-600 group-hover:text-brand-600 transition block">${item.details}</span>
+                                <span class="text-[11px] text-brand-600 font-medium inline-flex items-center gap-1 mt-0.5 group-hover:underline">
+                                    <i class="fa-solid fa-circle-info"></i> 點擊查看詳細 SOP 指引
+                                </span>
+                            </button>
+                        </td>
+                        <td class="py-3 px-2 text-center">
+                            <input type="checkbox" id="${item.id}_l1" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l1-check" title="L1：理解觀念">
+                        </td>
+                        <td class="py-3 px-2 text-center">
+                            <input type="checkbox" id="${item.id}_l2" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l2-check" title="L2：帶教示範">
+                        </td>
+                        <td class="py-3 px-2 text-center">
+                            <input type="checkbox" id="${item.id}_l3" onchange="handleCheckChange('${item.id}')" class="stage-checkbox l3-check" title="L3：獨立操作">
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <input type="text" id="${item.id}_mentor" oninput="saveToLocalStorage()" placeholder="導師簽名" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <input type="date" id="${item.id}_date" onchange="saveToLocalStorage()" class="w-full text-center text-xs py-1 px-1 border-b border-slate-200 focus:border-brand-500 outline-none bg-transparent">
+                        </td>
+                    </tr>
+                    `;
+                });
+
+                bodyEl.innerHTML = html;
+            });
+
+            document.getElementById('totalItemsCount').innerText = checklistData.length;
+            loadFromLocalStorage();
+            updateProgress();
+        }
+
+        function handleCheckChange(itemId) {
+            const l1 = document.getElementById(`${itemId}_l1`);
+            const l2 = document.getElementById(`${itemId}_l2`);
+            const l3 = document.getElementById(`${itemId}_l3`);
+
+            // Auto cascade logic if higher level checked
+            if (event.target === l3 && l3.checked) {
+                l1.checked = true;
+                l2.checked = true;
+            } else if (event.target === l2 && l2.checked) {
+                l1.checked = true;
+            }
+
+            updateProgress();
+            saveToLocalStorage();
+        }
+
+        function updateProgress() {
+            let totalL1 = 0;
+            let totalL2 = 0;
+            let totalL3 = 0;
+
+            checklistData.forEach(item => {
+                if (document.getElementById(`${item.id}_l1`)?.checked) totalL1++;
+                if (document.getElementById(`${item.id}_l2`)?.checked) totalL2++;
+                if (document.getElementById(`${item.id}_l3`)?.checked) totalL3++;
+            });
+
+            document.getElementById('countL1').innerText = totalL1;
+            document.getElementById('countL2').innerText = totalL2;
+            document.getElementById('countL3').innerText = totalL3;
+
+            const total = checklistData.length;
+            const percent = total > 0 ? Math.round((totalL3 / total) * 100) : 0;
+
+            document.getElementById('progressPercent').innerText = `${percent}%`;
+            document.getElementById('completedCount').innerText = totalL3;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        function showSopModal(itemId) {
+            const item = checklistData.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="mb-2">
+                    <strong class="text-slate-800">【核心訓練重點】</strong><br>
+                    ${item.details}
+                </div>
+                <hr class="my-2 border-slate-200">
+                <div>
+                    <strong class="text-brand-700">【SOP 標準作業步驟與守則】</strong><br>
+                    ${item.sopFull}
+                </div>
+            `;
+            document.getElementById('sopModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('sopModal').classList.add('hidden');
+        }
+
+        function filterCategory(catClass) {
+            // Update button styles
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600');
+            });
+            event.target.classList.remove('bg-white', 'text-slate-600');
+            event.target.classList.add('bg-brand-700', 'text-white');
+
+            const categories = document.querySelectorAll('.checklist-category');
+            categories.forEach(el => {
+                if (catClass === 'all' || el.classList.contains(catClass)) {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        function filterChecklist() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.item-row');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function saveToLocalStorage() {
+            const formData = {
+                empName: document.getElementById('empName').value,
+                hireDate: document.getElementById('hireDate').value,
+                mentorName: document.getElementById('mentorName').value,
+                managerName: document.getElementById('managerName').value,
+                mentorComment: document.getElementById('mentorComment').value,
+                managerComment: document.getElementById('managerComment').value,
+                items: {}
+            };
+
+            checklistData.forEach(item => {
+                formData.items[item.id] = {
+                    l1: document.getElementById(`${item.id}_l1`)?.checked || false,
+                    l2: document.getElementById(`${item.id}_l2`)?.checked || false,
+                    l3: document.getElementById(`${item.id}_l3`)?.checked || false,
+                    mentor: document.getElementById(`${item.id}_mentor`)?.value || '',
+                    date: document.getElementById(`${item.id}_date`)?.value || ''
+                };
+            });
+
+            localStorage.setItem('warehouse_sop_onboarding', JSON.stringify(formData));
+            showToast('資料與進度已儲存！');
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('warehouse_sop_onboarding');
+            if (!saved) return;
+
+            try {
+                const formData = JSON.parse(saved);
+                document.getElementById('empName').value = formData.empName || '';
+                document.getElementById('hireDate').value = formData.hireDate || '';
+                document.getElementById('mentorName').value = formData.mentorName || '';
+                document.getElementById('managerName').value = formData.managerName || '';
+                document.getElementById('mentorComment').value = formData.mentorComment || '';
+                document.getElementById('managerComment').value = formData.managerComment || '';
+
+                if (formData.items) {
+                    Object.keys(formData.items).forEach(id => {
+                        const data = formData.items[id];
+                        if (document.getElementById(`${id}_l1`)) document.getElementById(`${id}_l1`).checked = data.l1;
+                        if (document.getElementById(`${id}_l2`)) document.getElementById(`${id}_l2`).checked = data.l2;
+                        if (document.getElementById(`${id}_l3`)) document.getElementById(`${id}_l3`).checked = data.l3;
+                        if (document.getElementById(`${id}_mentor`)) document.getElementById(`${id}_mentor`).value = data.mentor;
+                        if (document.getElementById(`${id}_date`)) document.getElementById(`${id}_date`).value = data.date;
+                    });
+                }
+            } catch (e) {
+                console.error("Error loading localStorage data", e);
+            }
+        }
+
+        function resetForm() {
+            if (confirm("確定要重置所有勾選項目與填寫內容嗎？此動作無法復原。")) {
+                localStorage.removeItem('warehouse_sop_onboarding');
+                location.reload();
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderChecklist();
+        };
+    </script>
+</body>
+</html>
