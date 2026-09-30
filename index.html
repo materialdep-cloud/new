@@ -1036,7 +1036,6 @@
             const mentorNameEl = document.getElementById('mentorName');
             currentUserData.mentorName = mentorNameEl ? mentorNameEl.value : (currentUserData.mentorName || '');
             currentUserData.supervisorName = document.getElementById('supervisorName').value;
-            currentUserData.mentorComments = document.getElementById('mentorComments').value;
             currentUserData.supervisorComments = document.getElementById('supervisorComments').value;
             currentUserData.traineeSign = document.getElementById('traineeSign').value;
             currentUserData.mentorSign = document.getElementById('mentorSign').value;
@@ -1194,7 +1193,6 @@
             const mentorNameEl = document.getElementById('mentorName');
             if (mentorNameEl) mentorNameEl.value = currentUserData.mentorName || '';
             document.getElementById('supervisorName').value = currentUserData.supervisorName || '';
-            document.getElementById('mentorComments').value = currentUserData.mentorComments || '';
             document.getElementById('supervisorComments').value = currentUserData.supervisorComments || '';
             document.getElementById('traineeSign').value = currentUserData.traineeSign || '';
             document.getElementById('mentorSign').value = currentUserData.mentorSign || '';
