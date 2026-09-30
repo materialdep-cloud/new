@@ -151,15 +151,15 @@
                     <div class="flex gap-4 text-xs">
                         <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
                             <span class="text-slate-500 block">觀念理解</span>
-                            <span class="font-bold text-slate-800 text-sm" id="c1Count">0 / 25</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c1Count">0 / 59</span>
                         </div>
                         <div class="text-center px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
                             <span class="text-slate-500 block">帶教示範</span>
-                            <span class="font-bold text-slate-800 text-sm" id="c2Count">0 / 25</span>
+                            <span class="font-bold text-slate-800 text-sm" id="c2Count">0 / 59</span>
                         </div>
                         <div class="text-center px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800">
                             <span class="block">獨立操作認證</span>
-                            <span class="font-bold text-emerald-700 text-sm" id="c3Count">0 / 25</span>
+                            <span class="font-bold text-emerald-700 text-sm" id="c3Count">0 / 59</span>
                         </div>
                     </div>
                 </div>
@@ -174,7 +174,7 @@
                 <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-brand-600"></i>
-                        <span>培訓檢核項目表 (共 25 個獨立項目)</span>
+                        <span>培訓檢核項目表 (共 59 個獨立項目)</span>
                     </h3>
                     <div class="flex items-center gap-2 text-xs text-slate-500">
                         <span class="inline-flex items-center gap-1"><span class="w-3 h-3 bg-slate-200 rounded"></span> 一階: 觀念理解</span>
@@ -586,70 +586,53 @@
             { id: 19, category: "特殊出貨", name: "零售客(不用收錢)", sop: "確認出貨處理方式及單據放置位置。" },
             { id: 20, category: "特殊出貨", name: "商田", sop: "依特殊出貨流程確認出貨品項、單據處理及放置方式。" },
 
-            // 進貨（大項，下方區分進貨來源）
-            { id: 21, category: "進貨", name: "廠商自送", sop: `確認進貨品項、數量及單據處理方式，完成貨物歸位。
+            // 進貨（大項，下方拆分為各小品項；每個小品項各自獨立檢核）
+            { id: 21, category: "進貨", subgroup: "廠商自送", name: "生菜村", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
+            { id: 22, category: "進貨", subgroup: "廠商自送", name: "好菇道", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
+            { id: 23, category: "進貨", subgroup: "廠商自送", name: "包材", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
 
-・生菜村
-・好菇道
-・包材` },
-            { id: 22, category: "進貨", name: "物流部運回－農場進貨", sop: `依農場及品項確認進貨、入庫與拆分方式。
+            { id: 24, category: "進貨", subgroup: "物流部運回－農場進貨｜香菇", name: "香菇", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 25, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "蕈優", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 26, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "大發", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 27, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "永豐", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 28, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "大大", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 29, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "淼淼", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 30, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "金鑽", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 31, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "正裕", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 32, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "源農", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
 
-【香菇】
+            { id: 33, category: "進貨", subgroup: "物流部運回－農場進貨｜金針菇類", name: "豐生", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 34, category: "進貨", subgroup: "物流部運回－農場進貨｜金針菇類", name: "寶陞", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 35, category: "進貨", subgroup: "物流部運回－農場進貨｜金針菇類", name: "永鴻", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 36, category: "進貨", subgroup: "物流部運回－農場進貨｜金針菇類", name: "淞茂", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 37, category: "進貨", subgroup: "物流部運回－農場進貨｜金針菇類", name: "禾提", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
 
-【杏鮑類】
-・蕈優
-・大發
-・永豐
-・大大
-・淼淼
-・金鑽
-・正裕
-・源農
+            { id: 38, category: "進貨", subgroup: "物流部運回－農場進貨｜木耳類", name: "彥廷", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 39, category: "進貨", subgroup: "物流部運回－農場進貨｜木耳類", name: "豐年", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 40, category: "進貨", subgroup: "物流部運回－農場進貨｜木耳類", name: "一般（彭園、劉家瑜）", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
 
-【金針菇類】
-・豐生
-・寶陞
-・永鴻
-・淞茂
-・禾提
+            { id: 41, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "銀耳", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 42, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "秀珍", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 43, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "雪白", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 44, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "鴻喜", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 45, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "洋菇", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 46, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "白精靈", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 47, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "苜蓿芽", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 48, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "鮑魚", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 49, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "芽菜類（冠芳）", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 50, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "櫛瓜", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 51, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "生菜", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 52, category: "進貨", subgroup: "物流部運回－農場進貨｜雜類（依品種）", name: "蒜頭", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 53, category: "進貨", subgroup: "物流部運回－農場進貨｜其他農場", name: "子茂", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
 
-【木耳類】
-・彥廷
-・豐年
-・一般（彭園、劉家瑜）
+            { id: 54, category: "進貨", subgroup: "物流部運回－二廠接駁回", name: "小豆苗", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 55, category: "進貨", subgroup: "物流部運回－二廠接駁回", name: "待處理貨物", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 56, category: "進貨", subgroup: "物流部運回－二廠接駁回", name: "理貨自包", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 57, category: "進貨", subgroup: "物流部運回－二廠接駁回", name: "台朔出貨", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
 
-【雜類（依品種）】
-・銀耳
-・秀珍
-・雪白
-・鴻喜
-・洋菇
-・白精靈
-・苜蓿芽
-・鮑魚
-・芽菜類（冠芳）
-・櫛瓜
-・生菜
-・蒜頭
-
-【其他農場】
-・子茂
-
-【入庫判斷】
-確認該入哪一庫，以及什麼情況下可以不用拆分。` },
-            { id: 23, category: "進貨", name: "物流部運回－二廠接駁回", sop: `確認以下貨物的入庫方式，以及什麼情況下可以不用拆分。
-
-・小豆苗
-・待處理貨物
-・理貨自包
-・台朔出貨
-
-【入庫判斷】
-確認該入哪一庫，以及什麼情況下可以不用拆分。` },
-
-// 63-6-L3貨物處理 (24-25)
-            { id: 24, category: "63-6-L3貨物處理", name: "銷退貨處理", sop: "單據處理及貨物對點數量後要放哪邊。" },
-            { id: 25, category: "63-6-L3貨物處理", name: "待處理倉處理", sop: "單據處理及貨物對點數量後要放哪邊。" }
+            // 63-6-L3貨物處理 (58-59)
+            { id: 58, category: "63-6-L3貨物處理", name: "銷退貨處理", sop: "單據處理及貨物對點數量後要放哪邊。" },
+            { id: 59, category: "63-6-L3貨物處理", name: "待處理倉處理", sop: "單據處理及貨物對點數量後要放哪邊。" }
         ];
 
         // Initialize Firebase
@@ -841,11 +824,13 @@
             tbody.innerHTML = '';
 
             let currentCategory = '';
+            let currentSubgroup = '';
 
             CHECKLIST_ITEMS.forEach(item => {
                 // Category Header Separator
                 if (item.category !== currentCategory) {
                     currentCategory = item.category;
+                    currentSubgroup = '';
                     const catRow = document.createElement('tr');
                     catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
                     catRow.innerHTML = `
@@ -857,6 +842,21 @@
                         </td>
                     `;
                     tbody.appendChild(catRow);
+                }
+
+                if (item.subgroup && item.subgroup !== currentSubgroup) {
+                    currentSubgroup = item.subgroup;
+                    const subRow = document.createElement('tr');
+                    subRow.className = "bg-slate-50 font-semibold text-slate-700 text-xs border-b border-slate-200";
+                    subRow.innerHTML = `
+                        <td colspan="8" class="py-2 px-4 pl-8">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-angle-right text-brand-500"></i>
+                                <span>${currentSubgroup}</span>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(subRow);
                 }
 
                 const tr = document.createElement('tr');
@@ -903,11 +903,11 @@
                 if (document.getElementById(`chk_${item.id}_3`)?.checked) c3++;
             });
 
-            document.getElementById('c1Count').innerText = `${c1} / 25`;
-            document.getElementById('c2Count').innerText = `${c2} / 25`;
-            document.getElementById('c3Count').innerText = `${c3} / 25`;
+            document.getElementById('c1Count').innerText = `${c1} / ${CHECKLIST_ITEMS.length}`;
+            document.getElementById('c2Count').innerText = `${c2} / ${CHECKLIST_ITEMS.length}`;
+            document.getElementById('c3Count').innerText = `${c3} / ${CHECKLIST_ITEMS.length}`;
 
-            const percent = Math.round((c3 / 25) * 100);
+            const percent = Math.round((c3 / CHECKLIST_ITEMS.length) * 100);
             document.getElementById('overallPercentText').innerText = `${percent}%`;
             document.getElementById('progressBar').style.width = `${percent}%`;
         }
@@ -1370,7 +1370,7 @@
                     if (uData.checks?.[item.id]?.c3) c3Count++;
                 });
 
-                const percent = Math.round((c3Count / 25) * 100);
+                const percent = Math.round((c3Count / CHECKLIST_ITEMS.length) * 100);
                 totalProgressSum += percent;
 
                 if (percent >= 100 || uData.supervisorSign) certifiedCount++;
@@ -1535,7 +1535,7 @@
             document.getElementById('modalTitle').innerText = `${item.id}. ${item.name}`;
             document.getElementById('modalContent').innerHTML = `
                 <p class="font-bold text-slate-800 mb-1">【標準作業指引 (SOP)】</p>
-                <p class="text-slate-600 leading-relaxed">${item.sop}</p>
+                <div class="text-slate-600 leading-relaxed">${item.sop}</div>
                 <div class="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg text-xs text-brand-900">
                     <p class="font-bold">帶教重點提示：</p>
                     <ul class="list-disc list-inside mt-1 space-y-1">
