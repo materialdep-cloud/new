@@ -1278,6 +1278,8 @@
             const cloudKeys = Object.keys(allTraineesCache);
             const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
 
+            // 若 Firebase 尚未同步完成，先使用本機已有的人員名單，避免登入視窗暫時沒有姓名可選。
+
             allIds.forEach(uid => {
                 const raw = allTraineesCache[uid] || localStorage.getItem(`trainee_data_${uid}`);
                 let uData = {};
@@ -1304,6 +1306,9 @@
             document.getElementById('traineeLoginError').classList.add('hidden');
             updateTraineeAccessUI();
             modal.classList.remove('hidden');
+
+            // Firebase 連線可能比登入視窗晚到，稍後再刷新一次姓名清單。
+            setTimeout(() => updateTraineeLoginOptions(), 800);
         }
 
         window.verifyTraineeLogin = async function() {
@@ -1585,19 +1590,23 @@
                     }
                 });
 
-                // Firebase 雲端是正式名單：雲端已刪除的人員，同步清掉本機 LocalStorage / 快取，避免「刪掉後又出現」。
-                Object.keys(allTraineesCache).forEach(uid => {
-                    if (!cloudIds.has(uid)) delete allTraineesCache[uid];
-                });
-                Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).forEach(key => {
-                    const uid = key.replace('trainee_data_', '');
-                    if (!cloudIds.has(uid)) localStorage.removeItem(key);
-                });
+                // 注意：第一次連線時，如果 Firebase 尚未有資料，不能把瀏覽器裡既有的新人資料全部清掉。
+                // 否則會造成「姓名選單空白」。先保留本機資料，等雲端資料確認存在後再同步。
+                // 真正刪除的人員會由 deleteTraineePrompt / executeDeleteTrainee 同時清除本機資料。
+                if (snapshot.size > 0) {
+                    Object.keys(allTraineesCache).forEach(uid => {
+                        if (!cloudIds.has(uid)) delete allTraineesCache[uid];
+                    });
+                    Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).forEach(key => {
+                        const uid = key.replace('trainee_data_', '');
+                        if (!cloudIds.has(uid)) localStorage.removeItem(key);
+                    });
+                }
 
                 updateSyncBadgeStatus('connected', `雲端後台已連線 (${count} 筆資料同步中)`);
                 
                 // 若目前登入的人已經在雲端刪除，清除本機目前使用者記錄，不再自動復活。
-                if (currentUserId && currentUserId !== 'trainee_default' && !cloudIds.has(currentUserId)) {
+                if (snapshot.size > 0 && currentUserId && currentUserId !== 'trainee_default' && !cloudIds.has(currentUserId)) {
                     currentUserId = null;
                     localStorage.removeItem('active_trainee_id');
                     if (!isAdminUnlocked) isTraineeAuthenticated = false;
