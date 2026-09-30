@@ -996,10 +996,13 @@
             modal.classList.remove('hidden');
         }
 
-        window.verifyTraineeLogin = function() {
+        window.verifyTraineeLogin = async function() {
             const uid = document.getElementById('traineeLoginSelector').value;
-            const pwd = document.getElementById('traineeLoginPassword').value;
+            const pwd = document.getElementById('traineeLoginPassword').value.trim();
             const errorEl = document.getElementById('traineeLoginError');
+            const loginBtn = document.querySelector('#traineeLoginModal button[onclick="verifyTraineeLogin()"]');
+
+            errorEl.classList.add('hidden');
 
             // 管理者：直接使用主管管理密碼 1021 進入主管後台
             if (uid === '__manager__') {
@@ -1022,24 +1025,65 @@
                 return;
             }
 
-            const userData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
-            if (!userData.loginPassword) {
-                errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 此人員尚未設定登入密碼，請請主管設定後再登入！';
-                errorEl.classList.remove('hidden');
-                return;
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> 驗證中...';
             }
 
-            if (String(userData.loginPassword) !== String(pwd)) {
-                errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 密碼錯誤，請重新輸入！';
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            try {
+                // 先取目前快取，再嘗試直接向 Firestore 取得最新資料。
+                let userData = allTraineesCache[uid] || null;
+                if (!userData) {
+                    try {
+                        userData = JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || 'null');
+                    } catch (e) {
+                        userData = null;
+                    }
+                }
 
-            isTraineeAuthenticated = true;
-            loadUserData(uid);
-            updateTraineeAccessUI();
-            document.getElementById('traineeLoginModal').classList.add('hidden');
-            showToast(`歡迎 ${userData.empName || '新人'}，登入成功！`);
+                // 跨裝置登入的關鍵：若本機沒有密碼，直接從 Firebase 讀取最新文件。
+                if (db && auth && auth.currentUser) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data() || {};
+                        userData = { ...(userData || {}), ...cloudData };
+                        allTraineesCache[uid] = userData;
+                        localStorage.setItem(`trainee_data_${uid}`, JSON.stringify(userData));
+                    }
+                }
+
+                if (!userData || !userData.empName) {
+                    throw new Error('找不到此培訓人員資料，請確認 Firebase 是否已同步。');
+                }
+
+                if (!userData.loginPassword) {
+                    errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 此人員尚未設定登入密碼，請主管在後台設定後再登入！';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                if (String(userData.loginPassword) !== String(pwd)) {
+                    errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 密碼錯誤，請重新輸入！';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                isTraineeAuthenticated = true;
+                loadUserData(uid);
+                updateTraineeAccessUI();
+                document.getElementById('traineeLoginModal').classList.add('hidden');
+                showToast(`歡迎 ${userData.empName || '新人'}，登入成功！`);
+            } catch (err) {
+                console.error('新人登入驗證失敗:', err);
+                errorEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> 登入資料讀取失敗：${err.message || '請檢查網路或 Firebase Rules'}`;
+                errorEl.classList.remove('hidden');
+            } finally {
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-1"></i> 開始使用';
+                }
+            }
         }
 
         window.logoutTrainee = function() {
@@ -1170,12 +1214,7 @@
 
             if (db && auth.currentUser) {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
-                setDoc(docRef, newData, { merge: true }).then(() => {
-                    console.log(`已將 ${newName} 與登入密碼同步至 Firebase`);
-                }).catch(err => {
-                    console.warn("Cloud add user error:", err);
-                    showToast('新人已建立，但密碼尚未同步到雲端，請檢查 Firebase Rules');
-                });
+                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
             }
 
             updateUserSelectorOptions();
@@ -1199,7 +1238,7 @@
                         if (!docSnap || !docSnap.exists()) {
                             await setDoc(docRef, localData);
                             console.log(`已自動同步本機歷史檔案 [${localData.empName || localData.id}] 至雲端`);
-                        } else if (localData.loginPassword && !docSnap.data().loginPassword) {
+                        } else if (localData.loginPassword && !(docSnap.data() || {}).loginPassword) {
                             await setDoc(docRef, { loginPassword: localData.loginPassword, updatedAt: localData.updatedAt || new Date().toISOString() }, { merge: true });
                             console.log(`已補同步 [${localData.empName || localData.id}] 的登入密碼至雲端`);
                         }
@@ -1215,15 +1254,15 @@
                     const data = docSnap.data();
                     if (data && data.id) {
                         count++;
-                        // 若雲端舊資料沒有 loginPassword，但本機已有密碼，保留本機密碼，避免登入密碼被舊資料覆蓋
-                        const localSaved = localStorage.getItem(`trainee_data_${data.id}`);
-                        let localData = {};
-                        try { localData = localSaved ? JSON.parse(localSaved) : {}; } catch(e) {}
-                        if (!data.loginPassword && localData.loginPassword) {
-                            data.loginPassword = localData.loginPassword;
-                        }
-                        allTraineesCache[data.id] = data;
-                        localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(data));
+                        const existingData = allTraineesCache[data.id] || (() => {
+                            try { return JSON.parse(localStorage.getItem(`trainee_data_${data.id}`) || 'null'); } catch (e) { return null; }
+                        })();
+                        // 雲端舊資料若尚未有 loginPassword，不要把本機已設定的密碼洗掉。
+                        const mergedData = (existingData && existingData.loginPassword && !data.loginPassword)
+                            ? { ...existingData, ...data, loginPassword: existingData.loginPassword }
+                            : { ...(existingData || {}), ...data };
+                        allTraineesCache[data.id] = mergedData;
+                        localStorage.setItem(`trainee_data_${data.id}`, JSON.stringify(mergedData));
                     }
                 });
 
@@ -1269,7 +1308,7 @@
             loadUserData(uid);
         }
 
-        window.createNewUserPrompt = function() {
+        window.createNewUserPrompt = async function() {
             if (!isAdminUnlocked) {
                 openAdminAuthModal();
                 return;
@@ -1294,14 +1333,22 @@
             localStorage.setItem(`trainee_data_${newId}`, JSON.stringify(newData));
             allTraineesCache[newId] = newData;
 
-            if (db && auth.currentUser) {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
-                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
+            if (db && auth && auth.currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
+                    await setDoc(docRef, newData);
+                } catch (err) {
+                    console.error('Cloud add user error:', err);
+                    showToast(`已建立本機資料，但雲端同步失敗：${err.message || '請檢查 Firebase Rules'}`);
+                    updateUserSelectorOptions();
+                    updateTraineeLoginOptions();
+                    return;
+                }
             }
 
             updateUserSelectorOptions();
             updateTraineeLoginOptions();
-            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼`);
+            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼並同步雲端`);
         }
 
         // Admin Auth & Lock Logic
