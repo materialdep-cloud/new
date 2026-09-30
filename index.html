@@ -1118,12 +1118,16 @@
 
             let currentCategory = '';
             let currentSubgroup = '';
+            let categoryItemNumber = 0;
 
             CHECKLIST_ITEMS.forEach(item => {
-                // Category Header Separator
+                // 每個類別的序號都從 1 重新開始；item.id 仍保留作為資料儲存用的唯一 ID
                 if (item.category !== currentCategory) {
                     currentCategory = item.category;
                     currentSubgroup = '';
+                    categoryItemNumber = 0;
+                }
+                categoryItemNumber++;
                     const catRow = document.createElement('tr');
                     catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
                     const categoryExtraButton = currentCategory === '進貨' ? `
@@ -1161,7 +1165,7 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm";
                 tr.innerHTML = `
-                    <td class="py-3 px-4 text-center font-bold text-slate-400">${item.id}</td>
+                    <td class="py-3 px-4 text-center font-bold text-slate-400">${categoryItemNumber}</td>
                     <td class="py-3 px-4 font-bold text-slate-900">
                         <button onclick="openSopModal(${item.id})" class="text-left hover:text-brand-600 transition flex items-center gap-1.5 group">
                             <span>${item.name}</span>
@@ -1256,7 +1260,12 @@
         function updateTraineeLoginOptions() {
             const selector = document.getElementById('traineeLoginSelector');
             if (!selector) return;
-            const currentValue = selector.value;
+
+            // 優先保留目前選擇；若剛重新整理，則使用上次登入的 active_trainee_id。
+            const previousValue = selector.value;
+            const savedActiveId = localStorage.getItem('active_trainee_id') || '';
+            const preferredValue = previousValue || savedActiveId;
+
             selector.innerHTML = '<option value="">-- 請選擇自己的姓名 --</option>';
 
             // 管理者登入選項：使用主管管理密碼 1021
@@ -1270,7 +1279,9 @@
             const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
 
             allIds.forEach(uid => {
-                const uData = allTraineesCache[uid] || JSON.parse(localStorage.getItem(`trainee_data_${uid}`) || '{}');
+                const raw = allTraineesCache[uid] || localStorage.getItem(`trainee_data_${uid}`);
+                let uData = {};
+                try { uData = typeof raw === 'string' ? JSON.parse(raw || '{}') : (raw || {}); } catch (e) { uData = {}; }
                 if (!uData.empName || uData.empName === '新進員工') return;
                 const opt = document.createElement('option');
                 opt.value = uid;
@@ -1278,8 +1289,9 @@
                 selector.appendChild(opt);
             });
 
-            if (currentValue && [...selector.options].some(o => o.value === currentValue)) {
-                selector.value = currentValue;
+            // 讓「一開始的名字」在重新整理後仍會自動帶出。
+            if (preferredValue && [...selector.options].some(o => o.value === preferredValue)) {
+                selector.value = preferredValue;
             }
         }
 
@@ -1443,18 +1455,15 @@
         function updateUserSelectorOptions() {
             const selector = document.getElementById('userSelector');
             if (!selector) return;
-            selector.innerHTML = '';
+            const previousValue = selector.value;
+            selector.innerHTML = '<option value="">-- 選擇培訓人員檔案 --</option>';
 
-            // 整合本機與雲端的所有 Key，確保跨裝置資料全部列出
+            // 整合本機與雲端的所有 Key，確保跨裝置資料全部列出；已被 Firebase 刪除的資料會在同步後自動清掉。
             const localKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).map(k => k.replace('trainee_data_', ''));
             const cloudKeys = Object.keys(allTraineesCache);
-            const allIds = Array.from(new Set([...localKeys, ...cloudKeys]));
+            const allIds = Array.from(new Set([...localKeys, ...cloudKeys])).filter(uid => uid && uid !== 'trainee_default');
 
             if (allIds.length === 0) {
-                const opt = document.createElement('option');
-                opt.value = currentUserId;
-                opt.innerText = "新進員工";
-                selector.appendChild(opt);
                 return;
             }
 
@@ -1463,7 +1472,7 @@
                 const opt = document.createElement('option');
                 opt.value = uid;
                 opt.innerText = `${uData.empName || '新進員工'} (${uData.startDate || '未設定'})`;
-                if (uid === currentUserId) opt.selected = true;
+                if (uid === currentUserId || uid === previousValue) opt.selected = true;
                 selector.appendChild(opt);
             });
         }
@@ -1486,7 +1495,7 @@
             loadUserData(uid);
         }
 
-        window.createNewUserPrompt = function() {
+        window.createNewUserPrompt = async function() {
             if (!isAdminUnlocked) {
                 openAdminAuthModal();
                 return;
@@ -1512,13 +1521,21 @@
             allTraineesCache[newId] = newData;
 
             if (db && auth.currentUser) {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
-                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
+                    await setDoc(docRef, newData);
+                } catch (err) {
+                    console.error("Cloud add user error:", err);
+                    showToast(`新人已建立於本機，但雲端同步失敗：${err.message || '請檢查 Firebase Rules'}`);
+                    updateUserSelectorOptions();
+                    updateTraineeLoginOptions();
+                    return;
+                }
             }
 
             updateUserSelectorOptions();
             updateTraineeLoginOptions();
-            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼`);
+            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼並同步雲端`);
         }
 
         // Realtime Listener & Multi-Device Sync
@@ -1549,10 +1566,13 @@
 
             onSnapshot(colRef, (snapshot) => {
                 let count = 0;
+                const cloudIds = new Set();
+
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
                     if (data && data.id) {
                         count++;
+                        cloudIds.add(data.id);
                         const existingData = allTraineesCache[data.id] || (() => {
                             try { return JSON.parse(localStorage.getItem(`trainee_data_${data.id}`) || 'null'); } catch (e) { return null; }
                         })();
@@ -1565,12 +1585,29 @@
                     }
                 });
 
+                // Firebase 雲端是正式名單：雲端已刪除的人員，同步清掉本機 LocalStorage / 快取，避免「刪掉後又出現」。
+                Object.keys(allTraineesCache).forEach(uid => {
+                    if (!cloudIds.has(uid)) delete allTraineesCache[uid];
+                });
+                Object.keys(localStorage).filter(k => k.startsWith('trainee_data_')).forEach(key => {
+                    const uid = key.replace('trainee_data_', '');
+                    if (!cloudIds.has(uid)) localStorage.removeItem(key);
+                });
+
                 updateSyncBadgeStatus('connected', `雲端後台已連線 (${count} 筆資料同步中)`);
                 
-                // 跨裝置自動匹配：若新裝置當前 ID 為空或預設值，自動切換至雲端現有第一個員工
-                const cloudIds = Object.keys(allTraineesCache);
-                if (cloudIds.length > 0 && (!currentUserId || currentUserId === 'trainee_default' || !allTraineesCache[currentUserId])) {
-                    currentUserId = cloudIds[0];
+                // 若目前登入的人已經在雲端刪除，清除本機目前使用者記錄，不再自動復活。
+                if (currentUserId && currentUserId !== 'trainee_default' && !cloudIds.has(currentUserId)) {
+                    currentUserId = null;
+                    localStorage.removeItem('active_trainee_id');
+                    if (!isAdminUnlocked) isTraineeAuthenticated = false;
+                }
+
+                // 沒有目前使用者時，僅在已有雲端資料的情況下選第一位；不建立幽靈帳號。
+                const cloudIdArray = Array.from(cloudIds);
+                if (cloudIdArray.length > 0 && (!currentUserId || currentUserId === 'trainee_default')) {
+                    currentUserId = cloudIdArray[0];
+                    localStorage.setItem('active_trainee_id', currentUserId);
                 }
 
                 updateUserSelectorOptions();
@@ -1862,23 +1899,26 @@
                 }
             }
 
-            // 3. 若刪除的是當前正打開的人員，切換至其他人或建立新預設檔
+            // 3. 若刪除的是當前正打開的人員，切換至尚存的雲端人員；沒有就保持空白，不再建立「新進員工」幽靈帳號。
             if (currentUserId === uidToDelete) {
-                const remainingKeys = Object.keys(localStorage).filter(k => k.startsWith('trainee_data_'));
-                if (remainingKeys.length > 0) {
-                    const nextUid = remainingKeys[0].replace('trainee_data_', '');
-                    loadUserData(nextUid);
+                const remainingIds = Object.keys(allTraineesCache).filter(uid => uid !== uidToDelete);
+                if (remainingIds.length > 0) {
+                    loadUserData(remainingIds[0]);
                 } else {
-                    const defaultUid = 'trainee_' + Date.now();
-                    const defaultData = createNewUserData(defaultUid, '新進員工');
-                    localStorage.setItem(`trainee_data_${defaultUid}`, JSON.stringify(defaultData));
-                    loadUserData(defaultUid);
+                    currentUserId = null;
+                    currentUserData = createNewUserData('empty', '');
+                    localStorage.removeItem('active_trainee_id');
+                    document.getElementById('empName').value = '';
+                    document.getElementById('startDate').value = '';
+                    document.getElementById('supervisorName').value = '';
+                    updateProgress();
                 }
             }
 
             renderAdminDashboard();
             updateUserSelectorOptions();
-            showToast('已成功刪除該培訓檔案');
+            updateTraineeLoginOptions();
+            showToast('已成功刪除該培訓檔案，並清除本機暫存');
         }
 
         window.adminInspectUser = function(uid) {
@@ -1895,7 +1935,8 @@
             if (!item) return;
 
             document.getElementById('modalCatTag').innerText = item.category;
-            document.getElementById('modalTitle').innerText = `${item.id}. ${item.name}`;
+            const categoryItemNumber = CHECKLIST_ITEMS.filter(i => i.category === item.category).indexOf(item) + 1;
+            document.getElementById('modalTitle').innerText = `${categoryItemNumber}. ${item.name}`;
             document.getElementById('modalContent').innerHTML = `
                 <p class="font-bold text-slate-800 mb-1">【標準作業指引 (SOP)】</p>
                 <div class="text-slate-600 leading-relaxed">${item.sop}</div>
