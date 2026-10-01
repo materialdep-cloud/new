@@ -658,6 +658,37 @@
             cursor: not-allowed !important;
         }
 
+
+        /* 三階全部完成：整個培訓項目呈現綠色 */
+        #checklistTableBody .checklist-item-row.all-levels-complete {
+            background: #dcfce7 !important;
+            border-color: #86efac !important;
+        }
+
+        #checklistTableBody .checklist-item-row.all-levels-complete td {
+            background: #dcfce7 !important;
+            border-color: #bbf7d0 !important;
+        }
+
+        #checklistTableBody .checklist-item-row.all-levels-complete td:nth-child(2) {
+            color: #166534 !important;
+        }
+
+        #checklistTableBody .checklist-item-row.all-levels-complete td:nth-child(3) {
+            color: #15803d !important;
+        }
+
+        @media (max-width: 767px) {
+            #checklistTableBody .checklist-item-row.all-levels-complete {
+                background: #dcfce7 !important;
+                border-color: #86efac !important;
+            }
+
+            #checklistTableBody .checklist-item-row.all-levels-complete td {
+                background: #dcfce7 !important;
+            }
+        }
+
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
@@ -1186,6 +1217,10 @@
 
             // 盤商出貨 (13-17)
             { id: 13, category: "盤商出貨", name: "順益(劉家瑜)", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
+            { id: 67, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-6出貨", sop: "了解63-6出貨作業。" },
+            { id: 68, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-7出貨", sop: "了解63-7出貨作業。" },
+            { id: 69, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "子信大大備貨及出貨", sop: "了解子信大大備貨及出貨作業。" },
+
             { id: 14, category: "盤商出貨", name: "名間(澎湖有限)", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 15, category: "盤商出貨", name: "有來", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 16, category: "盤商出貨", name: "鋒圓", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
@@ -1492,7 +1527,11 @@
                 let displayNumber;
                 if (item.subgroup) {
                     subgroupItemNumber++;
-                    displayNumber = subgroupItemNumber;
+                    if (item.subgroup === '盤商出貨｜子信') {
+                        displayNumber = `5-${subgroupItemNumber}`;
+                    } else {
+                        displayNumber = subgroupItemNumber;
+                    }
                 } else {
                     categoryItemNumber++;
                     displayNumber = categoryItemNumber;
@@ -1626,7 +1665,42 @@
             }, 500);
         }
 
-        window.autoSaveField = function() {
+
+        // 一階、二階、三階全部完成時，整個項目列呈現綠色
+        function updateCompletedRowColors() {
+            const rows = document.querySelectorAll('#checklistTableBody .checklist-item-row');
+            rows.forEach(row => {
+                const checks = row.querySelectorAll('input[type="checkbox"]');
+                const levelChecks = Array.from(checks).slice(0, 3);
+                const completed = levelChecks.length >= 3 && levelChecks.every(cb => cb.checked);
+                row.classList.toggle('all-levels-complete', completed);
+            });
+        }
+
+        function bindCompletedRowColorEvents() {
+            const boxes = document.querySelectorAll('#checklistTableBody input[type="checkbox"]');
+            boxes.forEach(box => {
+                if (box.dataset.greenBound === '1') return;
+                box.dataset.greenBound = '1';
+                box.addEventListener('change', updateCompletedRowColors);
+            });
+            updateCompletedRowColors();
+        }
+
+        
+        // 表格重新渲染後自動重新套用完成綠色
+        const checklistGreenObserver = new MutationObserver(() => {
+            bindCompletedRowColorEvents();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('checklistTableBody');
+            if (tbody) {
+                checklistGreenObserver.observe(tbody, { childList: true, subtree: true });
+                bindCompletedRowColorEvents();
+            }
+        });
+
+window.autoSaveField = function() {
             if (!currentUserData) return;
 
             // 先更新畫面中的目前資料，再延遲寫入 Firebase
@@ -2233,7 +2307,7 @@
 
             if (isHrReadonly) {
                 setHrReadonlyForm(true);
-                showToast(`人資唯讀：正在查看 ${currentUserData.empName || '員工'} 的檢核表`);
+                showToast(`人資：正在查看 ${currentUserData.empName || '員工'} 的檢核表`);
             } else {
                 setHrReadonlyForm(false);
                 showToast(`已切換至 ${currentUserData.empName || '員工'} 的檢核表`);
