@@ -9,7 +9,7 @@
         function indentZixinSubitems() {
             document.querySelectorAll('#checklistTableBody .checklist-item-row').forEach(row => {
                 const name = row.innerText || '';
-                if (name.includes('63-6出貨') || name.includes('63-7出貨') || name.includes('子信大大備貨及出貨')) {
+                if (name.includes('子信63-6出貨') || name.includes('子信63-7出貨') || name.includes('子信大大備貨及出貨')) {
                     row.classList.add('subitem-indent');
                 }
             });
@@ -56,6 +56,27 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+
+        /* 子信 5-1～5-3：編號與內容整體向右縮排，並避免 5-1 被拆成兩行 */
+        #checklistTableBody .zixin-subitem td:first-child {
+            padding-left: 34px !important;
+            white-space: nowrap !important;
+            min-width: 72px;
+        }
+        #checklistTableBody .zixin-subitem td:nth-child(2) {
+            padding-left: 22px !important;
+        }
+        @media (max-width: 767px) {
+            #checklistTableBody .zixin-subitem td:first-child {
+                padding-left: 28px !important;
+                min-width: 0 !important;
+                white-space: nowrap !important;
+            }
+            #checklistTableBody .zixin-subitem td:nth-child(2) {
+                padding-left: 18px !important;
+            }
+        }
 
         /* 手機版：只調整檢核表顯示方式，不修改任何訓練內容 */
         @media (max-width: 767px) {
@@ -1383,14 +1404,20 @@
             { id: 11, category: "備貨", name: "家樂福大園倉出貨備貨", sop: "確認出貨預估數量，區分一廠、二廠備貨；出貨使用家樂福板；知道最終訂單數量的查詢位置。" },
             { id: 12, category: "備貨", name: "家樂福西螺倉出貨備貨", sop: "確認出貨預估數量，區分一廠、二廠備貨；出貨使用家樂福板；知道最終訂單數量的查詢位置。" },
 
+            // 調撥單發料
+            { id: 72, category: "備貨", subgroup: "【調撥單發料】", name: "待處理倉 發料備貨", sop: "確認調撥單發料作業及備貨方式。" },
+            { id: 73, category: "備貨", subgroup: "【調撥單發料】", name: "63-6 發料備貨", sop: "確認63-6調撥單發料作業及備貨方式。" },
+            { id: 74, category: "備貨", subgroup: "【調撥單發料】", name: "63-7 (香菇)發料備貨", sop: "確認63-7（香菇）調撥單發料作業及備貨方式。" },
+            { id: 75, category: "備貨", subgroup: "【調撥單發料】", name: "63-7 (雜菇)發料備貨", sop: "確認63-7（雜菇）調撥單發料作業及備貨方式。" },
+
             // 盤商出貨 (13-17)
             { id: 13, category: "盤商出貨", name: "順益(劉家瑜)", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 14, category: "盤商出貨", name: "名間(澎湖有限)", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 15, category: "盤商出貨", name: "有來", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 16, category: "盤商出貨", name: "鋒圓", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 17, category: "盤商出貨", name: "子信", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
-            { id: 67, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-6出貨", sop: "了解63-6出貨作業。" },
-            { id: 68, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-7出貨", sop: "了解63-7出貨作業。" },
+            { id: 67, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "子信63-6出貨", sop: "了解子信63-6出貨作業。" },
+            { id: 68, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "子信63-7出貨", sop: "了解子信63-7出貨作業。" },
             { id: 69, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "子信大大備貨及出貨", sop: "了解子信大大備貨及出貨作業。" },
 
             // 特殊出貨
@@ -1712,6 +1739,9 @@
 
                 const tr = document.createElement('tr');
                 tr.className = "checklist-item-row hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm";
+                if (item.subgroup === '盤商出貨｜子信') {
+                    tr.classList.add('zixin-subitem');
+                }
                 tr.innerHTML = `
                     <td class="py-3 px-4 text-center font-bold text-slate-400">${displayNumber}</td>
                     <td class="py-3 px-4 font-bold text-slate-900">
