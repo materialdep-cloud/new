@@ -1156,11 +1156,17 @@
             { id: 3, category: "用具學習", name: "綁貨黑色束繩使用", sop: "了解黑色束繩的正確使用方式、固定貨物與收納方式。" },
             { id: 4, category: "用具學習", name: "堆高機使用(需有執照)", sop: "了解堆高機基本使用與安全規範；實際操作前須確認持有合法堆高機操作相關執照。" },
 
-            // Category 2: 產品認識 (4項)
-            { id: 5, category: "產品認識", name: "菇類認識", sop: "能辨認常見菇類品項，知道品項名稱即可；現階段先不用熟悉品規。" },
-            { id: 6, category: "產品認識", name: "生菜類認識", sop: "能辨認常見生菜類品項，知道品項名稱即可；現階段先不用熟悉品規。" },
-            { id: 7, category: "產品認識", name: "其餘產品認識", sop: "能依全品項目錄辨認其他產品，知道品項名稱及基本分類即可；現階段先不用熟悉品規。" },
-            { id: 8, category: "產品認識", name: "包材認識", sop: "能辨認倉庫常用包材，知道名稱及用途即可；現階段先不用熟悉品規。" },
+            // Category 2: 產品認識 (10項)
+            { id: 5, category: "產品認識", name: "香菇認識", sop: "大、中、小、小小、下束繩顏色，分別對應藍、紅、黃、綠、白；一包為5台斤（3公斤）。大、中、小一籃為5包25台斤，一板為20籃共500台斤；小小、下一籃為6包30台斤，一板為20籃共600台斤。" },
+            { id: 6, category: "產品認識", name: "大品項菇類認識", sop: "知道這是什麼菇類：杏鮑菇、木耳、金針菇、鴻喜菇、雪白菇、秀珍菇、洋菇、黑美人菇（黑壕菇）、白精靈菇。" },
+            { id: 7, category: "產品認識", name: "小品項菇類認識", sop: "知道這是什麼菇類：柳松菇、金滑菇、韓小菇、鮑魚菇、舞菇、珊瑚菇。" },
+            { id: 8, category: "產品認識", name: "常見生菜認識", sop: "各國美生菜、蘿美。" },
+            { id: 60, category: "產品認識", name: "歐式生菜認識", sop: "各種歐式生菜認識。" },
+            { id: 61, category: "產品認識", name: "雜糧類認識", sop: "蒜頭、牛蕃茄、青蔥、小蕃茄、洋蔥、玉米筍。" },
+            { id: 62, category: "產品認識", name: "加工品認識", sop: "各類加工品。" },
+            { id: 63, category: "產品認識", name: "低溫倉產品認識", sop: "帶皮洋蔥、地瓜、栗子南瓜、阿成南瓜、小黃瓜、水果彩椒。" },
+            { id: 64, category: "產品認識", name: "乾貨認識", sop: "乾香菇。" },
+            { id: 65, category: "產品認識", name: "常見包材認識", sop: "常見包材認識。" },
 
             // Category 3: 現場實作（依工作內容拆分）
             // 備貨 (9-12)
@@ -1425,18 +1431,24 @@
 
             let currentCategory = '';
             let currentSubgroup = '';
+            let categoryItemNumber = 0;
 
             CHECKLIST_ITEMS.forEach(item => {
                 // Category Header Separator
                 if (item.category !== currentCategory) {
                     currentCategory = item.category;
                     currentSubgroup = '';
+                    categoryItemNumber = 0;
                     const catRow = document.createElement('tr');
                     catRow.className = "bg-slate-100/80 font-bold text-slate-800 text-xs border-y border-slate-200";
                     const categoryExtraButton = currentCategory === '進貨' ? `
                         <a href="https://drive.google.com/file/d/1Lr8VxiCOnpZw8i1mOFb5Xho1W0uT4yGy/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-2 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition font-semibold no-underline">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                             <span>進貨參考資料</span>
+                        </a>` : currentCategory === '產品認識' ? `
+                        <a href="https://materialdep-cloud.github.io/DM/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-2 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition font-semibold no-underline">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span>全品項目錄</span>
                         </a>` : '';
                     catRow.innerHTML = `
                         <td colspan="8" class="py-2.5 px-4">
@@ -1465,10 +1477,13 @@
                     tbody.appendChild(subRow);
                 }
 
+                categoryItemNumber++;
+                const displayNumber = categoryItemNumber;
+
                 const tr = document.createElement('tr');
                 tr.className = "checklist-item-row hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm";
                 tr.innerHTML = `
-                    <td class="py-3 px-4 text-center font-bold text-slate-400">${item.id}</td>
+                    <td class="py-3 px-4 text-center font-bold text-slate-400">${displayNumber}</td>
                     <td class="py-3 px-4 font-bold text-slate-900">
                         <button onclick="openSopModal(${item.id})" class="text-left hover:text-brand-600 transition flex items-center gap-1.5 group">
                             <span>${item.name}</span>
@@ -2175,8 +2190,11 @@
             const item = CHECKLIST_ITEMS.find(i => i.id === id);
             if (!item) return;
 
+            const categoryItems = CHECKLIST_ITEMS.filter(i => i.category === item.category);
+            const displayNumber = categoryItems.findIndex(i => i.id === item.id) + 1;
+
             document.getElementById('modalCatTag').innerText = item.category;
-            document.getElementById('modalTitle').innerText = `${item.id}. ${item.name}`;
+            document.getElementById('modalTitle').innerText = `${displayNumber}. ${item.name}`;
             document.getElementById('modalContent').innerHTML = `
                 <p class="font-bold text-slate-800 mb-1">【標準作業指引 (SOP)】</p>
                 <div class="text-slate-600 leading-relaxed">${item.sop}</div>
