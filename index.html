@@ -471,6 +471,184 @@
             }
         }
 
+
+        /* ===== 最終手機版：檢核表改為真正的單欄卡片 ===== */
+        @media (max-width: 767px) {
+            .overflow-x-auto:has(#checklistTable) {
+                overflow: visible !important;
+                width: 100% !important;
+            }
+
+            #checklistTable {
+                display: block !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                table-layout: auto !important;
+            }
+
+            #checklistTable > thead {
+                display: none !important;
+            }
+
+            #checklistTable > tbody {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            /* 類別標題 */
+            #checklistTable > tbody > tr.bg-slate-100\/80,
+            #checklistTable > tbody > tr.bg-slate-50 {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            #checklistTable > tbody > tr.bg-slate-100\/80 td,
+            #checklistTable > tbody > tr.bg-slate-50 td {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                white-space: normal !important;
+            }
+
+            /* 每個訓練項目 */
+            #checklistTable > tbody > tr.checklist-item-row {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                margin: 0 0 12px 0 !important;
+                padding: 12px !important;
+                background: #fff !important;
+                border: 1px solid #dbe3ee !important;
+                border-radius: 14px !important;
+                box-shadow: 0 1px 3px rgba(15,23,42,.07) !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td {
+                display: block !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                padding: 4px 0 !important;
+                margin: 0 !important;
+                border: 0 !important;
+                text-align: left !important;
+                white-space: normal !important;
+            }
+
+            /* 編號 */
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(1) {
+                font-size: 11px !important;
+                color: #94a3b8 !important;
+                line-height: 1.2 !important;
+                padding-bottom: 2px !important;
+            }
+
+            /* 名稱 */
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(2) {
+                font-size: 18px !important;
+                line-height: 1.35 !important;
+                padding-bottom: 7px !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(2) button {
+                display: inline-flex !important;
+                width: auto !important;
+                max-width: 100% !important;
+                align-items: center !important;
+                flex-wrap: wrap !important;
+                white-space: normal !important;
+                line-height: 1.35 !important;
+            }
+
+            /* SOP 說明 */
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(3) {
+                font-size: 13px !important;
+                line-height: 1.65 !important;
+                color: #475569 !important;
+                overflow-wrap: anywhere !important;
+                padding-bottom: 11px !important;
+            }
+
+            /* 三個勾選框：橫向三格 */
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(4),
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(5),
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(6) {
+                display: inline-flex !important;
+                vertical-align: top !important;
+                width: calc(33.333% - 6px) !important;
+                min-height: 62px !important;
+                margin: 0 7px 10px 0 !important;
+                padding: 8px 4px !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                border: 1px solid #dbe3ee !important;
+                border-radius: 12px !important;
+                background: #f8fafc !important;
+                font-size: 11px !important;
+                line-height: 1.3 !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(6) {
+                margin-right: 0 !important;
+                background: #ecfdf5 !important;
+                border-color: #bbf7d0 !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(4)::before,
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(5)::before,
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(6)::before {
+                display: inline-block !important;
+                white-space: pre !important;
+                text-align: center !important;
+                line-height: 1.35 !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(4)::before { content: '一階\A觀念理解'; }
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(5)::before { content: '二階\A帶教示範'; }
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(6)::before { content: '三階\A獨立操作'; }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(4) input,
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(5) input,
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(6) input {
+                width: 22px !important;
+                height: 22px !important;
+                min-width: 22px !important;
+                margin: 0 0 0 6px !important;
+                flex: 0 0 auto !important;
+            }
+
+            /* 簽認與日期 */
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(7),
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(8) {
+                display: block !important;
+                width: 100% !important;
+                padding: 5px 0 3px !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(7)::before,
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(8)::before {
+                display: block !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                color: #64748b !important;
+                margin-bottom: 4px !important;
+            }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(7)::before { content: '教導員/主管簽認'; }
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(8)::before { content: '完成日期'; }
+
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(7) input,
+            #checklistTable > tbody > tr.checklist-item-row > td:nth-child(8) input {
+                display: block !important;
+                width: 100% !important;
+                min-height: 40px !important;
+                box-sizing: border-box !important;
+                font-size: 14px !important;
+            }
+        }
+
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
@@ -605,7 +783,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table id="checklistTable" class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-700 font-bold text-xs uppercase border-b border-slate-200">
                             <tr>
                                 <th class="py-3.5 px-4 w-12 text-center">編號</th>
