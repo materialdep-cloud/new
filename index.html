@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>綠園生活倉管新人培訓系統</title>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+        function indentZixinSubitems() {
+            document.querySelectorAll('#checklistTableBody .checklist-item-row').forEach(row => {
+                const name = row.innerText || '';
+                if (name.includes('63-6出貨') || name.includes('63-7出貨') || name.includes('子信大大備貨及出貨')) {
+                    row.classList.add('subitem-indent');
+                }
+            });
+        }
+
+</script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -689,6 +699,27 @@
             }
         }
 
+
+        /* 子信 5-1～5-3 視覺縮排 */
+        #checklistTableBody .checklist-item-row.subitem-indent {
+            padding-left: 28px !important;
+        }
+
+        #checklistTableBody .checklist-item-row.subitem-indent td:first-child {
+            padding-left: 38px !important;
+        }
+
+        @media (max-width: 767px) {
+            #checklistTableBody .checklist-item-row.subitem-indent {
+                margin-left: 18px !important;
+                width: calc(100% - 18px) !important;
+            }
+
+            #checklistTableBody .checklist-item-row.subitem-indent td:first-child {
+                padding-left: 28px !important;
+            }
+        }
+
 </style>
 
 <style>
@@ -1354,19 +1385,20 @@
 
             // 盤商出貨 (13-17)
             { id: 13, category: "盤商出貨", name: "順益(劉家瑜)", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
-            { id: 67, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-6出貨", sop: "了解63-6出貨作業。" },
-            { id: 68, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-7出貨", sop: "了解63-7出貨作業。" },
-            { id: 69, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "子信大大備貨及出貨", sop: "了解子信大大備貨及出貨作業。" },
-
             { id: 14, category: "盤商出貨", name: "名間(澎湖有限)", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 15, category: "盤商出貨", name: "有來", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 16, category: "盤商出貨", name: "鋒圓", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
             { id: 17, category: "盤商出貨", name: "子信", sop: "確認出貨品項，完成苔籃系統登記，並處理出貨單據及放置。" },
+            { id: 67, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-6出貨", sop: "了解63-6出貨作業。" },
+            { id: 68, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "63-7出貨", sop: "了解63-7出貨作業。" },
+            { id: 69, category: "盤商出貨", subgroup: "盤商出貨｜子信", name: "子信大大備貨及出貨", sop: "了解子信大大備貨及出貨作業。" },
 
-            // 特殊出貨 (18-20)
+            // 特殊出貨
             { id: 18, category: "特殊出貨", name: "零售客(需收錢)", sop: "確認收款後的處理方式及交款對象；了解假日處理方式，以及單據放置位置。" },
             { id: 19, category: "特殊出貨", name: "零售客(不用收錢)", sop: "確認出貨處理方式及單據放置位置。" },
-            { id: 20, category: "特殊出貨", name: "商田", sop: "依特殊出貨流程確認出貨品項、單據處理及放置方式。" },
+            { id: 20, category: "特殊出貨", name: "商田代運", sop: "依特殊出貨流程確認出貨品項、單據處理及放置方式。" },
+            { id: 70, category: "特殊出貨", name: "大榮出貨", sop: "依大榮出貨流程確認出貨品項、單據處理及放置方式。" },
+            { id: 71, category: "特殊出貨", name: "黑貓出貨", sop: "依黑貓出貨流程確認出貨品項、單據處理及放置方式。" },
 
             // 進貨（大項，下方拆分為各小品項；每個小品項各自獨立檢核）
             { id: 21, category: "進貨", subgroup: "廠商自送", name: "川聖(生菜村)", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
@@ -1648,17 +1680,21 @@
                 if (item.subgroup && item.subgroup !== currentSubgroup) {
                     currentSubgroup = item.subgroup;
                     subgroupItemNumber = 0;
-                    const subRow = document.createElement('tr');
-                    subRow.className = "bg-slate-50 font-semibold text-slate-700 text-xs border-b border-slate-200";
-                    subRow.innerHTML = `
-                        <td colspan="8" class="py-2 px-4 pl-8">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-angle-right text-brand-500"></i>
-                                <span>${currentSubgroup}</span>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(subRow);
+
+                    // 子信的 5-1～5-3 直接接在「5. 子信」下面，不另外顯示分類標題。
+                    if (item.subgroup !== '盤商出貨｜子信') {
+                        const subRow = document.createElement('tr');
+                        subRow.className = "bg-slate-50 font-semibold text-slate-700 text-xs border-b border-slate-200";
+                        subRow.innerHTML = `
+                            <td colspan="8" class="py-2 px-4 pl-8">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-angle-right text-brand-500"></i>
+                                    <span>${currentSubgroup}</span>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(subRow);
+                    }
                 }
 
                 let displayNumber;
