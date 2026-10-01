@@ -649,7 +649,16 @@
             }
         }
 
-    </style>
+    
+        .hr-readonly-mode input:disabled,
+        .hr-readonly-mode textarea:disabled,
+        .hr-readonly-mode select:disabled {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            cursor: not-allowed !important;
+        }
+
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
@@ -1188,11 +1197,12 @@
             { id: 20, category: "特殊出貨", name: "商田", sop: "依特殊出貨流程確認出貨品項、單據處理及放置方式。" },
 
             // 進貨（大項，下方拆分為各小品項；每個小品項各自獨立檢核）
-            { id: 21, category: "進貨", subgroup: "廠商自送", name: "生菜村", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
-            { id: 22, category: "進貨", subgroup: "廠商自送", name: "好菇道", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
+            { id: 21, category: "進貨", subgroup: "廠商自送", name: "川聖(生菜村)", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
+            { id: 22, category: "進貨", subgroup: "廠商自送", name: "昕鈿(好菇道)", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
             { id: 23, category: "進貨", subgroup: "廠商自送", name: "包材", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
+            { id: 66, category: "進貨", subgroup: "廠商自送", name: "林承翰(櫛瓜)", sop: "確認進貨品項、數量及單據處理方式，完成貨物歸位。" },
 
-            { id: 24, category: "進貨", subgroup: "物流部運回－農場進貨｜香菇", name: "香菇", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
+            { id: 24, category: "進貨", subgroup: "物流部運回－農場進貨｜香菇", name: "香菇", sop: "需要知道如何疊板及區分一般.履歷。" },
             { id: 25, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "蕈優", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
             { id: 26, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "大發", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
             { id: 27, category: "進貨", subgroup: "物流部運回－農場進貨｜杏鮑類", name: "永豐", sop: "確認該入哪一庫，以及什麼情況下可以不用拆分。" },
@@ -1432,6 +1442,7 @@
             let currentCategory = '';
             let currentSubgroup = '';
             let categoryItemNumber = 0;
+            let subgroupItemNumber = 0;
 
             CHECKLIST_ITEMS.forEach(item => {
                 // Category Header Separator
@@ -1464,6 +1475,7 @@
 
                 if (item.subgroup && item.subgroup !== currentSubgroup) {
                     currentSubgroup = item.subgroup;
+                    subgroupItemNumber = 0;
                     const subRow = document.createElement('tr');
                     subRow.className = "bg-slate-50 font-semibold text-slate-700 text-xs border-b border-slate-200";
                     subRow.innerHTML = `
@@ -1477,8 +1489,14 @@
                     tbody.appendChild(subRow);
                 }
 
-                categoryItemNumber++;
-                const displayNumber = categoryItemNumber;
+                let displayNumber;
+                if (item.subgroup) {
+                    subgroupItemNumber++;
+                    displayNumber = subgroupItemNumber;
+                } else {
+                    categoryItemNumber++;
+                    displayNumber = categoryItemNumber;
+                }
 
                 const tr = document.createElement('tr');
                 tr.className = "checklist-item-row hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm";
@@ -1648,6 +1666,11 @@
             managerOpt.innerText = '管理者';
             selector.appendChild(managerOpt);
 
+            const hrOpt = document.createElement('option');
+            hrOpt.value = '__hr__';
+            hrOpt.innerText = '人資（只讀）';
+            selector.appendChild(hrOpt);
+
             // 人員名單只讀 Firebase，不再合併瀏覽器 LocalStorage
             const allIds = Object.keys(allTraineesCache);
 
@@ -1685,12 +1708,29 @@
             if (uid === '__manager__') {
                 if (pwd === '1021') {
                     isAdminUnlocked = true;
+                    isHrReadonly = false;
                     isTraineeAuthenticated = false;
                     document.getElementById('traineeLoginModal').classList.add('hidden');
                     switchView('admin');
                     showToast('管理者登入成功！');
                 } else {
                     errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 管理者密碼錯誤，請重新輸入！';
+                    errorEl.classList.remove('hidden');
+                }
+                return;
+            }
+
+            // 人資：1026，只能查看主管後台，不能新增、修改、刪除
+            if (uid === '__hr__') {
+                if (pwd === '1026') {
+                    isHrReadonly = true;
+                    isAdminUnlocked = false;
+                    isTraineeAuthenticated = false;
+                    document.getElementById('traineeLoginModal').classList.add('hidden');
+                    switchView('admin');
+                    showToast('人資登入成功！目前為唯讀模式');
+                } else {
+                    errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> 人資密碼錯誤，請重新輸入！';
                     errorEl.classList.remove('hidden');
                 }
                 return;
@@ -1960,6 +2000,7 @@
 
         // Admin Auth & Lock Logic
         let isAdminUnlocked = false;
+        let isHrReadonly = false;
 
         window.switchView = function(mode) {
             const formView = document.getElementById('formView');
@@ -1968,7 +2009,7 @@
             const tabAdminBtn = document.getElementById('tabAdminBtn');
 
             if (mode === 'admin') {
-                if (!isAdminUnlocked) {
+                if (!isAdminUnlocked && !isHrReadonly) {
                     openAdminAuthModal();
                     return;
                 }
@@ -1978,6 +2019,8 @@
                 tabAdminBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-brand-600 text-white shadow";
                 tabFormBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
 
+                const hrBadge = document.getElementById('hrReadonlyBadge');
+                if (hrBadge) hrBadge.classList.toggle('hidden', !isHrReadonly);
                 renderAdminDashboard();
             } else {
                 adminView.classList.add('hidden');
@@ -2014,6 +2057,7 @@
 
         window.lockAdminPanel = function() {
             isAdminUnlocked = false;
+            isHrReadonly = false;
             isTraineeAuthenticated = false;
             switchView('form');
             updateTraineeAccessUI();
@@ -2068,14 +2112,16 @@
                     <td class="py-3 px-4 text-right">
                         <div class="flex items-center justify-end gap-1.5">
                             <button onclick="adminInspectUser('${uData.id}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold transition">
-                                開啟審核
+                                查看資料
                             </button>
-                            <button onclick="setTraineePasswordPrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 rounded-lg text-xs font-bold transition" title="設定/修改登入密碼">
-                                <i class="fa-solid fa-key"></i>
-                            </button>
-                            <button onclick="deleteTraineePrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition" title="刪除檔案">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            ${isHrReadonly ? '' : `
+                                <button onclick="setTraineePasswordPrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 rounded-lg text-xs font-bold transition" title="設定/修改登入密碼">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
+                                <button onclick="deleteTraineePrompt('${uData.id}', '${safeName}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition" title="刪除檔案">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            `}
                         </div>
                     </td>
                 `;
@@ -2178,11 +2224,46 @@
         }
 
         window.adminInspectUser = function(uid) {
+            if (!isAdminUnlocked && !isHrReadonly) return;
+
             isTraineeAuthenticated = true;
             loadUserData(uid);
             updateTraineeAccessUI();
             switchView('form');
-            showToast(`已切換至 ${currentUserData.empName || '員工'} 的檢核表`);
+
+            if (isHrReadonly) {
+                setHrReadonlyForm(true);
+                showToast(`人資唯讀：正在查看 ${currentUserData.empName || '員工'} 的檢核表`);
+            } else {
+                setHrReadonlyForm(false);
+                showToast(`已切換至 ${currentUserData.empName || '員工'} 的檢核表`);
+            }
+        }
+
+        function setHrReadonlyForm(readonly) {
+            const formView = document.getElementById('formView');
+            if (!formView) return;
+
+            formView.classList.toggle('hr-readonly-mode', readonly);
+
+            formView.querySelectorAll('input, textarea, select').forEach(el => {
+                el.disabled = readonly;
+                if (readonly) {
+                    el.setAttribute('aria-readonly', 'true');
+                } else {
+                    el.removeAttribute('aria-readonly');
+                }
+            });
+
+            // 隱藏/停用會修改資料的儲存按鈕
+            formView.querySelectorAll('button').forEach(btn => {
+                const action = `${btn.getAttribute('onclick') || ''} ${btn.innerText || ''}`;
+                if (/save|儲存|autoSave|新增|刪除|修改/i.test(action)) {
+                    btn.disabled = readonly;
+                    btn.classList.toggle('opacity-40', readonly);
+                    btn.classList.toggle('pointer-events-none', readonly);
+                }
+            });
         }
 
         // SOP Modal
