@@ -1518,19 +1518,27 @@
             document.getElementById('progressBar').style.width = `${percent}%`;
         }
 
-        window.autoSaveField = function() {
-            if (!currentUserData) return;
+        // ===== Firebase 人員資料儲存：所有修改都寫回 Firestore =====
+        let cloudSaveTimer = null;
+        let cloudSaveQueue = Promise.resolve();
 
-            currentUserData.empName = document.getElementById('empName').value;
-            currentUserData.startDate = document.getElementById('startDate').value;
+        function collectCurrentFormData() {
+            if (!currentUserData || !currentUserId) return null;
+
+            currentUserData.empName = document.getElementById('empName')?.value || '';
+            currentUserData.startDate = document.getElementById('startDate')?.value || '';
+
             const mentorNameEl = document.getElementById('mentorName');
             currentUserData.mentorName = mentorNameEl ? mentorNameEl.value : (currentUserData.mentorName || '');
-            currentUserData.supervisorName = document.getElementById('supervisorName').value;
-            currentUserData.mentorComments = document.getElementById('mentorComments').value;
-            currentUserData.supervisorComments = document.getElementById('supervisorComments').value;
-            currentUserData.traineeSign = document.getElementById('traineeSign').value;
-            currentUserData.mentorSign = document.getElementById('mentorSign').value;
-            currentUserData.supervisorSign = document.getElementById('supervisorSign').value;
+
+            currentUserData.supervisorName = document.getElementById('supervisorName')?.value || '';
+            currentUserData.mentorComments = document.getElementById('mentorComments')?.value || '';
+            currentUserData.supervisorComments = document.getElementById('supervisorComments')?.value || '';
+            currentUserData.traineeSign = document.getElementById('traineeSign')?.value || '';
+            currentUserData.mentorSign = document.getElementById('mentorSign')?.value || '';
+            currentUserData.supervisorSign = document.getElementById('supervisorSign')?.value || '';
+
+            if (!currentUserData.checks) currentUserData.checks = {};
 
             CHECKLIST_ITEMS.forEach(item => {
                 currentUserData.checks[item.id] = {
@@ -1543,21 +1551,74 @@
             });
 
             currentUserData.updatedAt = new Date().toISOString();
-
-            // Firebase 是唯一的人員資料來源；瀏覽器不再儲存 trainee_data
             allTraineesCache[currentUserId] = currentUserData;
             updateUserSelectorOptions();
 
-            // Cloud Async Push
-            if (db && auth.currentUser) {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', currentUserId);
-                setDoc(docRef, currentUserData, { merge: true }).catch(err => console.warn("Cloud save error:", err));
-            }
+            return currentUserData;
         }
 
-        window.saveCurrentProgress = function() {
-            autoSaveField();
-            showToast('進度儲存成功！');
+        function writeCurrentUserToFirebase(data) {
+            if (!data || !currentUserId) {
+                return Promise.reject(new Error('目前沒有可儲存的人員資料'));
+            }
+
+            if (!db || !auth || !auth.currentUser) {
+                return Promise.reject(new Error('Firebase 尚未完成登入，無法寫入資料庫'));
+            }
+
+            const uid = currentUserId;
+            const payload = JSON.parse(JSON.stringify(data));
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', uid);
+
+            // 排隊寫入，避免快速勾選/輸入時多個 setDoc 互相覆蓋
+            cloudSaveQueue = cloudSaveQueue
+                .catch(() => {})
+                .then(() => setDoc(docRef, payload, { merge: true }));
+
+            return cloudSaveQueue;
+        }
+
+        function scheduleCloudSave() {
+            if (!currentUserData || !currentUserId) return;
+
+            clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(() => {
+                const snapshot = collectCurrentFormData();
+                if (!snapshot) return;
+
+                writeCurrentUserToFirebase(snapshot).catch(err => {
+                    console.error('Firebase 自動儲存失敗:', err);
+                    updateSyncBadgeStatus('error', '資料儲存失敗（請檢查 Firestore Rules）');
+                });
+            }, 500);
+        }
+
+        window.autoSaveField = function() {
+            if (!currentUserData) return;
+
+            // 先更新畫面中的目前資料，再延遲寫入 Firebase
+            collectCurrentFormData();
+            scheduleCloudSave();
+        }
+
+        window.saveCurrentProgress = async function() {
+            if (!currentUserData || !currentUserId) {
+                showToast('目前沒有選擇培訓人員');
+                return;
+            }
+
+            clearTimeout(cloudSaveTimer);
+            const snapshot = collectCurrentFormData();
+
+            try {
+                await writeCurrentUserToFirebase(snapshot);
+                updateSyncBadgeStatus('connected', '資料已同步至 Firebase');
+                showToast('進度已成功儲存至 Firebase！');
+            } catch (err) {
+                console.error('Firebase 手動儲存失敗:', err);
+                updateSyncBadgeStatus('error', '資料儲存失敗（請檢查 Firestore Rules）');
+                showToast(`儲存失敗：${err.code || err.message || '請檢查 Firebase 權限'}`);
+            }
         }
 
         function updateTraineeLoginOptions() {
@@ -1739,11 +1800,12 @@
             loadUserData(uid);
         }
 
-        window.createNewUserPrompt = function() {
+        window.createNewUserPrompt = async function() {
             if (!isAdminUnlocked) {
                 openAdminAuthModal();
                 return;
             }
+
             const newName = prompt("請輸入新員工姓名：", "張小明");
             if (!newName) return;
 
@@ -1752,25 +1814,35 @@
                 showToast('未設定登入密碼，已取消新增');
                 return;
             }
+
             const confirmPassword = prompt("請再次輸入登入密碼確認：", "");
             if (newPassword !== confirmPassword) {
                 showToast('兩次密碼不一致，已取消新增');
                 return;
             }
 
+            if (!db || !auth || !auth.currentUser) {
+                showToast('Firebase 尚未連線完成，無法建立人員');
+                return;
+            }
+
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
             newData.loginPassword = newPassword;
-            allTraineesCache[newId] = newData;
 
-            if (db && auth.currentUser) {
+            try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
-                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
-            }
+                await setDoc(docRef, newData);
 
-            updateUserSelectorOptions();
-            updateTraineeLoginOptions();
-            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼`);
+                // 只有 Firebase 成功後才加入目前快取
+                allTraineesCache[newId] = newData;
+                updateUserSelectorOptions();
+                updateTraineeLoginOptions();
+                showToast(`已建立 ${newName} 的培訓檔案，資料已寫入 Firebase`);
+            } catch (err) {
+                console.error('Firebase 新增人員失敗:', err);
+                showToast(`新增失敗：${err.code || err.message || '請檢查 Firestore Rules'}`);
+            }
         }
 
         // Realtime Listener & Multi-Device Sync
@@ -1826,11 +1898,12 @@
             loadUserData(uid);
         }
 
-        window.createNewUserPrompt = function() {
+        window.createNewUserPrompt = async function() {
             if (!isAdminUnlocked) {
                 openAdminAuthModal();
                 return;
             }
+
             const newName = prompt("請輸入新員工姓名：", "張小明");
             if (!newName) return;
 
@@ -1839,25 +1912,35 @@
                 showToast('未設定登入密碼，已取消新增');
                 return;
             }
+
             const confirmPassword = prompt("請再次輸入登入密碼確認：", "");
             if (newPassword !== confirmPassword) {
                 showToast('兩次密碼不一致，已取消新增');
                 return;
             }
 
+            if (!db || !auth || !auth.currentUser) {
+                showToast('Firebase 尚未連線完成，無法建立人員');
+                return;
+            }
+
             const newId = 'trainee_' + Date.now();
             const newData = createNewUserData(newId, newName);
             newData.loginPassword = newPassword;
-            allTraineesCache[newId] = newData;
 
-            if (db && auth.currentUser) {
+            try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'trainees', newId);
-                setDoc(docRef, newData).catch(err => console.warn("Cloud add user error:", err));
-            }
+                await setDoc(docRef, newData);
 
-            updateUserSelectorOptions();
-            updateTraineeLoginOptions();
-            showToast(`已建立 ${newName} 的培訓檔案，已設定登入密碼`);
+                // 只有 Firebase 成功後才加入目前快取
+                allTraineesCache[newId] = newData;
+                updateUserSelectorOptions();
+                updateTraineeLoginOptions();
+                showToast(`已建立 ${newName} 的培訓檔案，資料已寫入 Firebase`);
+            } catch (err) {
+                console.error('Firebase 新增人員失敗:', err);
+                showToast(`新增失敗：${err.code || err.message || '請檢查 Firestore Rules'}`);
+            }
         }
 
         // Admin Auth & Lock Logic
